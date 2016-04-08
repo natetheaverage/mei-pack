@@ -156,7 +156,28 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         
-        Laravel\Cashier\CashierServiceProvider::class
+        /*
+         *  MEi Service Providers...
+         */
+        App\Providers\ViewComposerServiceProvider::class,
+        
+        /*
+         * Vendor Service Providers...
+         */
+        Frozennode\Administrator\AdministratorServiceProvider::class,
+        Spatie\Geocoder\GeocoderServiceProvider::class,
+        Spatie\EloquentSortable\SortableServiceProvider::class,
+        Spatie\LaravelAnalytics\LaravelAnalyticsServiceProvider::class,
+        Spatie\Backup\BackupServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
+        Spatie\Activitylog\ActivitylogServiceProvider::class,
+        Barryvdh\Snappy\ServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
+        Laracasts\Utilities\JavaScript\JavaScriptServiceProvider::class,
+        BackupManager\Laravel\Laravel5ServiceProvider::class,
+        Kordy\Ticketit\TicketitServiceProvider::class,
+        Laravel\Cashier\CashierServiceProvider::class,
 
     ],
 
