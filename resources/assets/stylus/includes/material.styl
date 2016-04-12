@@ -1,0 +1,162 @@
+// material.styl
+$raised 								= 	0 2px 1px rgba(0,0,0,0.1),0 1px 3px rgba(0,0,0,0.3)
+$raised-hover 					= 	0 2px 3px rgba(0,0,0,0.1),0 4px 8px rgba(0,0,0,0.3);
+$flat-hover							=  rgba(255,255,255,0.22)
+$off-white  						=  #f5f5f5
+$brand-orange  					=  #ff5722
+$brand-purple  					=  #7049ba
+$brand-blue  						=  #00bcd4
+$brand-green  					=  #7cb342
+
+.bg-bright 
+  background $brand-bright
+.bg-dark 
+  background $brand-dark
+.bg-gray-light
+  background $gray-light
+.bg-gray-lighter
+  background $gray-lighter
+.bg-gray
+  background $gray
+.bg-gray-dark
+  background $gray-dark
+.bg-off-white
+  background $white-off
+  color $gray-dark
+  &:Hover
+    top -1
+    color $gray-dark
+.bg-orange 
+  background $brand-orange
+  color $gray-dark
+  &:Hover
+    top -1
+    color $gray-dark
+.bg-purple 
+  background $brand-purple
+  color $white-off
+  &:Hover
+    color $white-off
+.bg-blue
+  background $brand-blue
+  color $gray-darker
+  &:Hover
+    top -1
+    color $gray-darker
+a
+	&.bg-green 
+		background $brand-green
+		color $brand-purple
+a:hover, a:focus
+	&.bg-green
+		top -1
+		color $gray-dark
+// font colors
+.orange
+	color $orange
+	&:Hover
+		color $orange
+.purple
+	color $purple
+	&:Hover
+		color $purple
+.blue
+	color $blue
+	&:Hover
+		color $blue
+.green 
+	color $green
+	&:Hover
+		color $blue
+.mtrl
+	position relative
+.mtrl-raised
+	box-shadow $raised
+	top 0
+	left 0
+	right 0
+	&:Hover
+		top -1px
+		box-shadow $raised-hover
+.mtrl-flat
+	color $gray
+	font-size 18px
+	font-weight 700
+	box-shadow none
+	background-color transparent
+	&:Hover
+		color $gray-dark
+		background-color $flat-hover
+
+a
+	font-weight bold
+.w-logos.type_carousel .owl-loaded .w-logos-item
+	opacity 0.66
+	height auto
+.w-logos.style_1 .w-logos-item 
+	position relative
+	top 0
+	box-shadow 0 1px 1px rgba(0,0,0,0)
+	opacity 0.66
+	transition top 0.3s,background-color 0.3s,box-shadow 0.3s,opacity 0.3s
+.w-logos.style_1 .w-logos-item
+	&:Hover
+		top -2px
+		opacity 1
+		background-color rgba(0,0,0,0.16)
+		box-shadow 0 1px 1px rgba(0,0,0,0.1),0 1px 4px rgba(0,0,0,0.2)
+
+.mtrl-btn
+	transition background-color 0.3s,box-shadow 0.3s,color 0.3s
+	-webkit-tap-highlight-color rgba(0,0,0,0)
+	text-transform uppercase
+	vertical-align middle
+	display inline-block
+	white-space nowrap
+	border-radius 3px
+	padding 11px 22px
+	text-align center
+	position relative
+	line-height 20px
+	overflow hidden
+	cursor pointer
+	font-size 15px
+	margin 5px 0
+	border none
+ 
+.mtrl-btn-icon
+	padding 5px
+
+hr
+	&.style-one 
+		border 0
+		height 3px
+		background #ccc
+		background -webkit-linear-gradient(left, rgba(67,224,65,0) 0%, rgba(78,225,185,1) 34%, rgba(82,226,234,1) 48%, rgba(78,226,192,1) 61%, rgba(67,224,65,0) 100%)
+		background-image -moz-linear-gradient(left, rgba(67,224,65,0) 0%, rgba(78,225,185,1) 34%, rgba(82,226,234,1) 48%, rgba(78,226,192,1) 61%, rgba(67,224,65,0) 100%)
+		background-image -ms-linear-gradient(left, rgba(67,224,65,0) 0%, rgba(78,225,185,1) 34%, rgba(82,226,234,1) 48%, rgba(78,226,192,1) 61%, rgba(67,224,65,0) 100%)
+		background-image -o-linear-gradient(left, rgba(67,224,65,0) 0%, rgba(78,225,185,1) 34%, rgba(82,226,234,1) 48%, rgba(78,226,192,1) 61%, rgba(67,224,65,0) 100%)
+
+
+
+// Menu icons large
+.fa-menu
+	font-size 25px
+
+.header-section-300
+	min-height 300px
+	overflow hidden
+.body-section-600
+	height 600px
+	overflow hidden
+	> img
+		width 100%
+.hero
+	width 100%
+	.animated-words
+		width 80%
+.test-card
+	padding 20px
+	margin 20px
+	border 1px solid $gray-dark
+	width auto

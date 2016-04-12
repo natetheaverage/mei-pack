@@ -1,47 +1,64 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Laravel</title>
+@extends('layout')
+@section('title', 'Welcome')
 
-        <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet" type="text/css">
+@section('content')
+	@parent
 
-        <style>
-            html, body {
-                height: 100%;
-            }
+	<h2>say stuff</h2>
 
-            body {
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                display: table;
-                font-weight: 100;
-                font-family: 'Lato';
-            }
+	<!-- <test>Hi</test> -->
 
-            .container {
-                text-align: center;
-                display: table-cell;
-                vertical-align: middle;
-            }
+<!-- <animated_words
+	type="cao"
+	words="If you don’t DO anything different, there won’t BE anything different!"
+	:animate="true"
+></animated_words> -->
 
-            .content {
-                text-align: center;
-                display: inline-block;
-            }
+	<!-- <section id="IntroFlyAway">
+		<intro_fly_away></intro_fly_away>
+	</section> -->
 
-            .title {
-                font-size: 96px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="content">
-                <div class="title">Laravel 5</div>
-                <test></test>
-            </div>
-        </div>
-        <script src="/js/mei-core.js"></script>
-    </body>
-</html>
+	<!-- <section id="Intro" class="header-section align-left hero blue-hero">
+		{{-- @include('front.partials.ipadIntro') --}}
+	</section> -->
+
+	<div class="divider"></div>
+
+	<!-- <section id="Features">
+		{{-- @include('front.partials.features.ipadFeatures') --}}
+	</section> --><!--/#features-->
+
+	<!-- <section id="Services" >
+		{{-- @include('front.partials.info.ipadDetails') --}}
+	</section> --><!--/#services--> 
+
+
+	<!-- <section id="ipad-animate" class="body-section-600 container">
+		<ipad_3d_menu></ipad_3d_menu> 
+	</section> -->
+	
+<!-- 	<div class="divider"></div>
+	<hr class="style-one" />
+	<div class="divider"></div> -->
+
+	<!-- <section id="Pricing">
+		{{-- @include('front.partials.info.ipadPricing') --}}
+	</section>  --><!--/#pricing-->
+
+	<!-- <section id="Testimonial">
+		{{-- @include('front.partials.news.testimonials') --}}
+  </section>  -->  <!-- #testimonial -->
+
+	<!-- <section id="get-in-touch" class="blue-hero">
+		{{-- @include('front.partials.cta.get-in-touch') --}}
+	</section> --><!--/#get-in-touch-->
+
+	<!-- <div class="divider"></div> -->
+
+	<!-- <section id="contact">
+		{{-- @include('front.partials.contact.contact') --}}
+	</section> -->
+
+	<!-- <div class="divider"></div> -->
+
+@endsection

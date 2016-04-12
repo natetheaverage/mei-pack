@@ -1,0 +1,80 @@
+// /* always present */
+// .expand-transition {
+//   transition: all .4s ease;
+//   height: 30px;
+// }
+//  //.expand-enter defines the starting state for entering 
+//  //.expand-leave defines the ending state for leaving 
+// .expand-enter, .expand-leave {
+//   height: 0;
+// }
+
+.mtrl-hover-enter {
+	transition: all 0.4s ease-in-out 0.4s ;
+  box-shadow: 2px 2px 8px #000;
+  top: -2px;
+  z-index: 1;
+  left: -1px;
+}
+.mtrl-hover-leave {
+	transition: all 0.4s ease-in-out;
+  box-shadow: 0px 0px 0px #000;
+  top: 0;
+  z-index: 0;
+  left: 0;
+}
+
+.side-menu-enter {
+	transition: all 0.3s ease-out;
+  left: 0px;
+  flex-basis:0;
+  width: 170px;
+}
+.side-menu-leave {
+	transition: all 0.3s ease;
+  left: -230px;
+  flex-basis: 0.0001em;
+  width: 0;
+}
+
+.center-menu-enter {
+  transition: all 0.5s ease 0.5;
+  margin: 0;
+  padding: 0;
+  width: 80%;
+}
+.center-menu-leave {
+  transition: all 0.5s ease;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.aside-menu-enter {
+	transition: all 0.3s ease-out;
+  right: 0px;
+  flex-basis: 14em;
+  margin: 5px 0;
+	padding: 0 5px 0 15px;
+  width: 300px;
+}
+.aside-menu-leave {
+	transition: all 0.3s ease-in;
+  right: -250px;
+  flex-basis: 0.001em;
+  margin: 0;
+  padding: 0;
+  width: 0;
+}
+
+.menu-btn-hover-enter {
+	transition: all 0.3s ease-in-out;
+  box-shadow: 2px 4px 8px #000;
+	background-color: #FF9800
+}
+.menu-btn-hover-leave {
+	transition: all 0.3s ease-in-out;
+  box-shadow: 0px 0px 0px #000;
+  background-color: #FFF
+}
+

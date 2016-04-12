@@ -1,0 +1,41 @@
+/*
+* nav.styl
+* defines the navbar css
+*/
+.app-nav
+	// background-color #fff
+	// * used in transitions dont change
+	// * margin 
+	// * padding
+	position fixed
+	display flex
+	flex-direction column
+.menu-button
+	border none
+	padding-left 15px
+
+.main-menu
+	background-color #fff
+	margin 5px 5px 5px 0
+	box-shadow 0 0 4px $gray-dark
+.menu-button
+	width 100%
+	&.active
+		color rgb(148, 0, 211)
+		font-size 18px
+		font-weight 900
+		box-shadow none
+	&:hover, &:active
+		color #FF9800
+		//background-color $gray-lighter
+
+
+.sub-menu
+	.menu-button
+		//border-left 3px $brand-info solid
+
+.mei-header
+	height 20px
+	display flex
+	justify-content space-between
+

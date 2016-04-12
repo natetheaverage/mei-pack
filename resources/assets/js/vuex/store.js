@@ -1,22 +1,13 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import menus from './modules/menus.js'
+import Persistance from './persistance.js'
+import truth from '../truth/truth.js'
 import createLogger from 'vuex/logger'
 Vue.use( Vuex )
 
 const state = {
-  currentRoute: "home",
-  appName:'MEi',
-  viewTitle: 'Home',
-  currentView: 'home',
-  currentNavigation: 'mainnav',
-  //currentUser: mei.currentUser,
-  
-  editMode: false, 
-  editAll: false,
-  dataMode: false,
-
-  showLanguageSelector: false,
-
+  truth,
   models:{
 	  projects:{},
 	  tasks:{},
@@ -29,27 +20,26 @@ const state = {
       //menulayout:{},
     },
   },
-  menus:{
-    home:{},
-    main:{},
-  },
-
-  mainnav:[], 
-
 };
 
-const mutations = {
+
+
+export const mutations = {
   SET_ROUTE (state, payload) {
     state.currentRoute = payload
   },
   SET_MODEL (state, payload) {
     state.models[payload[0]+''] = payload[1]
   },
-  SET_MENU (state, payload) {
-    state.menus[payload[0]+''] = payload[1]
-  },
+  
   SET_PAGE (state, payload) {
     state.pages[payload[0]+''] = payload[1]
+  },
+  SET_COMPANY_BRAND_DETAIL (state, payload) {
+    state.truth.company.branding[payload[0]+''] = payload[1]
+  },
+  SET_SETTING (state, payload) {
+    state.truth.settings[payload[0]+''] = payload[1]
   },
 }
 
@@ -67,11 +57,26 @@ const logger = createLogger({
   }
 })
 
+const persistToDatabase = { 
+  snapshot: true,
+  onMutation (mutation, nextState, prevState, store) {
+    // console.log( mutation )
+    // console.log( prevState )
+    // console.log( nextState )
+    // console.log( store )
+    Persistance.save(mutation) 
+
+  }
+}
+
 
 export default new Vuex.Store({
   //remove these next two lines when in prodution cpu intence
-	middlewares: [createLogger()],
+	middlewares: [createLogger(), persistToDatabase],
   strict: true,
+  modules: {
+    menus
+  },
   state,
   mutations
 })

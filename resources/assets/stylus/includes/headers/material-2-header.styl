@@ -1,0 +1,89 @@
+/*************************
+*******Header******
+**************************/
+#main-menu
+	transition 0.3s ease 1s
+	top -200px
+	&.navbar-in
+		top 0
+	.navbar-default
+		border 0
+		border-radius 0
+		margin-bottom 0
+		position fixed
+		.navbar-toggle
+			margin-top 32px
+	.navbar-header
+		display flex
+		height 100px
+		.brand
+			align-self center
+			display flex
+			//padding 10px
+			flex-wrap wrap
+			height auto
+			//padding 22px 15px 21px
+			font-weight 400
+			font-size 1.5em
+			> img
+				max-width 50px
+				max-height 50px
+				align-self center
+				margin-right 5px
+			.logo-text
+				display flex
+				flex-direction column
+			.amp
+				font-size .8em
+				font-weight 300
+			.logo-center
+				font-weight 300
+				font-size 1.3em
+				color $brand-info
+				//align-self center
+				margin-left -4px
+				//margin-top -9px
+			//.logo3
+			//.logo4
+@media only screen and (min-width: 768px)
+	#main-menu
+		&.navbar-default
+			background rgba(255, 255, 255, 0.9)
+			-webkit-box-shadow 0 0 3px 0 rgba(0, 0, 0, 0.1)
+			box-shadow 0 0 3px 0 rgba(0, 0, 0, 0.1)
+			.navbar-nav
+				> li
+					> a
+						padding-top 40px
+						padding-bottom 40px
+					&.active > a, &.open > a, &:hover > a
+						background transparent
+						padding-top 37px
+						border-top 3px solid $brand-blue
+				.dropdown-menu
+					padding 0 20px
+					min-width 220px
+					background-color fade(rgb(26, 28, 40, 1), 90%)
+					border 0
+					border-radius 0
+					box-shadow none
+					-webkit-box-shadow none
+					background-clip inherit
+					> li 
+						border-left 3px solid transparent
+						margin-left -20px
+						padding-left 17px
+						-webit-transition border-color 400ms
+						transition border-color 400ms
+					> a
+					border-top 1px solid #404455
+					padding 15px 0
+					color #eeeeee
+					&:first-child > a
+						border-top 0
+					&.active, &.open, &:hover
+						border-left-color major_color
+					> a
+						color major_color
+						background-color transparent
+		

@@ -8,12 +8,26 @@ export function getRoute (state) {
 export function getModels (state) {
   return state.models
 }
-export function getMainMenu (state) {
-  return state.menus.main
+export function getPublicSettings (state) {
+  return state.truth.settings
 }
+
+export function getCompanyDetails (state) {
+  return state.truth.company
+}
+
+export function getPrimaryMenu (state) {
+  return state.truth.menus.filter(menu => {
+    return menu === 'primary'
+  })
+}
+// export function getPrimaryMenuHover (state) {
+//   return state.truth.menus.primary
+// }
 export function getHomeMenu (state) {
   return state.menus.dashboard
 }
+
 export function getHomePage (state) {
   return state.pages.home
 }

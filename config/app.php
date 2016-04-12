@@ -2,6 +2,16 @@
 
 return [
 
+    'keywords' => env('APP_KEYWORDS', 'App, MEi, Laravel, Vue.js'),
+    
+    'description' => env('APP_DESCRIPTION', 'This describes the app built by NateTheAverage @ MEi'),
+
+    'testing' => env('APP_TESTING', true),
+    
+    'theme' => env('APP_THEME', 'material-1'),
+
+    'name' => env('APP_NAME', 'MEi App'),
+    
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -160,7 +170,7 @@ return [
          *  MEi Service Providers...
          */
         App\Providers\ViewComposerServiceProvider::class,
-        
+
         /*
          * Vendor Service Providers...
          */
