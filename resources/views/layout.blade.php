@@ -1,6 +1,6 @@
 @extends('nest')
 @section('title') 
-	@parent Home 
+	@parent @yield('page')
 @stop
 @section('container')
 	@parent
@@ -16,5 +16,7 @@
     @include('front.partials.navs.'.config('app.theme').'-nav' )
     @include('front.partials.asides.'.config('app.theme').'-aside'  )
   </div>
-  {{-- @include('front.partials.footers.'.config('app.theme').'-footer') --}} 
+  @include('front.partials.footers.'.config('app.theme').'-footer')
+  @yield('footer')
+  @include('includes.php-to-js')
 @stop

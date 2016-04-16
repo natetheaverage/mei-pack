@@ -168,7 +168,7 @@
 							
 							<!--Edit Toggle Button-->
 			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-			                @can('edit-bosspos')
+			                @can('edit-layout')
 			                <li class="list-group-item">
 			                	<div class="pull-right">
 			                    	<input 
@@ -185,7 +185,7 @@
 			                <!--End Edit toggle button-->
 			                <!--Data Output Toggle Button-->
 			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-			                @can('edit-bosspos')
+			                @can('edit-layout')
 			                <li class="list-group-item">
 			                	<div class="pull-right">
 			                    	<input 

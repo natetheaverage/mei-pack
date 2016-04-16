@@ -31,11 +31,14 @@ elixir(function(mix) {
     //.copy('./node_modules/bootstrap-styl/bootstrap', './resources/assets/stylus/bootstrap/')
     //.stylus('bootstrap/*.styl', 'public/css/bootstrap.css')
     .stylus('mei-core.styl', 'public/css/mei-app-core.css')
+    // .less('nifty.less', 'public/css/nifty.css')
+    // .less('app.less', 'public/css/dashboard-app.css')
     .browserify('mei-core.js')
 
     .styles([
     	'./node_modules/normalize.css/normalize.css',
     	'./node_modules/sweetalert/dist/sweetalert.css',
+        './public/plugins/animate-css/animate.min.css'
     ], './public/css/all-vendor.css')
 
     .scripts([

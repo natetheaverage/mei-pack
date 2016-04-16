@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import Numpad from './numberpad.vue';
-import SaleReceipt from './salesreceipt.vue';
+import Numpad from './NumPad.vue';
+import SaleReceipt from './SalesReceipt.vue';
 
 export default {
     name: 'pos',

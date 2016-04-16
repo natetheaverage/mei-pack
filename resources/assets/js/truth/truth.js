@@ -10,6 +10,7 @@ export default {
 	
 	menus: {
 		primary: require('./mainMenuData'),
+		adminPrimary: require('./adminMenuData'),
 	},
 	
 	copyText:  require('./copyText'),

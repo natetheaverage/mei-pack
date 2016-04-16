@@ -1,41 +1,55 @@
-import {
-  RESET_ALL_MENU_HOVER,
-  SET_PRIMARY_MENU_HOVER
+ import {
+  RESET_ALL_MENU_ACTIVE,
+  SET_MENU_ACTIVE,
+  SET_MENU
 } from '../mutation-types'
+import menus from '../../api/vuex/menus.js'
 import truth from '../../truth/truth.js'
+
 // initial state
 const state = {
-  menus: truth.menus
+  primary: truth.menus.primary,
+  adminPrimary: truth.menus.adminPrimary,
+  DashboardMenu: truth.menus.DashboardMenu
 }
 
-// mutations
 const mutations = {
-  [GET_PRIMARY_MENU] (state, payload) {
-    state.truth.menus[payload]
+
+  [SET_MENU] (state, payload) {
+    state[payload[1]] = payload[0]
   },
-  [RESET_ALL_MENU_HOVER] (state) {
-    console.log(state.truth.menus['primary'])
-    for(var menu in state.truth.menus){
-      for(var button in state.truth.menus[menu]){
-        state.truth.menus[menu][button].hovering = false
+
+  [RESET_ALL_MENU_ACTIVE] (state) {
+    for(var menu in state){
+      for(var button in state[menu]){
+        state[menu][button].active = false
+        for(var sub in button.submenu){
+          state[menu][button].submenu[sub].active = false
+        }
       }
     }
   },
-  [SET_PRIMARY_MENU_HOVER] (state, payload) {
-    // state.truth(
-    //   menus => menus === payload[0](
-    //     btn => btn.id === payload[1]
-    //   ).hovering = true
-    // )
-    state.truth.menus[payload[0]+''][payload[1]].hovering = true
-  },
-  // [RECEIVE_PRODUCTS] (state, products) {
-  //   state.all = products
-  // },
 
-  // [ADD_TO_CART] (state, productId) {
-  //   state.all.find(p => p.id === productId).inventory--
-  // }
+  // Button owner_type is the name of the menu
+  // Use indexOf to locate the buttons position in the menu
+  [SET_MENU_ACTIVE] (state, button) {
+    var menu = state[button['menu_name']]
+    if( menu != undefined ){
+      menu[menu.indexOf(button) ].active = !menu[ menu.indexOf(button) ].active
+    }else{
+      var menu = state[ button['owner_type'] ]
+      for(var btn in menu){
+        if(menu[btn].id == button.menu_id){
+          var subMenu = menu[btn].submenu 
+          menu[btn].active = true
+          subMenu[ subMenu.indexOf(button) ].active = !subMenu[ subMenu.indexOf(button) ].active
+        }
+      }    
+    } 
+  } 
+
+
+
 }
 
 export default {

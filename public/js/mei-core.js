@@ -4366,6 +4366,2716 @@ module.exports = function (_) {
 };
 
 },{}],47:[function(require,module,exports){
+/*!
+ * vue-router v0.7.13
+ * (c) 2016 Evan You
+ * Released under the MIT License.
+ */
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  global.VueRouter = factory();
+}(this, function () { 'use strict';
+
+  var babelHelpers = {};
+
+  babelHelpers.classCallCheck = function (instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  };
+  function Target(path, matcher, delegate) {
+    this.path = path;
+    this.matcher = matcher;
+    this.delegate = delegate;
+  }
+
+  Target.prototype = {
+    to: function to(target, callback) {
+      var delegate = this.delegate;
+
+      if (delegate && delegate.willAddRoute) {
+        target = delegate.willAddRoute(this.matcher.target, target);
+      }
+
+      this.matcher.add(this.path, target);
+
+      if (callback) {
+        if (callback.length === 0) {
+          throw new Error("You must have an argument in the function passed to `to`");
+        }
+        this.matcher.addChild(this.path, target, callback, this.delegate);
+      }
+      return this;
+    }
+  };
+
+  function Matcher(target) {
+    this.routes = {};
+    this.children = {};
+    this.target = target;
+  }
+
+  Matcher.prototype = {
+    add: function add(path, handler) {
+      this.routes[path] = handler;
+    },
+
+    addChild: function addChild(path, target, callback, delegate) {
+      var matcher = new Matcher(target);
+      this.children[path] = matcher;
+
+      var match = generateMatch(path, matcher, delegate);
+
+      if (delegate && delegate.contextEntered) {
+        delegate.contextEntered(target, match);
+      }
+
+      callback(match);
+    }
+  };
+
+  function generateMatch(startingPath, matcher, delegate) {
+    return function (path, nestedCallback) {
+      var fullPath = startingPath + path;
+
+      if (nestedCallback) {
+        nestedCallback(generateMatch(fullPath, matcher, delegate));
+      } else {
+        return new Target(startingPath + path, matcher, delegate);
+      }
+    };
+  }
+
+  function addRoute(routeArray, path, handler) {
+    var len = 0;
+    for (var i = 0, l = routeArray.length; i < l; i++) {
+      len += routeArray[i].path.length;
+    }
+
+    path = path.substr(len);
+    var route = { path: path, handler: handler };
+    routeArray.push(route);
+  }
+
+  function eachRoute(baseRoute, matcher, callback, binding) {
+    var routes = matcher.routes;
+
+    for (var path in routes) {
+      if (routes.hasOwnProperty(path)) {
+        var routeArray = baseRoute.slice();
+        addRoute(routeArray, path, routes[path]);
+
+        if (matcher.children[path]) {
+          eachRoute(routeArray, matcher.children[path], callback, binding);
+        } else {
+          callback.call(binding, routeArray);
+        }
+      }
+    }
+  }
+
+  function map (callback, addRouteCallback) {
+    var matcher = new Matcher();
+
+    callback(generateMatch("", matcher, this.delegate));
+
+    eachRoute([], matcher, function (route) {
+      if (addRouteCallback) {
+        addRouteCallback(this, route);
+      } else {
+        this.add(route);
+      }
+    }, this);
+  }
+
+  var specials = ['/', '.', '*', '+', '?', '|', '(', ')', '[', ']', '{', '}', '\\'];
+
+  var escapeRegex = new RegExp('(\\' + specials.join('|\\') + ')', 'g');
+
+  var noWarning = false;
+  function warn(msg) {
+    if (!noWarning && typeof console !== 'undefined') {
+      console.error('[vue-router] ' + msg);
+    }
+  }
+
+  function tryDecode(uri, asComponent) {
+    try {
+      return asComponent ? decodeURIComponent(uri) : decodeURI(uri);
+    } catch (e) {
+      warn('malformed URI' + (asComponent ? ' component: ' : ': ') + uri);
+    }
+  }
+
+  function isArray(test) {
+    return Object.prototype.toString.call(test) === "[object Array]";
+  }
+
+  // A Segment represents a segment in the original route description.
+  // Each Segment type provides an `eachChar` and `regex` method.
+  //
+  // The `eachChar` method invokes the callback with one or more character
+  // specifications. A character specification consumes one or more input
+  // characters.
+  //
+  // The `regex` method returns a regex fragment for the segment. If the
+  // segment is a dynamic of star segment, the regex fragment also includes
+  // a capture.
+  //
+  // A character specification contains:
+  //
+  // * `validChars`: a String with a list of all valid characters, or
+  // * `invalidChars`: a String with a list of all invalid characters
+  // * `repeat`: true if the character specification can repeat
+
+  function StaticSegment(string) {
+    this.string = string;
+  }
+  StaticSegment.prototype = {
+    eachChar: function eachChar(callback) {
+      var string = this.string,
+          ch;
+
+      for (var i = 0, l = string.length; i < l; i++) {
+        ch = string.charAt(i);
+        callback({ validChars: ch });
+      }
+    },
+
+    regex: function regex() {
+      return this.string.replace(escapeRegex, '\\$1');
+    },
+
+    generate: function generate() {
+      return this.string;
+    }
+  };
+
+  function DynamicSegment(name) {
+    this.name = name;
+  }
+  DynamicSegment.prototype = {
+    eachChar: function eachChar(callback) {
+      callback({ invalidChars: "/", repeat: true });
+    },
+
+    regex: function regex() {
+      return "([^/]+)";
+    },
+
+    generate: function generate(params) {
+      var val = params[this.name];
+      return val == null ? ":" + this.name : val;
+    }
+  };
+
+  function StarSegment(name) {
+    this.name = name;
+  }
+  StarSegment.prototype = {
+    eachChar: function eachChar(callback) {
+      callback({ invalidChars: "", repeat: true });
+    },
+
+    regex: function regex() {
+      return "(.+)";
+    },
+
+    generate: function generate(params) {
+      var val = params[this.name];
+      return val == null ? ":" + this.name : val;
+    }
+  };
+
+  function EpsilonSegment() {}
+  EpsilonSegment.prototype = {
+    eachChar: function eachChar() {},
+    regex: function regex() {
+      return "";
+    },
+    generate: function generate() {
+      return "";
+    }
+  };
+
+  function parse(route, names, specificity) {
+    // normalize route as not starting with a "/". Recognition will
+    // also normalize.
+    if (route.charAt(0) === "/") {
+      route = route.substr(1);
+    }
+
+    var segments = route.split("/"),
+        results = [];
+
+    // A routes has specificity determined by the order that its different segments
+    // appear in. This system mirrors how the magnitude of numbers written as strings
+    // works.
+    // Consider a number written as: "abc". An example would be "200". Any other number written
+    // "xyz" will be smaller than "abc" so long as `a > z`. For instance, "199" is smaller
+    // then "200", even though "y" and "z" (which are both 9) are larger than "0" (the value
+    // of (`b` and `c`). This is because the leading symbol, "2", is larger than the other
+    // leading symbol, "1".
+    // The rule is that symbols to the left carry more weight than symbols to the right
+    // when a number is written out as a string. In the above strings, the leading digit
+    // represents how many 100's are in the number, and it carries more weight than the middle
+    // number which represents how many 10's are in the number.
+    // This system of number magnitude works well for route specificity, too. A route written as
+    // `a/b/c` will be more specific than `x/y/z` as long as `a` is more specific than
+    // `x`, irrespective of the other parts.
+    // Because of this similarity, we assign each type of segment a number value written as a
+    // string. We can find the specificity of compound routes by concatenating these strings
+    // together, from left to right. After we have looped through all of the segments,
+    // we convert the string to a number.
+    specificity.val = '';
+
+    for (var i = 0, l = segments.length; i < l; i++) {
+      var segment = segments[i],
+          match;
+
+      if (match = segment.match(/^:([^\/]+)$/)) {
+        results.push(new DynamicSegment(match[1]));
+        names.push(match[1]);
+        specificity.val += '3';
+      } else if (match = segment.match(/^\*([^\/]+)$/)) {
+        results.push(new StarSegment(match[1]));
+        specificity.val += '2';
+        names.push(match[1]);
+      } else if (segment === "") {
+        results.push(new EpsilonSegment());
+        specificity.val += '1';
+      } else {
+        results.push(new StaticSegment(segment));
+        specificity.val += '4';
+      }
+    }
+
+    specificity.val = +specificity.val;
+
+    return results;
+  }
+
+  // A State has a character specification and (`charSpec`) and a list of possible
+  // subsequent states (`nextStates`).
+  //
+  // If a State is an accepting state, it will also have several additional
+  // properties:
+  //
+  // * `regex`: A regular expression that is used to extract parameters from paths
+  //   that reached this accepting state.
+  // * `handlers`: Information on how to convert the list of captures into calls
+  //   to registered handlers with the specified parameters
+  // * `types`: How many static, dynamic or star segments in this route. Used to
+  //   decide which route to use if multiple registered routes match a path.
+  //
+  // Currently, State is implemented naively by looping over `nextStates` and
+  // comparing a character specification against a character. A more efficient
+  // implementation would use a hash of keys pointing at one or more next states.
+
+  function State(charSpec) {
+    this.charSpec = charSpec;
+    this.nextStates = [];
+  }
+
+  State.prototype = {
+    get: function get(charSpec) {
+      var nextStates = this.nextStates;
+
+      for (var i = 0, l = nextStates.length; i < l; i++) {
+        var child = nextStates[i];
+
+        var isEqual = child.charSpec.validChars === charSpec.validChars;
+        isEqual = isEqual && child.charSpec.invalidChars === charSpec.invalidChars;
+
+        if (isEqual) {
+          return child;
+        }
+      }
+    },
+
+    put: function put(charSpec) {
+      var state;
+
+      // If the character specification already exists in a child of the current
+      // state, just return that state.
+      if (state = this.get(charSpec)) {
+        return state;
+      }
+
+      // Make a new state for the character spec
+      state = new State(charSpec);
+
+      // Insert the new state as a child of the current state
+      this.nextStates.push(state);
+
+      // If this character specification repeats, insert the new state as a child
+      // of itself. Note that this will not trigger an infinite loop because each
+      // transition during recognition consumes a character.
+      if (charSpec.repeat) {
+        state.nextStates.push(state);
+      }
+
+      // Return the new state
+      return state;
+    },
+
+    // Find a list of child states matching the next character
+    match: function match(ch) {
+      // DEBUG "Processing `" + ch + "`:"
+      var nextStates = this.nextStates,
+          child,
+          charSpec,
+          chars;
+
+      // DEBUG "  " + debugState(this)
+      var returned = [];
+
+      for (var i = 0, l = nextStates.length; i < l; i++) {
+        child = nextStates[i];
+
+        charSpec = child.charSpec;
+
+        if (typeof (chars = charSpec.validChars) !== 'undefined') {
+          if (chars.indexOf(ch) !== -1) {
+            returned.push(child);
+          }
+        } else if (typeof (chars = charSpec.invalidChars) !== 'undefined') {
+          if (chars.indexOf(ch) === -1) {
+            returned.push(child);
+          }
+        }
+      }
+
+      return returned;
+    }
+
+    /** IF DEBUG
+    , debug: function() {
+      var charSpec = this.charSpec,
+          debug = "[",
+          chars = charSpec.validChars || charSpec.invalidChars;
+       if (charSpec.invalidChars) { debug += "^"; }
+      debug += chars;
+      debug += "]";
+       if (charSpec.repeat) { debug += "+"; }
+       return debug;
+    }
+    END IF **/
+  };
+
+  /** IF DEBUG
+  function debug(log) {
+    console.log(log);
+  }
+
+  function debugState(state) {
+    return state.nextStates.map(function(n) {
+      if (n.nextStates.length === 0) { return "( " + n.debug() + " [accepting] )"; }
+      return "( " + n.debug() + " <then> " + n.nextStates.map(function(s) { return s.debug() }).join(" or ") + " )";
+    }).join(", ")
+  }
+  END IF **/
+
+  // Sort the routes by specificity
+  function sortSolutions(states) {
+    return states.sort(function (a, b) {
+      return b.specificity.val - a.specificity.val;
+    });
+  }
+
+  function recognizeChar(states, ch) {
+    var nextStates = [];
+
+    for (var i = 0, l = states.length; i < l; i++) {
+      var state = states[i];
+
+      nextStates = nextStates.concat(state.match(ch));
+    }
+
+    return nextStates;
+  }
+
+  var oCreate = Object.create || function (proto) {
+    function F() {}
+    F.prototype = proto;
+    return new F();
+  };
+
+  function RecognizeResults(queryParams) {
+    this.queryParams = queryParams || {};
+  }
+  RecognizeResults.prototype = oCreate({
+    splice: Array.prototype.splice,
+    slice: Array.prototype.slice,
+    push: Array.prototype.push,
+    length: 0,
+    queryParams: null
+  });
+
+  function findHandler(state, path, queryParams) {
+    var handlers = state.handlers,
+        regex = state.regex;
+    var captures = path.match(regex),
+        currentCapture = 1;
+    var result = new RecognizeResults(queryParams);
+
+    for (var i = 0, l = handlers.length; i < l; i++) {
+      var handler = handlers[i],
+          names = handler.names,
+          params = {};
+
+      for (var j = 0, m = names.length; j < m; j++) {
+        params[names[j]] = captures[currentCapture++];
+      }
+
+      result.push({ handler: handler.handler, params: params, isDynamic: !!names.length });
+    }
+
+    return result;
+  }
+
+  function addSegment(currentState, segment) {
+    segment.eachChar(function (ch) {
+      var state;
+
+      currentState = currentState.put(ch);
+    });
+
+    return currentState;
+  }
+
+  function decodeQueryParamPart(part) {
+    // http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1
+    part = part.replace(/\+/gm, '%20');
+    return tryDecode(part, true);
+  }
+
+  // The main interface
+
+  var RouteRecognizer = function RouteRecognizer() {
+    this.rootState = new State();
+    this.names = {};
+  };
+
+  RouteRecognizer.prototype = {
+    add: function add(routes, options) {
+      var currentState = this.rootState,
+          regex = "^",
+          specificity = {},
+          handlers = [],
+          allSegments = [],
+          name;
+
+      var isEmpty = true;
+
+      for (var i = 0, l = routes.length; i < l; i++) {
+        var route = routes[i],
+            names = [];
+
+        var segments = parse(route.path, names, specificity);
+
+        allSegments = allSegments.concat(segments);
+
+        for (var j = 0, m = segments.length; j < m; j++) {
+          var segment = segments[j];
+
+          if (segment instanceof EpsilonSegment) {
+            continue;
+          }
+
+          isEmpty = false;
+
+          // Add a "/" for the new segment
+          currentState = currentState.put({ validChars: "/" });
+          regex += "/";
+
+          // Add a representation of the segment to the NFA and regex
+          currentState = addSegment(currentState, segment);
+          regex += segment.regex();
+        }
+
+        var handler = { handler: route.handler, names: names };
+        handlers.push(handler);
+      }
+
+      if (isEmpty) {
+        currentState = currentState.put({ validChars: "/" });
+        regex += "/";
+      }
+
+      currentState.handlers = handlers;
+      currentState.regex = new RegExp(regex + "$");
+      currentState.specificity = specificity;
+
+      if (name = options && options.as) {
+        this.names[name] = {
+          segments: allSegments,
+          handlers: handlers
+        };
+      }
+    },
+
+    handlersFor: function handlersFor(name) {
+      var route = this.names[name],
+          result = [];
+      if (!route) {
+        throw new Error("There is no route named " + name);
+      }
+
+      for (var i = 0, l = route.handlers.length; i < l; i++) {
+        result.push(route.handlers[i]);
+      }
+
+      return result;
+    },
+
+    hasRoute: function hasRoute(name) {
+      return !!this.names[name];
+    },
+
+    generate: function generate(name, params) {
+      var route = this.names[name],
+          output = "";
+      if (!route) {
+        throw new Error("There is no route named " + name);
+      }
+
+      var segments = route.segments;
+
+      for (var i = 0, l = segments.length; i < l; i++) {
+        var segment = segments[i];
+
+        if (segment instanceof EpsilonSegment) {
+          continue;
+        }
+
+        output += "/";
+        output += segment.generate(params);
+      }
+
+      if (output.charAt(0) !== '/') {
+        output = '/' + output;
+      }
+
+      if (params && params.queryParams) {
+        output += this.generateQueryString(params.queryParams);
+      }
+
+      return output;
+    },
+
+    generateQueryString: function generateQueryString(params) {
+      var pairs = [];
+      var keys = [];
+      for (var key in params) {
+        if (params.hasOwnProperty(key)) {
+          keys.push(key);
+        }
+      }
+      keys.sort();
+      for (var i = 0, len = keys.length; i < len; i++) {
+        key = keys[i];
+        var value = params[key];
+        if (value == null) {
+          continue;
+        }
+        var pair = encodeURIComponent(key);
+        if (isArray(value)) {
+          for (var j = 0, l = value.length; j < l; j++) {
+            var arrayPair = key + '[]' + '=' + encodeURIComponent(value[j]);
+            pairs.push(arrayPair);
+          }
+        } else {
+          pair += "=" + encodeURIComponent(value);
+          pairs.push(pair);
+        }
+      }
+
+      if (pairs.length === 0) {
+        return '';
+      }
+
+      return "?" + pairs.join("&");
+    },
+
+    parseQueryString: function parseQueryString(queryString) {
+      var pairs = queryString.split("&"),
+          queryParams = {};
+      for (var i = 0; i < pairs.length; i++) {
+        var pair = pairs[i].split('='),
+            key = decodeQueryParamPart(pair[0]),
+            keyLength = key.length,
+            isArray = false,
+            value;
+        if (pair.length === 1) {
+          value = 'true';
+        } else {
+          //Handle arrays
+          if (keyLength > 2 && key.slice(keyLength - 2) === '[]') {
+            isArray = true;
+            key = key.slice(0, keyLength - 2);
+            if (!queryParams[key]) {
+              queryParams[key] = [];
+            }
+          }
+          value = pair[1] ? decodeQueryParamPart(pair[1]) : '';
+        }
+        if (isArray) {
+          queryParams[key].push(value);
+        } else {
+          queryParams[key] = value;
+        }
+      }
+      return queryParams;
+    },
+
+    recognize: function recognize(path, silent) {
+      noWarning = silent;
+      var states = [this.rootState],
+          pathLen,
+          i,
+          l,
+          queryStart,
+          queryParams = {},
+          isSlashDropped = false;
+
+      queryStart = path.indexOf('?');
+      if (queryStart !== -1) {
+        var queryString = path.substr(queryStart + 1, path.length);
+        path = path.substr(0, queryStart);
+        if (queryString) {
+          queryParams = this.parseQueryString(queryString);
+        }
+      }
+
+      path = tryDecode(path);
+      if (!path) return;
+
+      // DEBUG GROUP path
+
+      if (path.charAt(0) !== "/") {
+        path = "/" + path;
+      }
+
+      pathLen = path.length;
+      if (pathLen > 1 && path.charAt(pathLen - 1) === "/") {
+        path = path.substr(0, pathLen - 1);
+        isSlashDropped = true;
+      }
+
+      for (i = 0, l = path.length; i < l; i++) {
+        states = recognizeChar(states, path.charAt(i));
+        if (!states.length) {
+          break;
+        }
+      }
+
+      // END DEBUG GROUP
+
+      var solutions = [];
+      for (i = 0, l = states.length; i < l; i++) {
+        if (states[i].handlers) {
+          solutions.push(states[i]);
+        }
+      }
+
+      states = sortSolutions(solutions);
+
+      var state = solutions[0];
+
+      if (state && state.handlers) {
+        // if a trailing slash was dropped and a star segment is the last segment
+        // specified, put the trailing slash back
+        if (isSlashDropped && state.regex.source.slice(-5) === "(.+)$") {
+          path = path + "/";
+        }
+        return findHandler(state, path, queryParams);
+      }
+    }
+  };
+
+  RouteRecognizer.prototype.map = map;
+
+  var genQuery = RouteRecognizer.prototype.generateQueryString;
+
+  // export default for holding the Vue reference
+  var exports$1 = {};
+  /**
+   * Warn stuff.
+   *
+   * @param {String} msg
+   */
+
+  function warn$1(msg) {
+    /* istanbul ignore next */
+    if (typeof console !== 'undefined') {
+      console.error('[vue-router] ' + msg);
+    }
+  }
+
+  /**
+   * Resolve a relative path.
+   *
+   * @param {String} base
+   * @param {String} relative
+   * @param {Boolean} append
+   * @return {String}
+   */
+
+  function resolvePath(base, relative, append) {
+    var query = base.match(/(\?.*)$/);
+    if (query) {
+      query = query[1];
+      base = base.slice(0, -query.length);
+    }
+    // a query!
+    if (relative.charAt(0) === '?') {
+      return base + relative;
+    }
+    var stack = base.split('/');
+    // remove trailing segment if:
+    // - not appending
+    // - appending to trailing slash (last segment is empty)
+    if (!append || !stack[stack.length - 1]) {
+      stack.pop();
+    }
+    // resolve relative path
+    var segments = relative.replace(/^\//, '').split('/');
+    for (var i = 0; i < segments.length; i++) {
+      var segment = segments[i];
+      if (segment === '.') {
+        continue;
+      } else if (segment === '..') {
+        stack.pop();
+      } else {
+        stack.push(segment);
+      }
+    }
+    // ensure leading slash
+    if (stack[0] !== '') {
+      stack.unshift('');
+    }
+    return stack.join('/');
+  }
+
+  /**
+   * Forgiving check for a promise
+   *
+   * @param {Object} p
+   * @return {Boolean}
+   */
+
+  function isPromise(p) {
+    return p && typeof p.then === 'function';
+  }
+
+  /**
+   * Retrive a route config field from a component instance
+   * OR a component contructor.
+   *
+   * @param {Function|Vue} component
+   * @param {String} name
+   * @return {*}
+   */
+
+  function getRouteConfig(component, name) {
+    var options = component && (component.$options || component.options);
+    return options && options.route && options.route[name];
+  }
+
+  /**
+   * Resolve an async component factory. Have to do a dirty
+   * mock here because of Vue core's internal API depends on
+   * an ID check.
+   *
+   * @param {Object} handler
+   * @param {Function} cb
+   */
+
+  var resolver = undefined;
+
+  function resolveAsyncComponent(handler, cb) {
+    if (!resolver) {
+      resolver = {
+        resolve: exports$1.Vue.prototype._resolveComponent,
+        $options: {
+          components: {
+            _: handler.component
+          }
+        }
+      };
+    } else {
+      resolver.$options.components._ = handler.component;
+    }
+    resolver.resolve('_', function (Component) {
+      handler.component = Component;
+      cb(Component);
+    });
+  }
+
+  /**
+   * Map the dynamic segments in a path to params.
+   *
+   * @param {String} path
+   * @param {Object} params
+   * @param {Object} query
+   */
+
+  function mapParams(path, params, query) {
+    if (params === undefined) params = {};
+
+    path = path.replace(/:([^\/]+)/g, function (_, key) {
+      var val = params[key];
+      /* istanbul ignore if */
+      if (!val) {
+        warn$1('param "' + key + '" not found when generating ' + 'path for "' + path + '" with params ' + JSON.stringify(params));
+      }
+      return val || '';
+    });
+    if (query) {
+      path += genQuery(query);
+    }
+    return path;
+  }
+
+  var hashRE = /#.*$/;
+
+  var HTML5History = (function () {
+    function HTML5History(_ref) {
+      var root = _ref.root;
+      var onChange = _ref.onChange;
+      babelHelpers.classCallCheck(this, HTML5History);
+
+      if (root && root !== '/') {
+        // make sure there's the starting slash
+        if (root.charAt(0) !== '/') {
+          root = '/' + root;
+        }
+        // remove trailing slash
+        this.root = root.replace(/\/$/, '');
+        this.rootRE = new RegExp('^\\' + this.root);
+      } else {
+        this.root = null;
+      }
+      this.onChange = onChange;
+      // check base tag
+      var baseEl = document.querySelector('base');
+      this.base = baseEl && baseEl.getAttribute('href');
+    }
+
+    HTML5History.prototype.start = function start() {
+      var _this = this;
+
+      this.listener = function (e) {
+        var url = location.pathname + location.search;
+        if (_this.root) {
+          url = url.replace(_this.rootRE, '');
+        }
+        _this.onChange(url, e && e.state, location.hash);
+      };
+      window.addEventListener('popstate', this.listener);
+      this.listener();
+    };
+
+    HTML5History.prototype.stop = function stop() {
+      window.removeEventListener('popstate', this.listener);
+    };
+
+    HTML5History.prototype.go = function go(path, replace, append) {
+      var url = this.formatPath(path, append);
+      if (replace) {
+        history.replaceState({}, '', url);
+      } else {
+        // record scroll position by replacing current state
+        history.replaceState({
+          pos: {
+            x: window.pageXOffset,
+            y: window.pageYOffset
+          }
+        }, '', location.href);
+        // then push new state
+        history.pushState({}, '', url);
+      }
+      var hashMatch = path.match(hashRE);
+      var hash = hashMatch && hashMatch[0];
+      path = url
+      // strip hash so it doesn't mess up params
+      .replace(hashRE, '')
+      // remove root before matching
+      .replace(this.rootRE, '');
+      this.onChange(path, null, hash);
+    };
+
+    HTML5History.prototype.formatPath = function formatPath(path, append) {
+      return path.charAt(0) === '/'
+      // absolute path
+      ? this.root ? this.root + '/' + path.replace(/^\//, '') : path : resolvePath(this.base || location.pathname, path, append);
+    };
+
+    return HTML5History;
+  })();
+
+  var HashHistory = (function () {
+    function HashHistory(_ref) {
+      var hashbang = _ref.hashbang;
+      var onChange = _ref.onChange;
+      babelHelpers.classCallCheck(this, HashHistory);
+
+      this.hashbang = hashbang;
+      this.onChange = onChange;
+    }
+
+    HashHistory.prototype.start = function start() {
+      var self = this;
+      this.listener = function () {
+        var path = location.hash;
+        var raw = path.replace(/^#!?/, '');
+        // always
+        if (raw.charAt(0) !== '/') {
+          raw = '/' + raw;
+        }
+        var formattedPath = self.formatPath(raw);
+        if (formattedPath !== path) {
+          location.replace(formattedPath);
+          return;
+        }
+        // determine query
+        // note it's possible to have queries in both the actual URL
+        // and the hash fragment itself.
+        var query = location.search && path.indexOf('?') > -1 ? '&' + location.search.slice(1) : location.search;
+        self.onChange(path.replace(/^#!?/, '') + query);
+      };
+      window.addEventListener('hashchange', this.listener);
+      this.listener();
+    };
+
+    HashHistory.prototype.stop = function stop() {
+      window.removeEventListener('hashchange', this.listener);
+    };
+
+    HashHistory.prototype.go = function go(path, replace, append) {
+      path = this.formatPath(path, append);
+      if (replace) {
+        location.replace(path);
+      } else {
+        location.hash = path;
+      }
+    };
+
+    HashHistory.prototype.formatPath = function formatPath(path, append) {
+      var isAbsoloute = path.charAt(0) === '/';
+      var prefix = '#' + (this.hashbang ? '!' : '');
+      return isAbsoloute ? prefix + path : prefix + resolvePath(location.hash.replace(/^#!?/, ''), path, append);
+    };
+
+    return HashHistory;
+  })();
+
+  var AbstractHistory = (function () {
+    function AbstractHistory(_ref) {
+      var onChange = _ref.onChange;
+      babelHelpers.classCallCheck(this, AbstractHistory);
+
+      this.onChange = onChange;
+      this.currentPath = '/';
+    }
+
+    AbstractHistory.prototype.start = function start() {
+      this.onChange('/');
+    };
+
+    AbstractHistory.prototype.stop = function stop() {
+      // noop
+    };
+
+    AbstractHistory.prototype.go = function go(path, replace, append) {
+      path = this.currentPath = this.formatPath(path, append);
+      this.onChange(path);
+    };
+
+    AbstractHistory.prototype.formatPath = function formatPath(path, append) {
+      return path.charAt(0) === '/' ? path : resolvePath(this.currentPath, path, append);
+    };
+
+    return AbstractHistory;
+  })();
+
+  /**
+   * Determine the reusability of an existing router view.
+   *
+   * @param {Directive} view
+   * @param {Object} handler
+   * @param {Transition} transition
+   */
+
+  function canReuse(view, handler, transition) {
+    var component = view.childVM;
+    if (!component || !handler) {
+      return false;
+    }
+    // important: check view.Component here because it may
+    // have been changed in activate hook
+    if (view.Component !== handler.component) {
+      return false;
+    }
+    var canReuseFn = getRouteConfig(component, 'canReuse');
+    return typeof canReuseFn === 'boolean' ? canReuseFn : canReuseFn ? canReuseFn.call(component, {
+      to: transition.to,
+      from: transition.from
+    }) : true; // defaults to true
+  }
+
+  /**
+   * Check if a component can deactivate.
+   *
+   * @param {Directive} view
+   * @param {Transition} transition
+   * @param {Function} next
+   */
+
+  function canDeactivate(view, transition, next) {
+    var fromComponent = view.childVM;
+    var hook = getRouteConfig(fromComponent, 'canDeactivate');
+    if (!hook) {
+      next();
+    } else {
+      transition.callHook(hook, fromComponent, next, {
+        expectBoolean: true
+      });
+    }
+  }
+
+  /**
+   * Check if a component can activate.
+   *
+   * @param {Object} handler
+   * @param {Transition} transition
+   * @param {Function} next
+   */
+
+  function canActivate(handler, transition, next) {
+    resolveAsyncComponent(handler, function (Component) {
+      // have to check due to async-ness
+      if (transition.aborted) {
+        return;
+      }
+      // determine if this component can be activated
+      var hook = getRouteConfig(Component, 'canActivate');
+      if (!hook) {
+        next();
+      } else {
+        transition.callHook(hook, null, next, {
+          expectBoolean: true
+        });
+      }
+    });
+  }
+
+  /**
+   * Call deactivate hooks for existing router-views.
+   *
+   * @param {Directive} view
+   * @param {Transition} transition
+   * @param {Function} next
+   */
+
+  function deactivate(view, transition, next) {
+    var component = view.childVM;
+    var hook = getRouteConfig(component, 'deactivate');
+    if (!hook) {
+      next();
+    } else {
+      transition.callHooks(hook, component, next);
+    }
+  }
+
+  /**
+   * Activate / switch component for a router-view.
+   *
+   * @param {Directive} view
+   * @param {Transition} transition
+   * @param {Number} depth
+   * @param {Function} [cb]
+   */
+
+  function activate(view, transition, depth, cb, reuse) {
+    var handler = transition.activateQueue[depth];
+    if (!handler) {
+      saveChildView(view);
+      if (view._bound) {
+        view.setComponent(null);
+      }
+      cb && cb();
+      return;
+    }
+
+    var Component = view.Component = handler.component;
+    var activateHook = getRouteConfig(Component, 'activate');
+    var dataHook = getRouteConfig(Component, 'data');
+    var waitForData = getRouteConfig(Component, 'waitForData');
+
+    view.depth = depth;
+    view.activated = false;
+
+    var component = undefined;
+    var loading = !!(dataHook && !waitForData);
+
+    // "reuse" is a flag passed down when the parent view is
+    // either reused via keep-alive or as a child of a kept-alive view.
+    // of course we can only reuse if the current kept-alive instance
+    // is of the correct type.
+    reuse = reuse && view.childVM && view.childVM.constructor === Component;
+
+    if (reuse) {
+      // just reuse
+      component = view.childVM;
+      component.$loadingRouteData = loading;
+    } else {
+      saveChildView(view);
+
+      // unbuild current component. this step also destroys
+      // and removes all nested child views.
+      view.unbuild(true);
+
+      // build the new component. this will also create the
+      // direct child view of the current one. it will register
+      // itself as view.childView.
+      component = view.build({
+        _meta: {
+          $loadingRouteData: loading
+        },
+        created: function created() {
+          this._routerView = view;
+        }
+      });
+
+      // handle keep-alive.
+      // when a kept-alive child vm is restored, we need to
+      // add its cached child views into the router's view list,
+      // and also properly update current view's child view.
+      if (view.keepAlive) {
+        component.$loadingRouteData = loading;
+        var cachedChildView = component._keepAliveRouterView;
+        if (cachedChildView) {
+          view.childView = cachedChildView;
+          component._keepAliveRouterView = null;
+        }
+      }
+    }
+
+    // cleanup the component in case the transition is aborted
+    // before the component is ever inserted.
+    var cleanup = function cleanup() {
+      component.$destroy();
+    };
+
+    // actually insert the component and trigger transition
+    var insert = function insert() {
+      if (reuse) {
+        cb && cb();
+        return;
+      }
+      var router = transition.router;
+      if (router._rendered || router._transitionOnLoad) {
+        view.transition(component);
+      } else {
+        // no transition on first render, manual transition
+        /* istanbul ignore if */
+        if (view.setCurrent) {
+          // 0.12 compat
+          view.setCurrent(component);
+        } else {
+          // 1.0
+          view.childVM = component;
+        }
+        component.$before(view.anchor, null, false);
+      }
+      cb && cb();
+    };
+
+    var afterData = function afterData() {
+      // activate the child view
+      if (view.childView) {
+        activate(view.childView, transition, depth + 1, null, reuse || view.keepAlive);
+      }
+      insert();
+    };
+
+    // called after activation hook is resolved
+    var afterActivate = function afterActivate() {
+      view.activated = true;
+      if (dataHook && waitForData) {
+        // wait until data loaded to insert
+        loadData(component, transition, dataHook, afterData, cleanup);
+      } else {
+        // load data and insert at the same time
+        if (dataHook) {
+          loadData(component, transition, dataHook);
+        }
+        afterData();
+      }
+    };
+
+    if (activateHook) {
+      transition.callHooks(activateHook, component, afterActivate, {
+        cleanup: cleanup,
+        postActivate: true
+      });
+    } else {
+      afterActivate();
+    }
+  }
+
+  /**
+   * Reuse a view, just reload data if necessary.
+   *
+   * @param {Directive} view
+   * @param {Transition} transition
+   */
+
+  function reuse(view, transition) {
+    var component = view.childVM;
+    var dataHook = getRouteConfig(component, 'data');
+    if (dataHook) {
+      loadData(component, transition, dataHook);
+    }
+  }
+
+  /**
+   * Asynchronously load and apply data to component.
+   *
+   * @param {Vue} component
+   * @param {Transition} transition
+   * @param {Function} hook
+   * @param {Function} cb
+   * @param {Function} cleanup
+   */
+
+  function loadData(component, transition, hook, cb, cleanup) {
+    component.$loadingRouteData = true;
+    transition.callHooks(hook, component, function () {
+      component.$loadingRouteData = false;
+      component.$emit('route-data-loaded', component);
+      cb && cb();
+    }, {
+      cleanup: cleanup,
+      postActivate: true,
+      processData: function processData(data) {
+        // handle promise sugar syntax
+        var promises = [];
+        if (isPlainObject(data)) {
+          Object.keys(data).forEach(function (key) {
+            var val = data[key];
+            if (isPromise(val)) {
+              promises.push(val.then(function (resolvedVal) {
+                component.$set(key, resolvedVal);
+              }));
+            } else {
+              component.$set(key, val);
+            }
+          });
+        }
+        if (promises.length) {
+          return promises[0].constructor.all(promises);
+        }
+      }
+    });
+  }
+
+  /**
+   * Save the child view for a kept-alive view so that
+   * we can restore it when it is switched back to.
+   *
+   * @param {Directive} view
+   */
+
+  function saveChildView(view) {
+    if (view.keepAlive && view.childVM && view.childView) {
+      view.childVM._keepAliveRouterView = view.childView;
+    }
+    view.childView = null;
+  }
+
+  /**
+   * Check plain object.
+   *
+   * @param {*} val
+   */
+
+  function isPlainObject(val) {
+    return Object.prototype.toString.call(val) === '[object Object]';
+  }
+
+  /**
+   * A RouteTransition object manages the pipeline of a
+   * router-view switching process. This is also the object
+   * passed into user route hooks.
+   *
+   * @param {Router} router
+   * @param {Route} to
+   * @param {Route} from
+   */
+
+  var RouteTransition = (function () {
+    function RouteTransition(router, to, from) {
+      babelHelpers.classCallCheck(this, RouteTransition);
+
+      this.router = router;
+      this.to = to;
+      this.from = from;
+      this.next = null;
+      this.aborted = false;
+      this.done = false;
+    }
+
+    /**
+     * Abort current transition and return to previous location.
+     */
+
+    RouteTransition.prototype.abort = function abort() {
+      if (!this.aborted) {
+        this.aborted = true;
+        // if the root path throws an error during validation
+        // on initial load, it gets caught in an infinite loop.
+        var abortingOnLoad = !this.from.path && this.to.path === '/';
+        if (!abortingOnLoad) {
+          this.router.replace(this.from.path || '/');
+        }
+      }
+    };
+
+    /**
+     * Abort current transition and redirect to a new location.
+     *
+     * @param {String} path
+     */
+
+    RouteTransition.prototype.redirect = function redirect(path) {
+      if (!this.aborted) {
+        this.aborted = true;
+        if (typeof path === 'string') {
+          path = mapParams(path, this.to.params, this.to.query);
+        } else {
+          path.params = path.params || this.to.params;
+          path.query = path.query || this.to.query;
+        }
+        this.router.replace(path);
+      }
+    };
+
+    /**
+     * A router view transition's pipeline can be described as
+     * follows, assuming we are transitioning from an existing
+     * <router-view> chain [Component A, Component B] to a new
+     * chain [Component A, Component C]:
+     *
+     *  A    A
+     *  | => |
+     *  B    C
+     *
+     * 1. Reusablity phase:
+     *   -> canReuse(A, A)
+     *   -> canReuse(B, C)
+     *   -> determine new queues:
+     *      - deactivation: [B]
+     *      - activation: [C]
+     *
+     * 2. Validation phase:
+     *   -> canDeactivate(B)
+     *   -> canActivate(C)
+     *
+     * 3. Activation phase:
+     *   -> deactivate(B)
+     *   -> activate(C)
+     *
+     * Each of these steps can be asynchronous, and any
+     * step can potentially abort the transition.
+     *
+     * @param {Function} cb
+     */
+
+    RouteTransition.prototype.start = function start(cb) {
+      var transition = this;
+
+      // determine the queue of views to deactivate
+      var deactivateQueue = [];
+      var view = this.router._rootView;
+      while (view) {
+        deactivateQueue.unshift(view);
+        view = view.childView;
+      }
+      var reverseDeactivateQueue = deactivateQueue.slice().reverse();
+
+      // determine the queue of route handlers to activate
+      var activateQueue = this.activateQueue = toArray(this.to.matched).map(function (match) {
+        return match.handler;
+      });
+
+      // 1. Reusability phase
+      var i = undefined,
+          reuseQueue = undefined;
+      for (i = 0; i < reverseDeactivateQueue.length; i++) {
+        if (!canReuse(reverseDeactivateQueue[i], activateQueue[i], transition)) {
+          break;
+        }
+      }
+      if (i > 0) {
+        reuseQueue = reverseDeactivateQueue.slice(0, i);
+        deactivateQueue = reverseDeactivateQueue.slice(i).reverse();
+        activateQueue = activateQueue.slice(i);
+      }
+
+      // 2. Validation phase
+      transition.runQueue(deactivateQueue, canDeactivate, function () {
+        transition.runQueue(activateQueue, canActivate, function () {
+          transition.runQueue(deactivateQueue, deactivate, function () {
+            // 3. Activation phase
+
+            // Update router current route
+            transition.router._onTransitionValidated(transition);
+
+            // trigger reuse for all reused views
+            reuseQueue && reuseQueue.forEach(function (view) {
+              return reuse(view, transition);
+            });
+
+            // the root of the chain that needs to be replaced
+            // is the top-most non-reusable view.
+            if (deactivateQueue.length) {
+              var _view = deactivateQueue[deactivateQueue.length - 1];
+              var depth = reuseQueue ? reuseQueue.length : 0;
+              activate(_view, transition, depth, cb);
+            } else {
+              cb();
+            }
+          });
+        });
+      });
+    };
+
+    /**
+     * Asynchronously and sequentially apply a function to a
+     * queue.
+     *
+     * @param {Array} queue
+     * @param {Function} fn
+     * @param {Function} cb
+     */
+
+    RouteTransition.prototype.runQueue = function runQueue(queue, fn, cb) {
+      var transition = this;
+      step(0);
+      function step(index) {
+        if (index >= queue.length) {
+          cb();
+        } else {
+          fn(queue[index], transition, function () {
+            step(index + 1);
+          });
+        }
+      }
+    };
+
+    /**
+     * Call a user provided route transition hook and handle
+     * the response (e.g. if the user returns a promise).
+     *
+     * If the user neither expects an argument nor returns a
+     * promise, the hook is assumed to be synchronous.
+     *
+     * @param {Function} hook
+     * @param {*} [context]
+     * @param {Function} [cb]
+     * @param {Object} [options]
+     *                 - {Boolean} expectBoolean
+     *                 - {Boolean} postActive
+     *                 - {Function} processData
+     *                 - {Function} cleanup
+     */
+
+    RouteTransition.prototype.callHook = function callHook(hook, context, cb) {
+      var _ref = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+
+      var _ref$expectBoolean = _ref.expectBoolean;
+      var expectBoolean = _ref$expectBoolean === undefined ? false : _ref$expectBoolean;
+      var _ref$postActivate = _ref.postActivate;
+      var postActivate = _ref$postActivate === undefined ? false : _ref$postActivate;
+      var processData = _ref.processData;
+      var cleanup = _ref.cleanup;
+
+      var transition = this;
+      var nextCalled = false;
+
+      // abort the transition
+      var abort = function abort() {
+        cleanup && cleanup();
+        transition.abort();
+      };
+
+      // handle errors
+      var onError = function onError(err) {
+        postActivate ? next() : abort();
+        if (err && !transition.router._suppress) {
+          warn$1('Uncaught error during transition: ');
+          throw err instanceof Error ? err : new Error(err);
+        }
+      };
+
+      // since promise swallows errors, we have to
+      // throw it in the next tick...
+      var onPromiseError = function onPromiseError(err) {
+        try {
+          onError(err);
+        } catch (e) {
+          setTimeout(function () {
+            throw e;
+          }, 0);
+        }
+      };
+
+      // advance the transition to the next step
+      var next = function next() {
+        if (nextCalled) {
+          warn$1('transition.next() should be called only once.');
+          return;
+        }
+        nextCalled = true;
+        if (transition.aborted) {
+          cleanup && cleanup();
+          return;
+        }
+        cb && cb();
+      };
+
+      var nextWithBoolean = function nextWithBoolean(res) {
+        if (typeof res === 'boolean') {
+          res ? next() : abort();
+        } else if (isPromise(res)) {
+          res.then(function (ok) {
+            ok ? next() : abort();
+          }, onPromiseError);
+        } else if (!hook.length) {
+          next();
+        }
+      };
+
+      var nextWithData = function nextWithData(data) {
+        var res = undefined;
+        try {
+          res = processData(data);
+        } catch (err) {
+          return onError(err);
+        }
+        if (isPromise(res)) {
+          res.then(next, onPromiseError);
+        } else {
+          next();
+        }
+      };
+
+      // expose a clone of the transition object, so that each
+      // hook gets a clean copy and prevent the user from
+      // messing with the internals.
+      var exposed = {
+        to: transition.to,
+        from: transition.from,
+        abort: abort,
+        next: processData ? nextWithData : next,
+        redirect: function redirect() {
+          transition.redirect.apply(transition, arguments);
+        }
+      };
+
+      // actually call the hook
+      var res = undefined;
+      try {
+        res = hook.call(context, exposed);
+      } catch (err) {
+        return onError(err);
+      }
+
+      if (expectBoolean) {
+        // boolean hooks
+        nextWithBoolean(res);
+      } else if (isPromise(res)) {
+        // promise
+        if (processData) {
+          res.then(nextWithData, onPromiseError);
+        } else {
+          res.then(next, onPromiseError);
+        }
+      } else if (processData && isPlainOjbect(res)) {
+        // data promise sugar
+        nextWithData(res);
+      } else if (!hook.length) {
+        next();
+      }
+    };
+
+    /**
+     * Call a single hook or an array of async hooks in series.
+     *
+     * @param {Array} hooks
+     * @param {*} context
+     * @param {Function} cb
+     * @param {Object} [options]
+     */
+
+    RouteTransition.prototype.callHooks = function callHooks(hooks, context, cb, options) {
+      var _this = this;
+
+      if (Array.isArray(hooks)) {
+        this.runQueue(hooks, function (hook, _, next) {
+          if (!_this.aborted) {
+            _this.callHook(hook, context, next, options);
+          }
+        }, cb);
+      } else {
+        this.callHook(hooks, context, cb, options);
+      }
+    };
+
+    return RouteTransition;
+  })();
+
+  function isPlainOjbect(val) {
+    return Object.prototype.toString.call(val) === '[object Object]';
+  }
+
+  function toArray(val) {
+    return val ? Array.prototype.slice.call(val) : [];
+  }
+
+  var internalKeysRE = /^(component|subRoutes|fullPath)$/;
+
+  /**
+   * Route Context Object
+   *
+   * @param {String} path
+   * @param {Router} router
+   */
+
+  var Route = function Route(path, router) {
+    var _this = this;
+
+    babelHelpers.classCallCheck(this, Route);
+
+    var matched = router._recognizer.recognize(path);
+    if (matched) {
+      // copy all custom fields from route configs
+      [].forEach.call(matched, function (match) {
+        for (var key in match.handler) {
+          if (!internalKeysRE.test(key)) {
+            _this[key] = match.handler[key];
+          }
+        }
+      });
+      // set query and params
+      this.query = matched.queryParams;
+      this.params = [].reduce.call(matched, function (prev, cur) {
+        if (cur.params) {
+          for (var key in cur.params) {
+            prev[key] = cur.params[key];
+          }
+        }
+        return prev;
+      }, {});
+    }
+    // expose path and router
+    this.path = path;
+    // for internal use
+    this.matched = matched || router._notFoundHandler;
+    // internal reference to router
+    Object.defineProperty(this, 'router', {
+      enumerable: false,
+      value: router
+    });
+    // Important: freeze self to prevent observation
+    Object.freeze(this);
+  };
+
+  function applyOverride (Vue) {
+    var _Vue$util = Vue.util;
+    var extend = _Vue$util.extend;
+    var isArray = _Vue$util.isArray;
+    var defineReactive = _Vue$util.defineReactive;
+
+    // override Vue's init and destroy process to keep track of router instances
+    var init = Vue.prototype._init;
+    Vue.prototype._init = function (options) {
+      options = options || {};
+      var root = options._parent || options.parent || this;
+      var router = root.$router;
+      var route = root.$route;
+      if (router) {
+        // expose router
+        this.$router = router;
+        router._children.push(this);
+        /* istanbul ignore if */
+        if (this._defineMeta) {
+          // 0.12
+          this._defineMeta('$route', route);
+        } else {
+          // 1.0
+          defineReactive(this, '$route', route);
+        }
+      }
+      init.call(this, options);
+    };
+
+    var destroy = Vue.prototype._destroy;
+    Vue.prototype._destroy = function () {
+      if (!this._isBeingDestroyed && this.$router) {
+        this.$router._children.$remove(this);
+      }
+      destroy.apply(this, arguments);
+    };
+
+    // 1.0 only: enable route mixins
+    var strats = Vue.config.optionMergeStrategies;
+    var hooksToMergeRE = /^(data|activate|deactivate)$/;
+
+    if (strats) {
+      strats.route = function (parentVal, childVal) {
+        if (!childVal) return parentVal;
+        if (!parentVal) return childVal;
+        var ret = {};
+        extend(ret, parentVal);
+        for (var key in childVal) {
+          var a = ret[key];
+          var b = childVal[key];
+          // for data, activate and deactivate, we need to merge them into
+          // arrays similar to lifecycle hooks.
+          if (a && hooksToMergeRE.test(key)) {
+            ret[key] = (isArray(a) ? a : [a]).concat(b);
+          } else {
+            ret[key] = b;
+          }
+        }
+        return ret;
+      };
+    }
+  }
+
+  function View (Vue) {
+
+    var _ = Vue.util;
+    var componentDef =
+    // 0.12
+    Vue.directive('_component') ||
+    // 1.0
+    Vue.internalDirectives.component;
+    // <router-view> extends the internal component directive
+    var viewDef = _.extend({}, componentDef);
+
+    // with some overrides
+    _.extend(viewDef, {
+
+      _isRouterView: true,
+
+      bind: function bind() {
+        var route = this.vm.$route;
+        /* istanbul ignore if */
+        if (!route) {
+          warn$1('<router-view> can only be used inside a ' + 'router-enabled app.');
+          return;
+        }
+        // force dynamic directive so v-component doesn't
+        // attempt to build right now
+        this._isDynamicLiteral = true;
+        // finally, init by delegating to v-component
+        componentDef.bind.call(this);
+
+        // locate the parent view
+        var parentView = undefined;
+        var parent = this.vm;
+        while (parent) {
+          if (parent._routerView) {
+            parentView = parent._routerView;
+            break;
+          }
+          parent = parent.$parent;
+        }
+        if (parentView) {
+          // register self as a child of the parent view,
+          // instead of activating now. This is so that the
+          // child's activate hook is called after the
+          // parent's has resolved.
+          this.parentView = parentView;
+          parentView.childView = this;
+        } else {
+          // this is the root view!
+          var router = route.router;
+          router._rootView = this;
+        }
+
+        // handle late-rendered view
+        // two possibilities:
+        // 1. root view rendered after transition has been
+        //    validated;
+        // 2. child view rendered after parent view has been
+        //    activated.
+        var transition = route.router._currentTransition;
+        if (!parentView && transition.done || parentView && parentView.activated) {
+          var depth = parentView ? parentView.depth + 1 : 0;
+          activate(this, transition, depth);
+        }
+      },
+
+      unbind: function unbind() {
+        if (this.parentView) {
+          this.parentView.childView = null;
+        }
+        componentDef.unbind.call(this);
+      }
+    });
+
+    Vue.elementDirective('router-view', viewDef);
+  }
+
+  var trailingSlashRE = /\/$/;
+  var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
+  var queryStringRE = /\?.*$/;
+
+  // install v-link, which provides navigation support for
+  // HTML5 history mode
+  function Link (Vue) {
+    var _Vue$util = Vue.util;
+    var _bind = _Vue$util.bind;
+    var isObject = _Vue$util.isObject;
+    var addClass = _Vue$util.addClass;
+    var removeClass = _Vue$util.removeClass;
+
+    var onPriority = Vue.directive('on').priority;
+    var LINK_UPDATE = '__vue-router-link-update__';
+
+    var activeId = 0;
+
+    Vue.directive('link-active', {
+      priority: 9999,
+      bind: function bind() {
+        var _this = this;
+
+        var id = String(activeId++);
+        // collect v-links contained within this element.
+        // we need do this here before the parent-child relationship
+        // gets messed up by terminal directives (if, for, components)
+        var childLinks = this.el.querySelectorAll('[v-link]');
+        for (var i = 0, l = childLinks.length; i < l; i++) {
+          var link = childLinks[i];
+          var existingId = link.getAttribute(LINK_UPDATE);
+          var value = existingId ? existingId + ',' + id : id;
+          // leave a mark on the link element which can be persisted
+          // through fragment clones.
+          link.setAttribute(LINK_UPDATE, value);
+        }
+        this.vm.$on(LINK_UPDATE, this.cb = function (link, path) {
+          if (link.activeIds.indexOf(id) > -1) {
+            link.updateClasses(path, _this.el);
+          }
+        });
+      },
+      unbind: function unbind() {
+        this.vm.$off(LINK_UPDATE, this.cb);
+      }
+    });
+
+    Vue.directive('link', {
+      priority: onPriority - 2,
+
+      bind: function bind() {
+        var vm = this.vm;
+        /* istanbul ignore if */
+        if (!vm.$route) {
+          warn$1('v-link can only be used inside a router-enabled app.');
+          return;
+        }
+        this.router = vm.$route.router;
+        // update things when the route changes
+        this.unwatch = vm.$watch('$route', _bind(this.onRouteUpdate, this));
+        // check v-link-active ids
+        var activeIds = this.el.getAttribute(LINK_UPDATE);
+        if (activeIds) {
+          this.el.removeAttribute(LINK_UPDATE);
+          this.activeIds = activeIds.split(',');
+        }
+        // no need to handle click if link expects to be opened
+        // in a new window/tab.
+        /* istanbul ignore if */
+        if (this.el.tagName === 'A' && this.el.getAttribute('target') === '_blank') {
+          return;
+        }
+        // handle click
+        this.handler = _bind(this.onClick, this);
+        this.el.addEventListener('click', this.handler);
+      },
+
+      update: function update(target) {
+        this.target = target;
+        if (isObject(target)) {
+          this.append = target.append;
+          this.exact = target.exact;
+          this.prevActiveClass = this.activeClass;
+          this.activeClass = target.activeClass;
+        }
+        this.onRouteUpdate(this.vm.$route);
+      },
+
+      onClick: function onClick(e) {
+        // don't redirect with control keys
+        /* istanbul ignore if */
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        // don't redirect when preventDefault called
+        /* istanbul ignore if */
+        if (e.defaultPrevented) return;
+        // don't redirect on right click
+        /* istanbul ignore if */
+        if (e.button !== 0) return;
+
+        var target = this.target;
+        if (target) {
+          // v-link with expression, just go
+          e.preventDefault();
+          this.router.go(target);
+        } else {
+          // no expression, delegate for an <a> inside
+          var el = e.target;
+          while (el.tagName !== 'A' && el !== this.el) {
+            el = el.parentNode;
+          }
+          if (el.tagName === 'A' && sameOrigin(el)) {
+            e.preventDefault();
+            var path = el.pathname;
+            if (this.router.history.root) {
+              path = path.replace(this.router.history.rootRE, '');
+            }
+            this.router.go({
+              path: path,
+              replace: target && target.replace,
+              append: target && target.append
+            });
+          }
+        }
+      },
+
+      onRouteUpdate: function onRouteUpdate(route) {
+        // router.stringifyPath is dependent on current route
+        // and needs to be called again whenver route changes.
+        var newPath = this.router.stringifyPath(this.target);
+        if (this.path !== newPath) {
+          this.path = newPath;
+          this.updateActiveMatch();
+          this.updateHref();
+        }
+        if (this.activeIds) {
+          this.vm.$emit(LINK_UPDATE, this, route.path);
+        } else {
+          this.updateClasses(route.path, this.el);
+        }
+      },
+
+      updateActiveMatch: function updateActiveMatch() {
+        this.activeRE = this.path && !this.exact ? new RegExp('^' + this.path.replace(/\/$/, '').replace(queryStringRE, '').replace(regexEscapeRE, '\\$&') + '(\\/|$)') : null;
+      },
+
+      updateHref: function updateHref() {
+        if (this.el.tagName !== 'A') {
+          return;
+        }
+        var path = this.path;
+        var router = this.router;
+        var isAbsolute = path.charAt(0) === '/';
+        // do not format non-hash relative paths
+        var href = path && (router.mode === 'hash' || isAbsolute) ? router.history.formatPath(path, this.append) : path;
+        if (href) {
+          this.el.href = href;
+        } else {
+          this.el.removeAttribute('href');
+        }
+      },
+
+      updateClasses: function updateClasses(path, el) {
+        var activeClass = this.activeClass || this.router._linkActiveClass;
+        // clear old class
+        if (this.prevActiveClass && this.prevActiveClass !== activeClass) {
+          toggleClasses(el, this.prevActiveClass, removeClass);
+        }
+        // remove query string before matching
+        var dest = this.path.replace(queryStringRE, '');
+        path = path.replace(queryStringRE, '');
+        // add new class
+        if (this.exact) {
+          if (dest === path ||
+          // also allow additional trailing slash
+          dest.charAt(dest.length - 1) !== '/' && dest === path.replace(trailingSlashRE, '')) {
+            toggleClasses(el, activeClass, addClass);
+          } else {
+            toggleClasses(el, activeClass, removeClass);
+          }
+        } else {
+          if (this.activeRE && this.activeRE.test(path)) {
+            toggleClasses(el, activeClass, addClass);
+          } else {
+            toggleClasses(el, activeClass, removeClass);
+          }
+        }
+      },
+
+      unbind: function unbind() {
+        this.el.removeEventListener('click', this.handler);
+        this.unwatch && this.unwatch();
+      }
+    });
+
+    function sameOrigin(link) {
+      return link.protocol === location.protocol && link.hostname === location.hostname && link.port === location.port;
+    }
+
+    // this function is copied from v-bind:class implementation until
+    // we properly expose it...
+    function toggleClasses(el, key, fn) {
+      key = key.trim();
+      if (key.indexOf(' ') === -1) {
+        fn(el, key);
+        return;
+      }
+      var keys = key.split(/\s+/);
+      for (var i = 0, l = keys.length; i < l; i++) {
+        fn(el, keys[i]);
+      }
+    }
+  }
+
+  var historyBackends = {
+    abstract: AbstractHistory,
+    hash: HashHistory,
+    html5: HTML5History
+  };
+
+  // late bind during install
+  var Vue = undefined;
+
+  /**
+   * Router constructor
+   *
+   * @param {Object} [options]
+   */
+
+  var Router = (function () {
+    function Router() {
+      var _this = this;
+
+      var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      var _ref$hashbang = _ref.hashbang;
+      var hashbang = _ref$hashbang === undefined ? true : _ref$hashbang;
+      var _ref$abstract = _ref.abstract;
+      var abstract = _ref$abstract === undefined ? false : _ref$abstract;
+      var _ref$history = _ref.history;
+      var history = _ref$history === undefined ? false : _ref$history;
+      var _ref$saveScrollPosition = _ref.saveScrollPosition;
+      var saveScrollPosition = _ref$saveScrollPosition === undefined ? false : _ref$saveScrollPosition;
+      var _ref$transitionOnLoad = _ref.transitionOnLoad;
+      var transitionOnLoad = _ref$transitionOnLoad === undefined ? false : _ref$transitionOnLoad;
+      var _ref$suppressTransitionError = _ref.suppressTransitionError;
+      var suppressTransitionError = _ref$suppressTransitionError === undefined ? false : _ref$suppressTransitionError;
+      var _ref$root = _ref.root;
+      var root = _ref$root === undefined ? null : _ref$root;
+      var _ref$linkActiveClass = _ref.linkActiveClass;
+      var linkActiveClass = _ref$linkActiveClass === undefined ? 'v-link-active' : _ref$linkActiveClass;
+      babelHelpers.classCallCheck(this, Router);
+
+      /* istanbul ignore if */
+      if (!Router.installed) {
+        throw new Error('Please install the Router with Vue.use() before ' + 'creating an instance.');
+      }
+
+      // Vue instances
+      this.app = null;
+      this._children = [];
+
+      // route recognizer
+      this._recognizer = new RouteRecognizer();
+      this._guardRecognizer = new RouteRecognizer();
+
+      // state
+      this._started = false;
+      this._startCb = null;
+      this._currentRoute = {};
+      this._currentTransition = null;
+      this._previousTransition = null;
+      this._notFoundHandler = null;
+      this._notFoundRedirect = null;
+      this._beforeEachHooks = [];
+      this._afterEachHooks = [];
+
+      // trigger transition on initial render?
+      this._rendered = false;
+      this._transitionOnLoad = transitionOnLoad;
+
+      // history mode
+      this._root = root;
+      this._abstract = abstract;
+      this._hashbang = hashbang;
+
+      // check if HTML5 history is available
+      var hasPushState = typeof window !== 'undefined' && window.history && window.history.pushState;
+      this._history = history && hasPushState;
+      this._historyFallback = history && !hasPushState;
+
+      // create history object
+      var inBrowser = Vue.util.inBrowser;
+      this.mode = !inBrowser || this._abstract ? 'abstract' : this._history ? 'html5' : 'hash';
+
+      var History = historyBackends[this.mode];
+      this.history = new History({
+        root: root,
+        hashbang: this._hashbang,
+        onChange: function onChange(path, state, anchor) {
+          _this._match(path, state, anchor);
+        }
+      });
+
+      // other options
+      this._saveScrollPosition = saveScrollPosition;
+      this._linkActiveClass = linkActiveClass;
+      this._suppress = suppressTransitionError;
+    }
+
+    /**
+     * Allow directly passing components to a route
+     * definition.
+     *
+     * @param {String} path
+     * @param {Object} handler
+     */
+
+    // API ===================================================
+
+    /**
+    * Register a map of top-level paths.
+    *
+    * @param {Object} map
+    */
+
+    Router.prototype.map = function map(_map) {
+      for (var route in _map) {
+        this.on(route, _map[route]);
+      }
+      return this;
+    };
+
+    /**
+     * Register a single root-level path
+     *
+     * @param {String} rootPath
+     * @param {Object} handler
+     *                 - {String} component
+     *                 - {Object} [subRoutes]
+     *                 - {Boolean} [forceRefresh]
+     *                 - {Function} [before]
+     *                 - {Function} [after]
+     */
+
+    Router.prototype.on = function on(rootPath, handler) {
+      if (rootPath === '*') {
+        this._notFound(handler);
+      } else {
+        this._addRoute(rootPath, handler, []);
+      }
+      return this;
+    };
+
+    /**
+     * Set redirects.
+     *
+     * @param {Object} map
+     */
+
+    Router.prototype.redirect = function redirect(map) {
+      for (var path in map) {
+        this._addRedirect(path, map[path]);
+      }
+      return this;
+    };
+
+    /**
+     * Set aliases.
+     *
+     * @param {Object} map
+     */
+
+    Router.prototype.alias = function alias(map) {
+      for (var path in map) {
+        this._addAlias(path, map[path]);
+      }
+      return this;
+    };
+
+    /**
+     * Set global before hook.
+     *
+     * @param {Function} fn
+     */
+
+    Router.prototype.beforeEach = function beforeEach(fn) {
+      this._beforeEachHooks.push(fn);
+      return this;
+    };
+
+    /**
+     * Set global after hook.
+     *
+     * @param {Function} fn
+     */
+
+    Router.prototype.afterEach = function afterEach(fn) {
+      this._afterEachHooks.push(fn);
+      return this;
+    };
+
+    /**
+     * Navigate to a given path.
+     * The path can be an object describing a named path in
+     * the format of { name: '...', params: {}, query: {}}
+     * The path is assumed to be already decoded, and will
+     * be resolved against root (if provided)
+     *
+     * @param {String|Object} path
+     * @param {Boolean} [replace]
+     */
+
+    Router.prototype.go = function go(path) {
+      var replace = false;
+      var append = false;
+      if (Vue.util.isObject(path)) {
+        replace = path.replace;
+        append = path.append;
+      }
+      path = this.stringifyPath(path);
+      if (path) {
+        this.history.go(path, replace, append);
+      }
+    };
+
+    /**
+     * Short hand for replacing current path
+     *
+     * @param {String} path
+     */
+
+    Router.prototype.replace = function replace(path) {
+      if (typeof path === 'string') {
+        path = { path: path };
+      }
+      path.replace = true;
+      this.go(path);
+    };
+
+    /**
+     * Start the router.
+     *
+     * @param {VueConstructor} App
+     * @param {String|Element} container
+     * @param {Function} [cb]
+     */
+
+    Router.prototype.start = function start(App, container, cb) {
+      /* istanbul ignore if */
+      if (this._started) {
+        warn$1('already started.');
+        return;
+      }
+      this._started = true;
+      this._startCb = cb;
+      if (!this.app) {
+        /* istanbul ignore if */
+        if (!App || !container) {
+          throw new Error('Must start vue-router with a component and a ' + 'root container.');
+        }
+        /* istanbul ignore if */
+        if (App instanceof Vue) {
+          throw new Error('Must start vue-router with a component, not a ' + 'Vue instance.');
+        }
+        this._appContainer = container;
+        var Ctor = this._appConstructor = typeof App === 'function' ? App : Vue.extend(App);
+        // give it a name for better debugging
+        Ctor.options.name = Ctor.options.name || 'RouterApp';
+      }
+
+      // handle history fallback in browsers that do not
+      // support HTML5 history API
+      if (this._historyFallback) {
+        var _location = window.location;
+        var _history = new HTML5History({ root: this._root });
+        var path = _history.root ? _location.pathname.replace(_history.rootRE, '') : _location.pathname;
+        if (path && path !== '/') {
+          _location.assign((_history.root || '') + '/' + this.history.formatPath(path) + _location.search);
+          return;
+        }
+      }
+
+      this.history.start();
+    };
+
+    /**
+     * Stop listening to route changes.
+     */
+
+    Router.prototype.stop = function stop() {
+      this.history.stop();
+      this._started = false;
+    };
+
+    /**
+     * Normalize named route object / string paths into
+     * a string.
+     *
+     * @param {Object|String|Number} path
+     * @return {String}
+     */
+
+    Router.prototype.stringifyPath = function stringifyPath(path) {
+      var generatedPath = '';
+      if (path && typeof path === 'object') {
+        if (path.name) {
+          var extend = Vue.util.extend;
+          var currentParams = this._currentTransition && this._currentTransition.to.params;
+          var targetParams = path.params || {};
+          var params = currentParams ? extend(extend({}, currentParams), targetParams) : targetParams;
+          generatedPath = encodeURI(this._recognizer.generate(path.name, params));
+        } else if (path.path) {
+          generatedPath = encodeURI(path.path);
+        }
+        if (path.query) {
+          // note: the generated query string is pre-URL-encoded by the recognizer
+          var query = this._recognizer.generateQueryString(path.query);
+          if (generatedPath.indexOf('?') > -1) {
+            generatedPath += '&' + query.slice(1);
+          } else {
+            generatedPath += query;
+          }
+        }
+      } else {
+        generatedPath = encodeURI(path ? path + '' : '');
+      }
+      return generatedPath;
+    };
+
+    // Internal methods ======================================
+
+    /**
+    * Add a route containing a list of segments to the internal
+    * route recognizer. Will be called recursively to add all
+    * possible sub-routes.
+    *
+    * @param {String} path
+    * @param {Object} handler
+    * @param {Array} segments
+    */
+
+    Router.prototype._addRoute = function _addRoute(path, handler, segments) {
+      guardComponent(path, handler);
+      handler.path = path;
+      handler.fullPath = (segments.reduce(function (path, segment) {
+        return path + segment.path;
+      }, '') + path).replace('//', '/');
+      segments.push({
+        path: path,
+        handler: handler
+      });
+      this._recognizer.add(segments, {
+        as: handler.name
+      });
+      // add sub routes
+      if (handler.subRoutes) {
+        for (var subPath in handler.subRoutes) {
+          // recursively walk all sub routes
+          this._addRoute(subPath, handler.subRoutes[subPath],
+          // pass a copy in recursion to avoid mutating
+          // across branches
+          segments.slice());
+        }
+      }
+    };
+
+    /**
+     * Set the notFound route handler.
+     *
+     * @param {Object} handler
+     */
+
+    Router.prototype._notFound = function _notFound(handler) {
+      guardComponent('*', handler);
+      this._notFoundHandler = [{ handler: handler }];
+    };
+
+    /**
+     * Add a redirect record.
+     *
+     * @param {String} path
+     * @param {String} redirectPath
+     */
+
+    Router.prototype._addRedirect = function _addRedirect(path, redirectPath) {
+      if (path === '*') {
+        this._notFoundRedirect = redirectPath;
+      } else {
+        this._addGuard(path, redirectPath, this.replace);
+      }
+    };
+
+    /**
+     * Add an alias record.
+     *
+     * @param {String} path
+     * @param {String} aliasPath
+     */
+
+    Router.prototype._addAlias = function _addAlias(path, aliasPath) {
+      this._addGuard(path, aliasPath, this._match);
+    };
+
+    /**
+     * Add a path guard.
+     *
+     * @param {String} path
+     * @param {String} mappedPath
+     * @param {Function} handler
+     */
+
+    Router.prototype._addGuard = function _addGuard(path, mappedPath, _handler) {
+      var _this2 = this;
+
+      this._guardRecognizer.add([{
+        path: path,
+        handler: function handler(match, query) {
+          var realPath = mapParams(mappedPath, match.params, query);
+          _handler.call(_this2, realPath);
+        }
+      }]);
+    };
+
+    /**
+     * Check if a path matches any redirect records.
+     *
+     * @param {String} path
+     * @return {Boolean} - if true, will skip normal match.
+     */
+
+    Router.prototype._checkGuard = function _checkGuard(path) {
+      var matched = this._guardRecognizer.recognize(path, true);
+      if (matched) {
+        matched[0].handler(matched[0], matched.queryParams);
+        return true;
+      } else if (this._notFoundRedirect) {
+        matched = this._recognizer.recognize(path);
+        if (!matched) {
+          this.replace(this._notFoundRedirect);
+          return true;
+        }
+      }
+    };
+
+    /**
+     * Match a URL path and set the route context on vm,
+     * triggering view updates.
+     *
+     * @param {String} path
+     * @param {Object} [state]
+     * @param {String} [anchor]
+     */
+
+    Router.prototype._match = function _match(path, state, anchor) {
+      var _this3 = this;
+
+      if (this._checkGuard(path)) {
+        return;
+      }
+
+      var currentRoute = this._currentRoute;
+      var currentTransition = this._currentTransition;
+
+      if (currentTransition) {
+        if (currentTransition.to.path === path) {
+          // do nothing if we have an active transition going to the same path
+          return;
+        } else if (currentRoute.path === path) {
+          // We are going to the same path, but we also have an ongoing but
+          // not-yet-validated transition. Abort that transition and reset to
+          // prev transition.
+          currentTransition.aborted = true;
+          this._currentTransition = this._prevTransition;
+          return;
+        } else {
+          // going to a totally different path. abort ongoing transition.
+          currentTransition.aborted = true;
+        }
+      }
+
+      // construct new route and transition context
+      var route = new Route(path, this);
+      var transition = new RouteTransition(this, route, currentRoute);
+
+      // current transition is updated right now.
+      // however, current route will only be updated after the transition has
+      // been validated.
+      this._prevTransition = currentTransition;
+      this._currentTransition = transition;
+
+      if (!this.app) {
+        (function () {
+          // initial render
+          var router = _this3;
+          _this3.app = new _this3._appConstructor({
+            el: _this3._appContainer,
+            created: function created() {
+              this.$router = router;
+            },
+            _meta: {
+              $route: route
+            }
+          });
+        })();
+      }
+
+      // check global before hook
+      var beforeHooks = this._beforeEachHooks;
+      var startTransition = function startTransition() {
+        transition.start(function () {
+          _this3._postTransition(route, state, anchor);
+        });
+      };
+
+      if (beforeHooks.length) {
+        transition.runQueue(beforeHooks, function (hook, _, next) {
+          if (transition === _this3._currentTransition) {
+            transition.callHook(hook, null, next, {
+              expectBoolean: true
+            });
+          }
+        }, startTransition);
+      } else {
+        startTransition();
+      }
+
+      if (!this._rendered && this._startCb) {
+        this._startCb.call(null);
+      }
+
+      // HACK:
+      // set rendered to true after the transition start, so
+      // that components that are acitvated synchronously know
+      // whether it is the initial render.
+      this._rendered = true;
+    };
+
+    /**
+     * Set current to the new transition.
+     * This is called by the transition object when the
+     * validation of a route has succeeded.
+     *
+     * @param {Transition} transition
+     */
+
+    Router.prototype._onTransitionValidated = function _onTransitionValidated(transition) {
+      // set current route
+      var route = this._currentRoute = transition.to;
+      // update route context for all children
+      if (this.app.$route !== route) {
+        this.app.$route = route;
+        this._children.forEach(function (child) {
+          child.$route = route;
+        });
+      }
+      // call global after hook
+      if (this._afterEachHooks.length) {
+        this._afterEachHooks.forEach(function (hook) {
+          return hook.call(null, {
+            to: transition.to,
+            from: transition.from
+          });
+        });
+      }
+      this._currentTransition.done = true;
+    };
+
+    /**
+     * Handle stuff after the transition.
+     *
+     * @param {Route} route
+     * @param {Object} [state]
+     * @param {String} [anchor]
+     */
+
+    Router.prototype._postTransition = function _postTransition(route, state, anchor) {
+      // handle scroll positions
+      // saved scroll positions take priority
+      // then we check if the path has an anchor
+      var pos = state && state.pos;
+      if (pos && this._saveScrollPosition) {
+        Vue.nextTick(function () {
+          window.scrollTo(pos.x, pos.y);
+        });
+      } else if (anchor) {
+        Vue.nextTick(function () {
+          var el = document.getElementById(anchor.slice(1));
+          if (el) {
+            window.scrollTo(window.scrollX, el.offsetTop);
+          }
+        });
+      }
+    };
+
+    return Router;
+  })();
+
+  function guardComponent(path, handler) {
+    var comp = handler.component;
+    if (Vue.util.isPlainObject(comp)) {
+      comp = handler.component = Vue.extend(comp);
+    }
+    /* istanbul ignore if */
+    if (typeof comp !== 'function') {
+      handler.component = null;
+      warn$1('invalid component for route "' + path + '".');
+    }
+  }
+
+  /* Installation */
+
+  Router.installed = false;
+
+  /**
+   * Installation interface.
+   * Install the necessary directives.
+   */
+
+  Router.install = function (externalVue) {
+    /* istanbul ignore if */
+    if (Router.installed) {
+      warn$1('already installed.');
+      return;
+    }
+    Vue = externalVue;
+    applyOverride(Vue);
+    View(Vue);
+    Link(Vue);
+    exports$1.Vue = Vue;
+    Router.installed = true;
+  };
+
+  // auto install
+  /* istanbul ignore if */
+  if (typeof window !== 'undefined' && window.Vue) {
+    window.Vue.use(Router);
+  }
+
+  return Router;
+
+}));
+},{}],48:[function(require,module,exports){
 ;(function () {
 
   var vueTouch = {}
@@ -4528,7 +7238,7 @@ module.exports = function (_) {
 
 })()
 
-},{"hammerjs":36}],48:[function(require,module,exports){
+},{"hammerjs":36}],49:[function(require,module,exports){
 (function (process,global){
 /*!
  * Vue.js v1.0.21
@@ -14454,7 +17164,7 @@ setTimeout(function () {
 
 module.exports = Vue;
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":37}],49:[function(require,module,exports){
+},{"_process":37}],50:[function(require,module,exports){
 var inserted = exports.cache = {}
 
 exports.insert = function (css) {
@@ -14474,7 +17184,73 @@ exports.insert = function (css) {
   return elem
 }
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
+exports.sync = function (store, router) {
+  patchStore(store)
+  store.router = router
+
+  var isTimeTraveling = false
+  var currentPath
+
+  // sync router on store change
+  store.watch(
+    function (state) {
+      return state.route
+    },
+    function (route) {
+      if (route.path === currentPath) {
+        return
+      }
+      isTimeTraveling = true
+      currentPath = route.path
+      router.go(route.path)
+    },
+    { deep: true, sync: true }
+  )
+
+  // sync store on router navigation
+  router.afterEach(function (transition) {
+    if (isTimeTraveling) {
+      isTimeTraveling = false
+      return
+    }
+    var to = transition.to
+    currentPath = to.path
+    store.dispatch('router/ROUTE_CHANGED', {
+      path: to.path,
+      query: to.query,
+      params: to.params
+    })
+  })
+}
+
+function patchStore (store) {
+  // add state
+  var set = store._vm.constructor.parsers.path.setPath
+  store._dispatching = true
+  set(store._vm._data, 'route', {
+    path: '',
+    query: null,
+    params: null
+  })
+  store._dispatching = false
+  // add mutations
+  store.hotUpdate({
+    modules: {
+      route: {
+        mutations: {
+          'router/ROUTE_CHANGED': function (state, to) {
+            state.path = to.path
+            state.query = to.query
+            state.params = to.params
+          }
+        }
+      }
+    }
+  })
+}
+
+},{}],52:[function(require,module,exports){
 /*!
  * Vuex v0.6.2
  * (c) 2016 Evan You
@@ -15051,7 +17827,7 @@ exports.insert = function (css) {
   return index;
 
 }));
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 'use strict';
 
 // Credits: borrowed code from fcomb/redux-logger
@@ -15111,47 +17887,240 @@ function pad(num, maxLength) {
 }
 
 module.exports = createLogger;
-},{}],52:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    iconList: '<option></option><option data-icon="fa fa-adjust" value="fa-adjust">fa-adjust</option><option data-icon="fa fa-adn" value="fa-adn">fa-adn</option><option value="fa-align-center" data-icon="fa fa-align-center">fa-align-center</option><option value="fa-align-justify" data-icon="fa fa-align-justify">fa-align-justify</option><option value="fa-align-left" data-icon="fa fa-align-left">fa-align-left</option><option value="fa-align-right" data-icon="fa fa-align-right">fa-align-right</option><option value="fa-ambulance" data-icon="fa fa-ambulance">fa-ambulance</option><option value="fa-anchor" data-icon="fa fa-anchor">fa-anchor</option><option value="fa-android" data-icon="fa fa-android">fa-android</option><option value="fa-angellist" data-icon="fa fa-angellist">fa-angellist</option><option value="fa-angle-double-down" data-icon="fa fa-angle-double-down">fa-angle-double-down</option><option value="fa-angle-double-left" data-icon="fa fa-angle-double-left">fa-angle-double-left</option><option value="fa-angle-double-right" data-icon="fa fa-angle-double-right">fa-angle-double-right</option><option value="fa-angle-double-up" data-icon="fa fa-angle-double-up">fa-angle-double-up</option><option value="fa-angle-down" data-icon="fa fa-angle-down">fa-angle-down</option><option value="fa-angle-left" data-icon="fa fa-angle-left">fa-angle-left</option><option value="fa-angle-right" data-icon="fa fa-angle-right">fa-angle-right</option><option value="fa-angle-up" data-icon="fa fa-angle-up">fa-angle-up</option><option value="fa-apple" data-icon="fa fa-apple">fa-apple</option><option value="fa-archive" data-icon="fa fa-archive">fa-archive</option><option value="fa-area-chart" data-icon="fa fa-area-chart">fa-area-chart</option><option value="fa-arrow-circle-down" data-icon="fa fa-arrow-circle-down">fa-arrow-circle-down</option><option value="fa-arrow-circle-left" data-icon="fa fa-arrow-circle-left">fa-arrow-circle-left</option><option value="fa-arrow-circle-o-down" data-icon="fa fa-arrow-circle-o-down">fa-arrow-circle-o-down</option><option value="fa-arrow-circle-o-left" data-icon="fa fa-arrow-circle-o-left">fa-arrow-circle-o-left</option><option value="fa-arrow-circle-o-right" data-icon="fa fa-arrow-circle-o-right">fa-arrow-circle-o-right</option><option value="fa-arrow-circle-o-up" data-icon="fa fa-arrow-circle-o-up">fa-arrow-circle-o-up</option><option value="fa-arrow-circle-right" data-icon="fa fa-arrow-circle-right">fa-arrow-circle-right</option><option value="fa-arrow-circle-up" data-icon="fa fa-arrow-circle-up">fa-arrow-circle-up</option><option value="fa-arrow-down" data-icon="fa fa-arrow-down">fa-arrow-down</option><option value="fa-arrow-left" data-icon="fa fa-arrow-left">fa-arrow-left</option><option value="fa-arrow-right" data-icon="fa fa-arrow-right">fa-arrow-right</option><option value="fa-arrow-up" data-icon="fa fa-arrow-up">fa-arrow-up</option><option value="fa-arrows" data-icon="fa fa-arrows">fa-arrows</option><option value="fa-arrows-alt" data-icon="fa fa-arrows-alt">fa-arrows-alt</option><option value="fa-arrows-h" data-icon="fa fa-arrows-h">fa-arrows-h</option><option value="fa-arrows-v" data-icon="fa fa-arrows-v">fa-arrows-v</option><option value="fa-asterisk" data-icon="fa fa-asterisk">fa-asterisk</option><option value="fa-at" data-icon="fa fa-at">fa-at</option><option value="fa-automobile" data-icon="fa fa-automobile">fa-automobile</option><option value="fa-backward" data-icon="fa fa-backward">fa-backward</option><option value="fa-ban" data-icon="fa fa-ban">fa-ban</option><option value="fa-bank" data-icon="fa fa-bank">fa-bank</option><option value="fa-bar-chart" data-icon="fa fa-bar-chart">fa-bar-chart</option><option value="fa-bar-chart-o" data-icon="fa fa-bar-chart-o">fa-bar-chart-o</option><option value="fa-barcode" data-icon="fa fa-barcode">fa-barcode</option><option value="fa-bars" data-icon="fa fa-bars">fa-bars</option><option value="fa-bed" data-icon="fa fa-bed">fa-bed</option><option value="fa-beer" data-icon="fa fa-beer">fa-beer</option><option value="fa-behance" data-icon="fa fa-behance">fa-behance</option><option value="fa-behance-square" data-icon="fa fa-behance-square">fa-behance-square</option><option value="fa-bell" data-icon="fa fa-bell">fa-bell</option><option value="fa-bell-o" data-icon="fa fa-bell-o">fa-bell-o</option><option value="fa-bell-slash" data-icon="fa fa-bell-slash">fa-bell-slash</option><option value="fa-bell-slash-o" data-icon="fa fa-bell-slash-o">fa-bell-slash-o</option><option value="fa-bicycle" data-icon="fa fa-bicycle">fa-bicycle</option><option value="fa-binoculars" data-icon="fa fa-binoculars">fa-binoculars</option><option value="fa-birthday-cake" data-icon="fa fa-birthday-cake">fa-birthday-cake</option><option value="fa-bitbucket" data-icon="fa fa-bitbucket">fa-bitbucket</option><option value="fa-bitbucket-square" data-icon="fa fa-bitbucket-square">fa-bitbucket-square</option><option value="fa-bitcoin" data-icon="fa fa-bitcoin">fa-bitcoin</option><option value="fa-bold" data-icon="fa fa-bold">fa-bold</option><option value="fa-bolt" data-icon="fa fa-bolt">fa-bolt</option><option value="fa-bomb" data-icon="fa fa-bomb">fa-bomb</option><option value="fa-book" data-icon="fa fa-book">fa-book</option><option value="fa-bookmark" data-icon="fa fa-bookmark">fa-bookmark</option><option value="fa-bookmark-o" data-icon="fa fa-bookmark-o">fa-bookmark-o</option><option value="fa-briefcase" data-icon="fa fa-briefcase">fa-briefcase</option><option value="fa-btc" data-icon="fa fa-btc">fa-btc</option><option value="fa-bug" data-icon="fa fa-bug">fa-bug</option><option value="fa-building" data-icon="fa fa-building">fa-building</option><option value="fa-building-o" data-icon="fa fa-building-o">fa-building-o</option><option value="fa-bullhorn" data-icon="fa fa-bullhorn">fa-bullhorn</option><option value="fa-bullseye" data-icon="fa fa-bullseye">fa-bullseye</option><option value="fa-bus" data-icon="fa fa-bus">fa-bus</option><option value="fa-buysellads" data-icon="fa fa-buysellads">fa-buysellads</option><option value="fa-cab" data-icon="fa fa-cab">fa-cab</option><option value="fa-calculator" data-icon="fa fa-calculator">fa-calculator</option><option value="fa-calendar" data-icon="fa fa-calendar">fa-calendar</option><option value="fa-calendar-o" data-icon="fa fa-calendar-o">fa-calendar-o</option><option value="fa-camera" data-icon="fa fa-camera">fa-camera</option><option value="fa-camera-retro" data-icon="fa fa-camera-retro">fa-camera-retro</option><option value="fa-car" data-icon="fa fa-car">fa-car</option><option value="fa-caret-down" data-icon="fa fa-caret-down">fa-caret-down</option><option value="fa-caret-left" data-icon="fa fa-caret-left">fa-caret-left</option><option value="fa-caret-right" data-icon="fa fa-caret-right">fa-caret-right</option><option value="fa-caret-square-o-down" data-icon="fa fa-caret-square-o-down">fa-caret-square-o-down</option><option value="fa-caret-square-o-left" data-icon="fa fa-caret-square-o-left">fa-caret-square-o-left</option><option value="fa-caret-square-o-right" data-icon="fa fa-caret-square-o-right">fa-caret-square-o-right</option><option value="fa-caret-square-o-up" data-icon="fa fa-caret-square-o-up">fa-caret-square-o-up</option><option value="fa-caret-up" data-icon="fa fa-caret-up">fa-caret-up</option><option value="fa-cart-arrow-down" data-icon="fa fa-cart-arrow-down">fa-cart-arrow-down</option><option value="fa-cart-plus" data-icon="fa fa-cart-plus">fa-cart-plus</option><option value="fa-cc" data-icon="fa fa-cc">fa-cc</option><option value="fa-cc-amex" data-icon="fa fa-cc-amex">fa-cc-amex</option><option value="fa-cc-discover" data-icon="fa fa-cc-discover">fa-cc-discover</option><option value="fa-cc-mastercard" data-icon="fa fa-cc-mastercard">fa-cc-mastercard</option><option value="fa-cc-paypal" data-icon="fa fa-cc-paypal">fa-cc-paypal</option><option value="fa-cc-stripe" data-icon="fa fa-cc-stripe">fa-cc-stripe</option><option value="fa-cc-visa" data-icon="fa fa-cc-visa">fa-cc-visa</option><option value="fa-certificate" data-icon="fa fa-certificate">fa-certificate</option><option value="fa-chain" data-icon="fa fa-chain">fa-chain</option><option value="fa-chain-broken" data-icon="fa fa-chain-broken">fa-chain-broken</option><option value="fa-check" data-icon="fa fa-check">fa-check</option><option value="fa-check-circle" data-icon="fa fa-check-circle">fa-check-circle</option><option value="fa-check-circle-o" data-icon="fa fa-check-circle-o">fa-check-circle-o</option><option value="fa-check-square" data-icon="fa fa-check-square">fa-check-square</option><option value="fa-check-square-o" data-icon="fa fa-check-square-o">fa-check-square-o</option><option value="fa-chevron-circle-down" data-icon="fa fa-chevron-circle-down">fa-chevron-circle-down</option><option value="fa-chevron-circle-left" data-icon="fa fa-chevron-circle-left">fa-chevron-circle-left</option><option value="fa-chevron-circle-right" data-icon="fa fa-chevron-circle-right">fa-chevron-circle-right</option><option value="fa-chevron-circle-up" data-icon="fa fa-chevron-circle-up">fa-chevron-circle-up</option><option value="fa-chevron-down" data-icon="fa fa-chevron-down">fa-chevron-down</option><option value="fa-chevron-left" data-icon="fa fa-chevron-left">fa-chevron-left</option><option value="fa-chevron-right" data-icon="fa fa-chevron-right">fa-chevron-right</option><option value="fa-chevron-up" data-icon="fa fa-chevron-up">fa-chevron-up</option><option value="fa-child" data-icon="fa fa-child">fa-child</option><option value="fa-circle" data-icon="fa fa-circle">fa-circle</option><option value="fa-circle-o" data-icon="fa fa-circle-o">fa-circle-o</option><option value="fa-circle-o-notch" data-icon="fa fa-circle-o-notch">fa-circle-o-notch</option><option value="fa-circle-thin" data-icon="fa fa-circle-thin">fa-circle-thin</option><option value="fa-clipboard" data-icon="fa fa-clipboard">fa-clipboard</option><option value="fa-clock-o" data-icon="fa fa-clock-o">fa-clock-o</option><option value="fa-close" data-icon="fa fa-close">fa-close</option><option value="fa-cloud" data-icon="fa fa-cloud">fa-cloud</option><option value="fa-cloud-download" data-icon="fa fa-cloud-download">fa-cloud-download</option><option value="fa-cloud-upload" data-icon="fa fa-cloud-upload">fa-cloud-upload</option><option value="fa-cny" data-icon="fa fa-cny">fa-cny</option><option value="fa-code" data-icon="fa fa-code">fa-code</option><option value="fa-code-fork" data-icon="fa fa-code-fork">fa-code-fork</option><option value="fa-codepen" data-icon="fa fa-codepen">fa-codepen</option><option value="fa-coffee" data-icon="fa fa-coffee">fa-coffee</option><option value="fa-cog" data-icon="fa fa-cog">fa-cog</option><option value="fa-cogs" data-icon="fa fa-cogs">fa-cogs</option><option value="fa-columns" data-icon="fa fa-columns">fa-columns</option><option value="fa-comment" data-icon="fa fa-comment">fa-comment</option><option value="fa-comment-o" data-icon="fa fa-comment-o">fa-comment-o</option><option value="fa-comments" data-icon="fa fa-comments">fa-comments</option><option value="fa-comments-o" data-icon="fa fa-comments-o">fa-comments-o</option><option value="fa-compass" data-icon="fa fa-compass">fa-compass</option><option value="fa-compress" data-icon="fa fa-compress">fa-compress</option><option value="fa-connectdevelop" data-icon="fa fa-connectdevelop">fa-connectdevelop</option><option value="fa-copy" data-icon="fa fa-copy">fa-copy</option><option value="fa-copyright" data-icon="fa fa-copyright">fa-copyright</option><option value="fa-credit-card" data-icon="fa fa-credit-card">fa-credit-card</option><option value="fa-crop" data-icon="fa fa-crop">fa-crop</option><option value="fa-crosshairs" data-icon="fa fa-crosshairs">fa-crosshairs</option><option value="fa-css3" data-icon="fa fa-css3">fa-css3</option><option value="fa-cube" data-icon="fa fa-cube">fa-cube</option><option value="fa-cubes" data-icon="fa fa-cubes">fa-cubes</option><option value="fa-cut" data-icon="fa fa-cut">fa-cut</option><option value="fa-cutlery" data-icon="fa fa-cutlery">fa-cutlery</option><option value="fa-dashboard" data-icon="fa fa-dashboard">fa-dashboard</option><option value="fa-dashcube" data-icon="fa fa-dashcube">fa-dashcube</option><option value="fa-database" data-icon="fa fa-database">fa-database</option><option value="fa-dedent" data-icon="fa fa-dedent">fa-dedent</option><option value="fa-delicious" data-icon="fa fa-delicious">fa-delicious</option><option value="fa-desktop" data-icon="fa fa-desktop">fa-desktop</option><option value="fa-deviantart" data-icon="fa fa-deviantart">fa-deviantart</option><option value="fa-diamond" data-icon="fa fa-diamond">fa-diamond</option><option value="fa-digg" data-icon="fa fa-digg">fa-digg</option><option value="fa-dollar" data-icon="fa fa-dollar">fa-dollar</option><option value="fa-dot-circle-o" data-icon="fa fa-dot-circle-o">fa-dot-circle-o</option><option value="fa-download" data-icon="fa fa-download">fa-download</option><option value="fa-dribbble" data-icon="fa fa-dribbble">fa-dribbble</option><option value="fa-dropbox" data-icon="fa fa-dropbox">fa-dropbox</option><option value="fa-drupal" data-icon="fa fa-drupal">fa-drupal</option><option value="fa-edit" data-icon="fa fa-edit">fa-edit</option><option value="fa-eject" data-icon="fa fa-eject">fa-eject</option><option value="fa-ellipsis-h" data-icon="fa fa-ellipsis-h">fa-ellipsis-h</option><option value="fa-ellipsis-v" data-icon="fa fa-ellipsis-v">fa-ellipsis-v</option><option value="fa-empire" data-icon="fa fa-empire">fa-empire</option><option value="fa-envelope" data-icon="fa fa-envelope">fa-envelope</option><option value="fa-envelope-o" data-icon="fa fa-envelope-o">fa-envelope-o</option><option value="fa-envelope-square" data-icon="fa fa-envelope-square">fa-envelope-square</option><option value="fa-eraser" data-icon="fa fa-eraser">fa-eraser</option><option value="fa-eur" data-icon="fa fa-eur">fa-eur</option><option value="fa-euro" data-icon="fa fa-euro">fa-euro</option><option value="fa-exchange" data-icon="fa fa-exchange">fa-exchange</option><option value="fa-exclamation" data-icon="fa fa-exclamation">fa-exclamation</option><option value="fa-exclamation-circle" data-icon="fa fa-exclamation-circle">fa-exclamation-circle</option><option value="fa-exclamation-triangle" data-icon="fa fa-exclamation-triangle">fa-exclamation-triangle</option><option value="fa-expand" data-icon="fa fa-expand">fa-expand</option><option value="fa-external-link" data-icon="fa fa-external-link">fa-external-link</option><option value="fa-external-link-square" data-icon="fa fa-external-link-square">fa-external-link-square</option><option value="fa-eye" data-icon="fa fa-eye">fa-eye</option><option value="fa-eye-slash" data-icon="fa fa-eye-slash">fa-eye-slash</option><option value="fa-eyedropper" data-icon="fa fa-eyedropper">fa-eyedropper</option><option value="fa-facebook" data-icon="fa fa-facebook">fa-facebook</option><option value="fa-facebook-f" data-icon="fa fa-facebook-f">fa-facebook-f</option><option value="fa-facebook-official" data-icon="fa fa-facebook-official">fa-facebook-official</option><option value="fa-facebook-square" data-icon="fa fa-facebook-square">fa-facebook-square</option><option value="fa-fast-backward" data-icon="fa fa-fast-backward">fa-fast-backward</option><option value="fa-fast-forward" data-icon="fa fa-fast-forward">fa-fast-forward</option><option value="fa-fax" data-icon="fa fa-fax">fa-fax</option><option value="fa-female" data-icon="fa fa-female">fa-female</option><option value="fa-fighter-jet" data-icon="fa fa-fighter-jet">fa-fighter-jet</option><option value="fa-file" data-icon="fa fa-file">fa-file</option><option value="fa-file-archive-o" data-icon="fa fa-file-archive-o">fa-file-archive-o</option><option value="fa-file-audio-o" data-icon="fa fa-file-audio-o">fa-file-audio-o</option><option value="fa-file-code-o" data-icon="fa fa-file-code-o">fa-file-code-o</option><option value="fa-file-excel-o" data-icon="fa fa-file-excel-o">fa-file-excel-o</option><option value="fa-file-image-o" data-icon="fa fa-file-image-o">fa-file-image-o</option><option value="fa-file-movie-o" data-icon="fa fa-file-movie-o">fa-file-movie-o</option><option value="fa-file-o" data-icon="fa fa-file-o">fa-file-o</option><option value="fa-file-pdf-o" data-icon="fa fa-file-pdf-o">fa-file-pdf-o</option><option value="fa-file-photo-o" data-icon="fa fa-file-photo-o">fa-file-photo-o</option><option value="fa-file-picture-o" data-icon="fa fa-file-picture-o">fa-file-picture-o</option><option value="fa-file-powerpoint-o" data-icon="fa fa-file-powerpoint-o">fa-file-powerpoint-o</option><option value="fa-file-sound-o" data-icon="fa fa-file-sound-o">fa-file-sound-o</option><option value="fa-file-text" data-icon="fa fa-file-text">fa-file-text</option><option value="fa-file-text-o" data-icon="fa fa-file-text-o">fa-file-text-o</option><option value="fa-file-video-o" data-icon="fa fa-file-video-o">fa-file-video-o</option><option value="fa-file-word-o" data-icon="fa fa-file-word-o">fa-file-word-o</option><option value="fa-file-zip-o" data-icon="fa fa-file-zip-o">fa-file-zip-o</option><option value="fa-files-o" data-icon="fa fa-files-o">fa-files-o</option><option value="fa-film" data-icon="fa fa-film">fa-film</option><option value="fa-filter" data-icon="fa fa-filter">fa-filter</option><option value="fa-fire" data-icon="fa fa-fire">fa-fire</option><option value="fa-fire-extinguisher" data-icon="fa fa-fire-extinguisher">fa-fire-extinguisher</option><option value="fa-flag" data-icon="fa fa-flag">fa-flag</option><option value="fa-flag-checkered" data-icon="fa fa-flag-checkered">fa-flag-checkered</option><option value="fa-flag-o" data-icon="fa fa-flag-o">fa-flag-o</option><option value="fa-flash" data-icon="fa fa-flash">fa-flash</option><option value="fa-flask" data-icon="fa fa-flask">fa-flask</option><option value="fa-flickr" data-icon="fa fa-flickr">fa-flickr</option><option value="fa-floppy-o" data-icon="fa fa-floppy-o">fa-floppy-o</option><option value="fa-folder" data-icon="fa fa-folder">fa-folder</option><option value="fa-folder-o" data-icon="fa fa-folder-o">fa-folder-o</option><option value="fa-folder-open" data-icon="fa fa-folder-open">fa-folder-open</option><option value="fa-folder-open-o" data-icon="fa fa-folder-open-o">fa-folder-open-o</option><option value="fa-font" data-icon="fa fa-font">fa-font</option><option value="fa-forumbee" data-icon="fa fa-forumbee">fa-forumbee</option><option value="fa-forward" data-icon="fa fa-forward">fa-forward</option><option value="fa-foursquare" data-icon="fa fa-foursquare">fa-foursquare</option><option value="fa-frown-o" data-icon="fa fa-frown-o">fa-frown-o</option><option value="fa-futbol-o" data-icon="fa fa-futbol-o">fa-futbol-o</option><option value="fa-gamepad" data-icon="fa fa-gamepad">fa-gamepad</option><option value="fa-gavel" data-icon="fa fa-gavel">fa-gavel</option><option value="fa-gbp" data-icon="fa fa-gbp">fa-gbp</option><option value="fa-ge" data-icon="fa fa-ge">fa-ge</option><option value="fa-gear" data-icon="fa fa-gear">fa-gear</option><option value="fa-gears" data-icon="fa fa-gears">fa-gears</option><option value="fa-genderless" data-icon="fa fa-genderless">fa-genderless</option><option value="fa-gift" data-icon="fa fa-gift">fa-gift</option><option value="fa-git" data-icon="fa fa-git">fa-git</option><option value="fa-git-square" data-icon="fa fa-git-square">fa-git-square</option><option value="fa-github" data-icon="fa fa-github">fa-github</option><option value="fa-github-alt" data-icon="fa fa-github-alt">fa-github-alt</option><option value="fa-github-square" data-icon="fa fa-github-square">fa-github-square</option><option value="fa-gittip" data-icon="fa fa-gittip">fa-gittip</option><option value="fa-glass" data-icon="fa fa-glass">fa-glass</option><option value="fa-globe" data-icon="fa fa-globe">fa-globe</option><option value="fa-google" data-icon="fa fa-google">fa-google</option><option value="fa-google-plus" data-icon="fa fa-google-plus">fa-google-plus</option><option value="fa-google-plus-square" data-icon="fa fa-google-plus-square">fa-google-plus-square</option><option value="fa-google-wallet" data-icon="fa fa-google-wallet">fa-google-wallet</option><option value="fa-graduation-cap" data-icon="fa fa-graduation-cap">fa-graduation-cap</option><option value="fa-gratipay" data-icon="fa fa-gratipay">fa-gratipay</option><option value="fa-group" data-icon="fa fa-group">fa-group</option><option value="fa-h-square" data-icon="fa fa-h-square">fa-h-square</option><option value="fa-hacker-news" data-icon="fa fa-hacker-news">fa-hacker-news</option><option value="fa-hand-o-down" data-icon="fa fa-hand-o-down">fa-hand-o-down</option><option value="fa-hand-o-left" data-icon="fa fa-hand-o-left">fa-hand-o-left</option><option value="fa-hand-o-right" data-icon="fa fa-hand-o-right">fa-hand-o-right</option><option value="fa-hand-o-up" data-icon="fa fa-hand-o-up">fa-hand-o-up</option><option value="fa-hdd-o" data-icon="fa fa-hdd-o">fa-hdd-o</option><option value="fa-header" data-icon="fa fa-header">fa-header</option><option value="fa-headphones" data-icon="fa fa-headphones">fa-headphones</option><option value="fa-heart" data-icon="fa fa-heart">fa-heart</option><option value="fa-heart-o" data-icon="fa fa-heart-o">fa-heart-o</option><option value="fa-heartbeat" data-icon="fa fa-heartbeat">fa-heartbeat</option><option value="fa-history" data-icon="fa fa-history">fa-history</option><option value="fa-home" data-icon="fa fa-home">fa-home</option><option value="fa-hospital-o" data-icon="fa fa-hospital-o">fa-hospital-o</option><option value="fa-hotel" data-icon="fa fa-hotel">fa-hotel</option><option value="fa-html5" data-icon="fa fa-html5">fa-html5</option><option value="fa-ils" data-icon="fa fa-ils">fa-ils</option><option value="fa-image" data-icon="fa fa-image">fa-image</option><option value="fa-inbox" data-icon="fa fa-inbox">fa-inbox</option><option value="fa-indent" data-icon="fa fa-indent">fa-indent</option><option value="fa-info" data-icon="fa fa-info">fa-info</option><option value="fa-info-circle" data-icon="fa fa-info-circle">fa-info-circle</option><option value="fa-inr" data-icon="fa fa-inr">fa-inr</option><option value="fa-instagram" data-icon="fa fa-instagram">fa-instagram</option><option value="fa-institution" data-icon="fa fa-institution">fa-institution</option><option value="fa-ioxhost" data-icon="fa fa-ioxhost">fa-ioxhost</option><option value="fa-italic" data-icon="fa fa-italic">fa-italic</option><option value="fa-joomla" data-icon="fa fa-joomla">fa-joomla</option><option value="fa-jpy" data-icon="fa fa-jpy">fa-jpy</option><option value="fa-jsfiddle" data-icon="fa fa-jsfiddle">fa-jsfiddle</option><option value="fa-key" data-icon="fa fa-key">fa-key</option><option value="fa-keyboard-o" data-icon="fa fa-keyboard-o">fa-keyboard-o</option><option value="fa-krw" data-icon="fa fa-krw">fa-krw</option><option value="fa-language" data-icon="fa fa-language">fa-language</option><option value="fa-laptop" data-icon="fa fa-laptop">fa-laptop</option><option value="fa-lastfm" data-icon="fa fa-lastfm">fa-lastfm</option><option value="fa-lastfm-square" data-icon="fa fa-lastfm-square">fa-lastfm-square</option><option value="fa-leaf" data-icon="fa fa-leaf">fa-leaf</option><option value="fa-leanpub" data-icon="fa fa-leanpub">fa-leanpub</option><option value="fa-legal" data-icon="fa fa-legal">fa-legal</option><option value="fa-lemon-o" data-icon="fa fa-lemon-o">fa-lemon-o</option><option value="fa-level-down" data-icon="fa fa-level-down">fa-level-down</option><option value="fa-level-up" data-icon="fa fa-level-up">fa-level-up</option><option value="fa-life-bouy" data-icon="fa fa-life-bouy">fa-life-bouy</option><option value="fa-life-buoy" data-icon="fa fa-life-buoy">fa-life-buoy</option><option value="fa-life-ring" data-icon="fa fa-life-ring">fa-life-ring</option><option value="fa-life-saver" data-icon="fa fa-life-saver">fa-life-saver</option><option value="fa-lightbulb-o" data-icon="fa fa-lightbulb-o">fa-lightbulb-o</option><option value="fa-line-chart" data-icon="fa fa-line-chart">fa-line-chart</option><option value="fa-link" data-icon="fa fa-link">fa-link</option><option value="fa-linkedin" data-icon="fa fa-linkedin">fa-linkedin</option><option value="fa-linkedin-square" data-icon="fa fa-linkedin-square">fa-linkedin-square</option><option value="fa-linux" data-icon="fa fa-linux">fa-linux</option><option value="fa-list" data-icon="fa fa-list">fa-list</option><option value="fa-list-alt" data-icon="fa fa-list-alt">fa-list-alt</option><option value="fa-list-ol" data-icon="fa fa-list-ol">fa-list-ol</option><option value="fa-list-ul" data-icon="fa fa-list-ul">fa-list-ul</option><option value="fa-location-arrow" data-icon="fa fa-location-arrow">fa-location-arrow</option><option value="fa-lock" data-icon="fa fa-lock">fa-lock</option><option value="fa-long-arrow-down" data-icon="fa fa-long-arrow-down">fa-long-arrow-down</option><option value="fa-long-arrow-left" data-icon="fa fa-long-arrow-left">fa-long-arrow-left</option><option value="fa-long-arrow-right" data-icon="fa fa-long-arrow-right">fa-long-arrow-right</option><option value="fa-long-arrow-up" data-icon="fa fa-long-arrow-up">fa-long-arrow-up</option><option value="fa-magic" data-icon="fa fa-magic">fa-magic</option><option value="fa-magnet" data-icon="fa fa-magnet">fa-magnet</option><option value="fa-mail-forward" data-icon="fa fa-mail-forward">fa-mail-forward</option><option value="fa-mail-reply" data-icon="fa fa-mail-reply">fa-mail-reply</option><option value="fa-mail-reply-all" data-icon="fa fa-mail-reply-all">fa-mail-reply-all</option><option value="fa-male" data-icon="fa fa-male">fa-male</option><option value="fa-map-marker" data-icon="fa fa-map-marker">fa-map-marker</option><option value="fa-mars" data-icon="fa fa-mars">fa-mars</option><option value="fa-mars-double" data-icon="fa fa-mars-double">fa-mars-double</option><option value="fa-mars-stroke" data-icon="fa fa-mars-stroke">fa-mars-stroke</option><option value="fa-mars-stroke-h" data-icon="fa fa-mars-stroke-h">fa-mars-stroke-h</option><option value="fa-mars-stroke-v" data-icon="fa fa-mars-stroke-v">fa-mars-stroke-v</option><option value="fa-maxcdn" data-icon="fa fa-maxcdn">fa-maxcdn</option><option value="fa-meanpath" data-icon="fa fa-meanpath">fa-meanpath</option><option value="fa-medium" data-icon="fa fa-medium">fa-medium</option><option value="fa-medkit" data-icon="fa fa-medkit">fa-medkit</option><option value="fa-meh-o" data-icon="fa fa-meh-o">fa-meh-o</option><option value="fa-mercury" data-icon="fa fa-mercury">fa-mercury</option><option value="fa-microphone" data-icon="fa fa-microphone">fa-microphone</option><option value="fa-microphone-slash" data-icon="fa fa-microphone-slash">fa-microphone-slash</option><option value="fa-minus" data-icon="fa fa-minus">fa-minus</option><option value="fa-minus-circle" data-icon="fa fa-minus-circle">fa-minus-circle</option><option value="fa-minus-square" data-icon="fa fa-minus-square">fa-minus-square</option><option value="fa-minus-square-o" data-icon="fa fa-minus-square-o">fa-minus-square-o</option><option value="fa-mobile" data-icon="fa fa-mobile">fa-mobile</option><option value="fa-mobile-phone" data-icon="fa fa-mobile-phone">fa-mobile-phone</option><option value="fa-money" data-icon="fa fa-money">fa-money</option><option value="fa-moon-o" data-icon="fa fa-moon-o">fa-moon-o</option><option value="fa-mortar-board" data-icon="fa fa-mortar-board">fa-mortar-board</option><option value="fa-motorcycle" data-icon="fa fa-motorcycle">fa-motorcycle</option><option value="fa-music" data-icon="fa fa-music">fa-music</option><option value="fa-navicon" data-icon="fa fa-navicon">fa-navicon</option><option value="fa-neuter" data-icon="fa fa-neuter">fa-neuter</option><option value="fa-newspaper-o" data-icon="fa fa-newspaper-o">fa-newspaper-o</option><option value="fa-openid" data-icon="fa fa-openid">fa-openid</option><option value="fa-outdent" data-icon="fa fa-outdent">fa-outdent</option><option value="fa-pagelines" data-icon="fa fa-pagelines">fa-pagelines</option><option value="fa-paint-brush" data-icon="fa fa-paint-brush">fa-paint-brush</option><option value="fa-paper-plane" data-icon="fa fa-paper-plane">fa-paper-plane</option><option value="fa-paper-plane-o" data-icon="fa fa-paper-plane-o">fa-paper-plane-o</option><option value="fa-paperclip" data-icon="fa fa-paperclip">fa-paperclip</option><option value="fa-paragraph" data-icon="fa fa-paragraph">fa-paragraph</option><option value="fa-paste" data-icon="fa fa-paste">fa-paste</option><option value="fa-pause" data-icon="fa fa-pause">fa-pause</option><option value="fa-paw" data-icon="fa fa-paw">fa-paw</option><option value="fa-paypal" data-icon="fa fa-paypal">fa-paypal</option><option value="fa-pencil" data-icon="fa fa-pencil">fa-pencil</option><option value="fa-pencil-square" data-icon="fa fa-pencil-square">fa-pencil-square</option><option value="fa-pencil-square-o" data-icon="fa fa-pencil-square-o">fa-pencil-square-o</option><option value="fa-phone" data-icon="fa fa-phone">fa-phone</option><option value="fa-phone-square" data-icon="fa fa-phone-square">fa-phone-square</option><option value="fa-photo" data-icon="fa fa-photo">fa-photo</option><option value="fa-picture-o" data-icon="fa fa-picture-o">fa-picture-o</option><option value="fa-pie-chart" data-icon="fa fa-pie-chart">fa-pie-chart</option><option value="fa-pied-piper" data-icon="fa fa-pied-piper">fa-pied-piper</option><option value="fa-pied-piper-alt" data-icon="fa fa-pied-piper-alt">fa-pied-piper-alt</option><option value="fa-pinterest" data-icon="fa fa-pinterest">fa-pinterest</option><option value="fa-pinterest-p" data-icon="fa fa-pinterest-p">fa-pinterest-p</option><option value="fa-pinterest-square" data-icon="fa fa-pinterest-square">fa-pinterest-square</option><option value="fa-plane" data-icon="fa fa-plane">fa-plane</option><option value="fa-play" data-icon="fa fa-play">fa-play</option><option value="fa-play-circle" data-icon="fa fa-play-circle">fa-play-circle</option><option value="fa-play-circle-o" data-icon="fa fa-play-circle-o">fa-play-circle-o</option><option value="fa-plug" data-icon="fa fa-plug">fa-plug</option><option value="fa-plus" data-icon="fa fa-plus">fa-plus</option><option value="fa-plus-circle" data-icon="fa fa-plus-circle">fa-plus-circle</option><option value="fa-plus-square" data-icon="fa fa-plus-square">fa-plus-square</option><option value="fa-plus-square-o" data-icon="fa fa-plus-square-o">fa-plus-square-o</option><option value="fa-power-off" data-icon="fa fa-power-off">fa-power-off</option><option value="fa-print" data-icon="fa fa-print">fa-print</option><option value="fa-puzzle-piece" data-icon="fa fa-puzzle-piece">fa-puzzle-piece</option><option value="fa-qq" data-icon="fa fa-qq">fa-qq</option><option value="fa-qrcode" data-icon="fa fa-qrcode">fa-qrcode</option><option value="fa-question" data-icon="fa fa-question">fa-question</option><option value="fa-question-circle" data-icon="fa fa-question-circle">fa-question-circle</option><option value="fa-quote-left" data-icon="fa fa-quote-left">fa-quote-left</option><option value="fa-quote-right" data-icon="fa fa-quote-right">fa-quote-right</option><option value="fa-ra" data-icon="fa fa-ra">fa-ra</option><option value="fa-random" data-icon="fa fa-random">fa-random</option><option value="fa-rebel" data-icon="fa fa-rebel">fa-rebel</option><option value="fa-recycle" data-icon="fa fa-recycle">fa-recycle</option><option value="fa-reddit" data-icon="fa fa-reddit">fa-reddit</option><option value="fa-reddit-square" data-icon="fa fa-reddit-square">fa-reddit-square</option><option value="fa-refresh" data-icon="fa fa-refresh">fa-refresh</option><option value="fa-remove" data-icon="fa fa-remove">fa-remove</option><option value="fa-renren" data-icon="fa fa-renren">fa-renren</option><option value="fa-reorder" data-icon="fa fa-reorder">fa-reorder</option><option value="fa-repeat" data-icon="fa fa-repeat">fa-repeat</option><option value="fa-reply" data-icon="fa fa-reply">fa-reply</option><option value="fa-reply-all" data-icon="fa fa-reply-all">fa-reply-all</option><option value="fa-retweet" data-icon="fa fa-retweet">fa-retweet</option><option value="fa-rmb" data-icon="fa fa-rmb">fa-rmb</option><option value="fa-road" data-icon="fa fa-road">fa-road</option><option value="fa-rocket" data-icon="fa fa-rocket">fa-rocket</option><option value="fa-rotate-left" data-icon="fa fa-rotate-left">fa-rotate-left</option><option value="fa-rotate-right" data-icon="fa fa-rotate-right">fa-rotate-right</option><option value="fa-rouble" data-icon="fa fa-rouble">fa-rouble</option><option value="fa-rss" data-icon="fa fa-rss">fa-rss</option><option value="fa-rss-square" data-icon="fa fa-rss-square">fa-rss-square</option><option value="fa-rub" data-icon="fa fa-rub">fa-rub</option><option value="fa-ruble" data-icon="fa fa-ruble">fa-ruble</option><option value="fa-rupee" data-icon="fa fa-rupee">fa-rupee</option><option value="fa-save" data-icon="fa fa-save">fa-save</option><option value="fa-scissors" data-icon="fa fa-scissors">fa-scissors</option><option value="fa-search" data-icon="fa fa-search">fa-search</option><option value="fa-search-minus" data-icon="fa fa-search-minus">fa-search-minus</option><option value="fa-search-plus" data-icon="fa fa-search-plus">fa-search-plus</option><option value="fa-sellsy" data-icon="fa fa-sellsy">fa-sellsy</option><option value="fa-send" data-icon="fa fa-send">fa-send</option><option value="fa-send-o" data-icon="fa fa-send-o">fa-send-o</option><option value="fa-server" data-icon="fa fa-server">fa-server</option><option value="fa-share" data-icon="fa fa-share">fa-share</option><option value="fa-share-alt" data-icon="fa fa-share-alt">fa-share-alt</option><option value="fa-share-alt-square" data-icon="fa fa-share-alt-square">fa-share-alt-square</option><option value="fa-share-square" data-icon="fa fa-share-square">fa-share-square</option><option value="fa-share-square-o" data-icon="fa fa-share-square-o">fa-share-square-o</option><option value="fa-shekel" data-icon="fa fa-shekel">fa-shekel</option><option value="fa-sheqel" data-icon="fa fa-sheqel">fa-sheqel</option><option value="fa-shield" data-icon="fa fa-shield">fa-shield</option><option value="fa-ship" data-icon="fa fa-ship">fa-ship</option><option value="fa-shirtsinbulk" data-icon="fa fa-shirtsinbulk">fa-shirtsinbulk</option><option value="fa-shopping-cart" data-icon="fa fa-shopping-cart">fa-shopping-cart</option><option value="fa-sign-in" data-icon="fa fa-sign-in">fa-sign-in</option><option value="fa-sign-out" data-icon="fa fa-sign-out">fa-sign-out</option><option value="fa-signal" data-icon="fa fa-signal">fa-signal</option><option value="fa-simplybuilt" data-icon="fa fa-simplybuilt">fa-simplybuilt</option><option value="fa-sitemap" data-icon="fa fa-sitemap">fa-sitemap</option><option value="fa-skyatlas" data-icon="fa fa-skyatlas">fa-skyatlas</option><option value="fa-skype" data-icon="fa fa-skype">fa-skype</option><option value="fa-slack" data-icon="fa fa-slack">fa-slack</option><option value="fa-sliders" data-icon="fa fa-sliders">fa-sliders</option><option value="fa-slideshare" data-icon="fa fa-slideshare">fa-slideshare</option><option value="fa-smile-o" data-icon="fa fa-smile-o">fa-smile-o</option><option value="fa-soccer-ball-o" data-icon="fa fa-soccer-ball-o">fa-soccer-ball-o</option><option value="fa-sort" data-icon="fa fa-sort">fa-sort</option><option value="fa-sort-alpha-asc" data-icon="fa fa-sort-alpha-asc">fa-sort-alpha-asc</option><option value="fa-sort-alpha-desc" data-icon="fa fa-sort-alpha-desc">fa-sort-alpha-desc</option><option value="fa-sort-amount-asc" data-icon="fa fa-sort-amount-asc">fa-sort-amount-asc</option><option value="fa-sort-amount-desc" data-icon="fa fa-sort-amount-desc">fa-sort-amount-desc</option><option value="fa-sort-asc" data-icon="fa fa-sort-asc">fa-sort-asc</option><option value="fa-sort-desc" data-icon="fa fa-sort-desc">fa-sort-desc</option><option value="fa-sort-down" data-icon="fa fa-sort-down">fa-sort-down</option><option value="fa-sort-numeric-asc" data-icon="fa fa-sort-numeric-asc">fa-sort-numeric-asc</option><option value="fa-sort-numeric-desc" data-icon="fa fa-sort-numeric-desc">fa-sort-numeric-desc</option><option value="fa-sort-up" data-icon="fa fa-sort-up">fa-sort-up</option><option value="fa-soundcloud" data-icon="fa fa-soundcloud">fa-soundcloud</option><option value="fa-space-shuttle" data-icon="fa fa-space-shuttle">fa-space-shuttle</option><option value="fa-spinner" data-icon="fa fa-spinner">fa-spinner</option><option value="fa-spoon" data-icon="fa fa-spoon">fa-spoon</option><option value="fa-spotify" data-icon="fa fa-spotify">fa-spotify</option><option value="fa-square" data-icon="fa fa-square">fa-square</option><option value="fa-square-o" data-icon="fa fa-square-o">fa-square-o</option><option value="fa-stack-exchange" data-icon="fa fa-stack-exchange">fa-stack-exchange</option><option value="fa-stack-overflow" data-icon="fa fa-stack-overflow">fa-stack-overflow</option><option value="fa-star" data-icon="fa fa-star">fa-star</option><option value="fa-star-half" data-icon="fa fa-star-half">fa-star-half</option><option value="fa-star-half-empty" data-icon="fa fa-star-half-empty">fa-star-half-empty</option><option value="fa-star-half-full" data-icon="fa fa-star-half-full">fa-star-half-full</option><option value="fa-star-half-o" data-icon="fa fa-star-half-o">fa-star-half-o</option><option value="fa-star-o" data-icon="fa fa-star-o">fa-star-o</option><option value="fa-steam" data-icon="fa fa-steam">fa-steam</option><option value="fa-steam-square" data-icon="fa fa-steam-square">fa-steam-square</option><option value="fa-step-backward" data-icon="fa fa-step-backward">fa-step-backward</option><option value="fa-step-forward" data-icon="fa fa-step-forward">fa-step-forward</option><option value="fa-stethoscope" data-icon="fa fa-stethoscope">fa-stethoscope</option><option value="fa-stop" data-icon="fa fa-stop">fa-stop</option><option value="fa-street-view" data-icon="fa fa-street-view">fa-street-view</option><option value="fa-strikethrough" data-icon="fa fa-strikethrough">fa-strikethrough</option><option value="fa-stumbleupon" data-icon="fa fa-stumbleupon">fa-stumbleupon</option><option value="fa-stumbleupon-circle" data-icon="fa fa-stumbleupon-circle">fa-stumbleupon-circle</option><option value="fa-subscript" data-icon="fa fa-subscript">fa-subscript</option><option value="fa-subway" data-icon="fa fa-subway">fa-subway</option><option value="fa-suitcase" data-icon="fa fa-suitcase">fa-suitcase</option><option value="fa-sun-o" data-icon="fa fa-sun-o">fa-sun-o</option><option value="fa-superscript" data-icon="fa fa-superscript">fa-superscript</option><option value="fa-support" data-icon="fa fa-support">fa-support</option><option value="fa-table" data-icon="fa fa-table">fa-table</option><option value="fa-tablet" data-icon="fa fa-tablet">fa-tablet</option><option value="fa-tachometer" data-icon="fa fa-tachometer">fa-tachometer</option><option value="fa-tag" data-icon="fa fa-tag">fa-tag</option><option value="fa-tags" data-icon="fa fa-tags">fa-tags</option><option value="fa-tasks" data-icon="fa fa-tasks">fa-tasks</option><option value="fa-taxi" data-icon="fa fa-taxi">fa-taxi</option><option value="fa-tencent-weibo" data-icon="fa fa-tencent-weibo">fa-tencent-weibo</option><option value="fa-terminal" data-icon="fa fa-terminal">fa-terminal</option><option value="fa-text-height" data-icon="fa fa-text-height">fa-text-height</option><option value="fa-text-width" data-icon="fa fa-text-width">fa-text-width</option><option value="fa-th" data-icon="fa fa-th">fa-th</option><option value="fa-th-large" data-icon="fa fa-th-large">fa-th-large</option><option value="fa-th-list" data-icon="fa fa-th-list">fa-th-list</option><option value="fa-thumb-tack" data-icon="fa fa-thumb-tack">fa-thumb-tack</option><option value="fa-thumbs-down" data-icon="fa fa-thumbs-down">fa-thumbs-down</option><option value="fa-thumbs-o-down" data-icon="fa fa-thumbs-o-down">fa-thumbs-o-down</option><option value="fa-thumbs-o-up" data-icon="fa fa-thumbs-o-up">fa-thumbs-o-up</option><option value="fa-thumbs-up" data-icon="fa fa-thumbs-up">fa-thumbs-up</option><option value="fa-ticket" data-icon="fa fa-ticket">fa-ticket</option><option value="fa-times" data-icon="fa fa-times">fa-times</option><option value="fa-times-circle" data-icon="fa fa-times-circle">fa-times-circle</option><option value="fa-times-circle-o" data-icon="fa fa-times-circle-o">fa-times-circle-o</option><option value="fa-tint" data-icon="fa fa-tint">fa-tint</option><option value="fa-toggle-down" data-icon="fa fa-toggle-down">fa-toggle-down</option><option value="fa-toggle-left" data-icon="fa fa-toggle-left">fa-toggle-left</option><option value="fa-toggle-off" data-icon="fa fa-toggle-off">fa-toggle-off</option><option value="fa-toggle-on" data-icon="fa fa-toggle-on">fa-toggle-on</option><option value="fa-toggle-right" data-icon="fa fa-toggle-right">fa-toggle-right</option><option value="fa-toggle-up" data-icon="fa fa-toggle-up">fa-toggle-up</option><option value="fa-train" data-icon="fa fa-train">fa-train</option><option value="fa-transgender" data-icon="fa fa-transgender">fa-transgender</option><option value="fa-transgender-alt" data-icon="fa fa-transgender-alt">fa-transgender-alt</option><option value="fa-trash" data-icon="fa fa-trash">fa-trash</option><option value="fa-trash-o" data-icon="fa fa-trash-o">fa-trash-o</option><option value="fa-tree" data-icon="fa fa-tree">fa-tree</option><option value="fa-trello" data-icon="fa fa-trello">fa-trello</option><option value="fa-trophy" data-icon="fa fa-trophy">fa-trophy</option><option value="fa-truck" data-icon="fa fa-truck">fa-truck</option><option value="fa-try" data-icon="fa fa-try">fa-try</option><option value="fa-tty" data-icon="fa fa-tty">fa-tty</option><option value="fa-tumblr" data-icon="fa fa-tumblr">fa-tumblr</option><option value="fa-tumblr-square" data-icon="fa fa-tumblr-square">fa-tumblr-square</option><option value="fa-turkish-lira" data-icon="fa fa-turkish-lira">fa-turkish-lira</option><option value="fa-twitch" data-icon="fa fa-twitch">fa-twitch</option><option value="fa-twitter" data-icon="fa fa-twitter">fa-twitter</option><option value="fa-twitter-square" data-icon="fa fa-twitter-square">fa-twitter-square</option><option value="fa-umbrella" data-icon="fa fa-umbrella">fa-umbrella</option><option value="fa-underline" data-icon="fa fa-underline">fa-underline</option><option value="fa-undo" data-icon="fa fa-undo">fa-undo</option><option value="fa-university" data-icon="fa fa-university">fa-university</option><option value="fa-unlink" data-icon="fa fa-unlink">fa-unlink</option><option value="fa-unlock" data-icon="fa fa-unlock">fa-unlock</option><option value="fa-unlock-alt" data-icon="fa fa-unlock-alt">fa-unlock-alt</option><option value="fa-unsorted" data-icon="fa fa-unsorted">fa-unsorted</option><option value="fa-upload" data-icon="fa fa-upload">fa-upload</option><option value="fa-usd" data-icon="fa fa-usd">fa-usd</option><option value="fa-user" data-icon="fa fa-user">fa-user</option><option value="fa-user-md" data-icon="fa fa-user-md">fa-user-md</option><option value="fa-user-plus" data-icon="fa fa-user-plus">fa-user-plus</option><option value="fa-user-secret" data-icon="fa fa-user-secret">fa-user-secret</option><option value="fa-user-times" data-icon="fa fa-user-times">fa-user-times</option><option value="fa-users" data-icon="fa fa-users">fa-users</option><option value="fa-venus" data-icon="fa fa-venus">fa-venus</option><option value="fa-venus-double" data-icon="fa fa-venus-double">fa-venus-double</option><option value="fa-venus-mars" data-icon="fa fa-venus-mars">fa-venus-mars</option><option value="fa-viacoin" data-icon="fa fa-viacoin">fa-viacoin</option><option value="fa-video-camera" data-icon="fa fa-video-camera">fa-video-camera</option><option value="fa-vimeo-square" data-icon="fa fa-vimeo-square">fa-vimeo-square</option><option value="fa-vine" data-icon="fa fa-vine">fa-vine</option><option value="fa-vk" data-icon="fa fa-vk">fa-vk</option><option value="fa-volume-down" data-icon="fa fa-volume-down">fa-volume-down</option><option value="fa-volume-off" data-icon="fa fa-volume-off">fa-volume-off</option><option value="fa-volume-up" data-icon="fa fa-volume-up">fa-volume-up</option><option value="fa-warning" data-icon="fa fa-warning">fa-warning</option><option value="fa-wechat" data-icon="fa fa-wechat">fa-wechat</option><option value="fa-weibo" data-icon="fa fa-weibo">fa-weibo</option><option value="fa-weixin" data-icon="fa fa-weixin">fa-weixin</option><option value="fa-whatsapp" data-icon="fa fa-whatsapp">fa-whatsapp</option><option value="fa-wheelchair" data-icon="fa fa-wheelchair">fa-wheelchair</option><option value="fa-wifi" data-icon="fa fa-wifi">fa-wifi</option><option value="fa-windows" data-icon="fa fa-windows">fa-windows</option><option value="fa-won" data-icon="fa fa-won">fa-won</option><option value="fa-wordpress" data-icon="fa fa-wordpress">fa-wordpress</option><option value="fa-wrench" data-icon="fa fa-wrench">fa-wrench</option><option value="fa-xing" data-icon="fa fa-xing">fa-xing</option><option value="fa-xing-square" data-icon="fa fa-xing-square">fa-xing-square</option><option value="fa-yahoo" data-icon="fa fa-yahoo">fa-yahoo</option><option value="fa-yelp" data-icon="fa fa-yelp">fa-yelp</option><option value="fa-yen" data-icon="fa fa-yen">fa-yen</option><option value="fa-youtube" data-icon="fa fa-youtube">fa-youtube</option><option value="fa-youtube-play" data-icon="fa fa-youtube-play">fa-youtube-play</option><option value="fa-youtube-square" data-icon="fa fa-youtube-square">fa-youtube-square</option>'
+};
+
+},{}],55:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _truth = require('../../truth/truth.js');
+
+var _truth2 = _interopRequireDefault(_truth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import Vue from 'vue'
+// import VueResource from 'vue-resource'
+// Vue.use(VueResource)
+
+var _menus = _truth2.default.menus;
+
+exports.default = {
+	getMenu: function getMenu(menuName, cb) {
+		console.log(menuName);
+		setTimeout(function () {
+			cb(_menus[menuName]);
+		}, 100);
+	}
+};
+
+},{"../../truth/truth.js":70}],56:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _vue = require('vue');
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _vueResource = require('vue-resource');
+
+var _vueResource2 = _interopRequireDefault(_vueResource);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_vue2.default.use(_vueResource2.default);
+
+exports.default = new _vue2.default({
+	methods: {
+		save: function save(d) {
+			//console.log(d)
+			return true;
+		}
+	}
+});
+
+},{"vue":49,"vue-resource":40}],57:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _store = require('./vuex/store.js');
-
-var _store2 = _interopRequireDefault(_store);
-
 var _getters = require('./vuex/getters.js');
 
 var _actions = require('./vuex/actions.js');
 
+var _store = require('./vuex/store');
+
+var _store2 = _interopRequireDefault(_store);
+
+var _router = require('./vue-router/router');
+
+var _router2 = _interopRequireDefault(_router);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-  name: 'MEi App',
+  name: 'MEiApp',
+  watchMode: true,
+  data: function data() {
+    return {
+      names: 'MEi Aplic',
+      objectResource: this.$resource('/api/:objectType/:objectOptions'),
+      apiResource: this.$resource('/api/:model/:id'),
+      editMode: this.pubSettings.editMode,
+      editAll: this.pubSettings.editAll,
+      dataMode: this.pubSettings.dataMode,
+      baseView: this.pubSettings.baseView,
+      copy: {
+        order: [],
+        texts: this.getCopy
+      }
+
+    };
+  },
+
   store: _store2.default,
   vuex: {
     getters: {
-      company: _getters.getCompanyDetails,
-      getPublicSettings: _getters.getPublicSettings
+      getCopy: function getCopy(_ref) {
+        var copyText = _ref.copyText;
+        return copyText.all;
+      },
+      getCompanyDetails: _getters.getCompanyDetails,
+      pubSettings: _getters.getPublicSettings
     },
     actions: {
-      setSetting: _actions.setSetting
+      setSetting: _actions.setSetting,
+      setCopy: _actions.setCopy,
+      toggleSetting: _actions.toggleSetting,
+      setMenu: _actions.setMenu
     }
   },
+
   methods: {
+    //objectMethods: require('./vue/control/objectMethods.js'),
+
+    addNavButton: function addNavButton() {
+      this.navPage.menuLayout.push({
+        icon: "fa-user",
+        href: "#1",
+        label: "Inventory",
+        class: "btn btn-active-success btn-default btn-dashboard",
+        notification_text: "2",
+        notification_style: "",
+        notification_color: "primary"
+      });
+    },
+    editButton: function editButton(obj) {
+      var formId = obj.id;
+      var saveIt = this.saveObject;
+      var deleteIt = this.deleteObject;
+      bootbox.dialog({
+        className: 'modal-primary',
+        title: 'Editor',
+        message: "<div id='bootbox-modal'></div>",
+        closeButton: false,
+        animateIn: 'zoomIn',
+        animateOut: 'zoomOut',
+        buttons: {
+          success: {
+            label: "Save",
+            className: "btn-primary",
+            callback: function callback() {
+              saveIt(obj.id);
+              $('#object-' + obj.id + '-editing-form').appendTo('#' + obj.id + '-form-holder');
+            }
+          },
+          close: {
+            label: "Close",
+            className: "btn-warning",
+            callback: function callback() {
+              $('#object-' + obj.id + '-editing-form').appendTo('#' + obj.id + '-form-holder');
+            }
+          },
+          delete: {
+            label: "Delete",
+            className: "btn-danger",
+            callback: function callback() {
+              deleteIt(obj.id);
+            }
+          }
+        }
+      });
+      $('#object-' + obj.id + '-editing-form').appendTo("#bootbox-modal");
+      $('#selectpicker-' + obj.id).chosen();
+      var currentIcon = obj.icon;
+      $('#chosen-fa-icon-' + obj.id).addClass(currentIcon);
+      $('#selectpicker-' + obj.id).on('change', function (evt, params) {
+        console.log(currentIcon, " - ", params.selected);
+        $('#chosen-fa-icon-' + obj.id).removeClass(currentIcon);
+        $('#chosen-fa-icon-' + obj.id).addClass(params.selected);
+        currentIcon = params.selected;
+      });
+      obj.icon = currentIcon;
+    },
+    deleteObject: function deleteObject(id) {
+      this.objectResource.delete({ objectType: 'interfaceObject', objectOptions: id }, { objectOptions: id }, function (data, status, request) {
+        //handle success
+      }).error(function (data, status, request) {
+        //handle error
+      });
+    },
+    saveObject: function saveObject(id) {
+      var objectResource = this.objectResource;
+      $('#object-' + id + '-editing-form').on('submit', function (e) {
+        e.preventDefault();
+        var objectData = $(this).serializeArray();
+        console.log(objectData);
+        objectResource.update({ objectType: "interfaceObjects", objectOptions: id }, { objectData: objectData }, function (data, status, request) {
+          $.niftyNoty({ type: 'info', icon: 'fa fa-check', message: '<strong>Button Saved!</strong>. ', container: 'page', timer: 3000 });
+        }).error(function (data, status, request) {
+          console.log("Something went wrong with (mainnavbutton.js->addButton->objectArray.save) Error Stat = " + status + " here is the request = " + request);
+        });
+      }).submit();
+    },
+
+
+    /*
+    * Called from buttons dispaches 
+    * to function in child.button.created()
+     */
+    updateMenu: function updateMenu(button) {
+      this.$broadcast('checkButton', button);
+    },
     save: function save() {
       // console.log('loggedIn ?');
       // console.log(this.setSetting);
-      //  	//this.setSetting('loggedIn')
+      // this.setSetting('loggedIn')
       // console.log('loggedIn ?');
       // console.log(this.setSetting.loggedIn);
       // this.editPage = true;
     },
+    toggleAside: function toggleAside() {
+      this.toggleSetting('asideOpen');
+    },
+    togglePrimary: function togglePrimary() {
+      this.toggleSetting('primaryOpen');
+    },
     login: function login(e) {
-      if (this.loggedIn) {
-        this.loggedIn = !this.loggedIn;
+      if (this.settings.loggedIn) {
+        this.toggleSetting('loggedIn');
+        this.toggleSetting('editMode');
       } else {
         e.preventDefault();
         var that = this;
@@ -15171,8 +18140,8 @@ exports.default = {
           };
           if (inputValue === "l") {
             console.log('Password Correct');
-            that.setSetting(that.getPublicSettings.loggedIn, true);
-            that.setSetting('editMode', true);
+            that.toggleSetting('loggedIn');
+            that.toggleSetting('editMode');
             //Login Success handler
             swal({
               title: "Logged In",
@@ -15183,23 +18152,54 @@ exports.default = {
               type: 'success'
             }, function (isConfirmed) {
               if (isConfirmed) {
-                window.location.replace('admin');
+                window.location.replace('dashboard');
               }
             }); //End Login Success handler
           };
         }); // End admin button sweet alert
       } // End Else
+    },
+    // End adminlogin
+    loadMenus: function loadMenus() {
+      var that = this;
+      this.objectResource.get({ objectType: "interfaceObjects", objectOptions: "navpage.DashboardMenu" }, function (menu, status, request) {
+        console.log("%cloadMenus() menu data fetched in Truth", this.pubSettings.logGood);
+        that.setMenu('DashboardMenu', menu);
+      }).error(function (data, status, request) {
+        console.log("%c loadMenus() Errrrrr in Truth", this.$root.logErr);
+      });
+      this.objectResource.get({ objectType: "interfaceObjects", objectOptions: "navigation.adminPrimary" }, function (menu, status, request) {
+        console.log("%cloadMenus() menu data fetched in Truth", this.pubSettings.logGood);
+        that.setMenu('adminPrimary', menu);
+        // nifty.document.ready(function(){
+        //   nifty.document.trigger("nifty.ready")
+        // })
+        //nifty.document.trigger('nifty.ready');
+        nifty.mainNav.unbindSmallNav();
+        //nifty.document.trigger('update');
+      }).error(function (data, status, request) {
+        console.log("%c loadMenus() Errrrrr in Truth", this.$root.logErr);
+      });
+    },
+    loadCopy: function loadCopy() {
+      var that = this;
+      this.$http.get('/api/copyText', function (data, status, request) {
+        console.log("%c loadCopy() in mei-app.js", that.$root.settings.logGood);
+        console.log(data[1]);
+        that.setCopy(data[1]);
+      }).error(function (data, status, request) {
+        console.log("%c loadCopy() Err in mei-app.js", that.$root.settings.logErr);
+      });
     }
+  },
+  ready: function ready() {
+    this.loadMenus();
+    this.loadCopy();
   }
-
 };
 
-},{"./vuex/actions.js":74,"./vuex/getters.js":75,"./vuex/store.js":79}],53:[function(require,module,exports){
+},{"./vue-router/router":71,"./vuex/actions.js":98,"./vuex/getters.js":99,"./vuex/store":104}],58:[function(require,module,exports){
 'use strict';
-
-var _vue = require('vue');
-
-var _vue2 = _interopRequireDefault(_vue);
 
 var _vueResource = require('vue-resource');
 
@@ -15209,15 +18209,39 @@ var _vueTouch = require('vue-touch');
 
 var _vueTouch2 = _interopRequireDefault(_vueTouch);
 
-var _MainMenu = require('./vue/components/materialTheme/MainMenu.vue');
+var _vueRouter = require('vue-router');
+
+var _vueRouter2 = _interopRequireDefault(_vueRouter);
+
+var _vue = require('vue');
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _SettingsWatcher = require('./vue/mixins/SettingsWatcher.js');
+
+var _SettingsWatcher2 = _interopRequireDefault(_SettingsWatcher);
+
+var _VisibilityMode = require('./vue/filters/VisibilityMode.js');
+
+var _VisibilityMode2 = _interopRequireDefault(_VisibilityMode);
+
+var _Currency = require('./vue/filters/Currency.js');
+
+var _Currency2 = _interopRequireDefault(_Currency);
+
+var _HooksMixin = require('./vue/mixins/HooksMixin.js');
+
+var _HooksMixin2 = _interopRequireDefault(_HooksMixin);
+
+var _MainMenu = require('./vue/components/navigation/materialTheme/MainMenu.vue');
 
 var _MainMenu2 = _interopRequireDefault(_MainMenu);
 
-var _MenuButton = require('./vue/components/materialTheme/MenuButton.vue');
+var _MenuButton = require('./vue/components/navigation/materialTheme/MenuButton.vue');
 
 var _MenuButton2 = _interopRequireDefault(_MenuButton);
 
-var _SubMenuButton = require('./vue/components/materialTheme/SubMenuButton.vue');
+var _SubMenuButton = require('./vue/components/navigation/materialTheme/SubMenuButton.vue');
 
 var _SubMenuButton2 = _interopRequireDefault(_SubMenuButton);
 
@@ -15237,22 +18261,69 @@ var _IntroFlyAway = require('./vue/components/animate/IntroFlyAway.vue');
 
 var _IntroFlyAway2 = _interopRequireDefault(_IntroFlyAway);
 
-var _NavPage = require('./vue/components/navigation/NavPage.vue');
+var _EditableCopy = require('./vue/components/controllers/EditableCopy.vue');
 
-var _NavPage2 = _interopRequireDefault(_NavPage);
+var _EditableCopy2 = _interopRequireDefault(_EditableCopy);
+
+var _MainNav = require('./vue/components/navigation/nifty/MainNav.vue');
+
+var _MainNav2 = _interopRequireDefault(_MainNav);
+
+var _MainNavButton = require('./vue/components/navigation/nifty/MainNavButton.vue');
+
+var _MainNavButton2 = _interopRequireDefault(_MainNavButton);
+
+var _ShortcutButtons = require('./vue/components/navigation/nifty/ShortcutButtons.vue');
+
+var _ShortcutButtons2 = _interopRequireDefault(_ShortcutButtons);
+
+var _MenuWidget = require('./vue/components/navigation/nifty/MenuWidget.vue');
+
+var _MenuWidget2 = _interopRequireDefault(_MenuWidget);
+
+var _ObjectEditor = require('./vue/components/controllers/ObjectEditor.vue');
+
+var _ObjectEditor2 = _interopRequireDefault(_ObjectEditor);
+
+var _NavpageButton = require('./vue/components/navigation/NavpageButton.vue');
+
+var _NavpageButton2 = _interopRequireDefault(_NavpageButton);
 
 var _meiApp = require('./mei-app.js');
 
 var _meiApp2 = _interopRequireDefault(_meiApp);
 
-var _Test = require('./modules/Test.vue');
+var _router = require('./vue-router/router');
 
-var _Test2 = _interopRequireDefault(_Test);
+var _router2 = _interopRequireDefault(_router);
+
+var _routerMap = require('./vue-router/routerMap');
+
+var _routerMap2 = _interopRequireDefault(_routerMap);
+
+var _projector = require('./vue/components/projector/projector.vue');
+
+var _projector2 = _interopRequireDefault(_projector);
+
+var _vuexRouterSync = require('vuex-router-sync');
+
+var _store = require('./vuex/store');
+
+var _store2 = _interopRequireDefault(_store);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+_vue2.default.use(_vueRouter2.default);
 _vue2.default.use(_vueResource2.default);
 _vue2.default.use(_vueTouch2.default);
+
+_vue2.default.mixin(_SettingsWatcher2.default);
+
+_vue2.default.filter('visibilityMode', _VisibilityMode2.default);
+
+_vue2.default.filter('currencyDisplay', _Currency2.default);
+
+_vue2.default.mixin(_HooksMixin2.default);
 
 // REQUESTS HEADER
 _vue2.default.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('#token').getAttribute('value');
@@ -15290,6 +18361,9 @@ _vue2.default.component('intro-fly-away', _IntroFlyAway2.default);
 
 // import MapBox from './vue/components/controllers/MapBox.vue';
 // Vue.component('map_box', MapBox)
+
+_vue2.default.component('editableCopy', _EditableCopy2.default);
+
 // import AddressForm from './vue/components/form/AddressForm.vue';
 // Vue.component('address_form', AddressForm)
 // import ContactsForm from './vue/components/form/ContactsForm.vue';
@@ -15329,16 +18403,18 @@ _vue2.default.component('intro-fly-away', _IntroFlyAway2.default);
 // import SettingsWatcher from './vue/mixins/SettingsWatcher.js';
 // Vue.mixin(SettingsWatcher)
 
-//import MainNav from './vue/components/navigation/nifty/MainNav.vue';
-//Vue.component('dashmainnav', require('./vue/components/navigation/nifty/MainNav.vue'));
+_vue2.default.component('mainnav', _MainNav2.default);
 
-_vue2.default.component('home', _NavPage2.default);
+_vue2.default.component('mainnavbutton', _MainNavButton2.default);
 
-// import MainNavButton from './vue/components/navigation/nifty/MainNavButton.vue';
-// Vue.component('mainnavbutton', MainNavButton )
+_vue2.default.component('shortcutbuttons', _ShortcutButtons2.default);
 
-// import ObjectEditor from './vue/components/controllers/ObjectEditor.vue';
-// Vue.component('objecteditor', ObjectEditor )
+_vue2.default.component('menuwidget', _MenuWidget2.default);
+
+// import NavPage from './vue/components/navigation/NavPage.vue'
+// Vue.component('home', NavPage );
+
+_vue2.default.component('objecteditor', _ObjectEditor2.default);
 
 // import Project from './vue/components/projector/Project.vue'
 // Vue.component('project', Project )
@@ -15367,82 +18443,160 @@ _vue2.default.component('home', _NavPage2.default);
 // import VisibilitySwitch from './vue/components/controllers/VisibilitySwitch.vue';
 // Vue.component('visibilityswitch',  VisibilitySwitch )
 
-// import NavPageButton from './vue/components/navigation/NavpageButton.vue';
-// Vue.component('navpagebutton',  NavPageButton )
+_vue2.default.component('navpagebutton', _NavpageButton2.default);
 
-// import VisibilityMode from './vue/filters/VisibilityMode.js';
-// Vue.filter('visibilityMode', VisibilityMode)
+//import RouterMap from './truth/routeMap'
 
-// import CurrencyDisplay from './vue/filters/Currency.js';
-// Vue.filter('currencyDisplay', CurrencyDisplay)
+// Instanciate Vue Router
+var MEiCore = _vue2.default.extend(_meiApp2.default);
 
-// import HooksMixin from './vue/mixins/HooksMixin.js';
-// Vue.mixin(HooksMixin);
+_router2.default.map(_routerMap2.default);
+_router2.default.start(MEiCore, 'body');
+_router2.default.go({ name: mei.vueRoute });
+//module.exports = Router
 
-// import SettingsWatcher from './vue/mixins/SettingsWatcher.js';
-// Vue.mixin(SettingsWatcher);
+(0, _vuexRouterSync.sync)(_store2.default, _router2.default);
 
-_vue2.default.component('test', _Test2.default);
+//module.exports = new Vue(MeiApp).$mount('body')
 
-module.exports = new _vue2.default(_meiApp2.default).$mount('body');
-
+// TODO FIND A BETTER HOME FOR THIS
 var $head = $('#ha-header');
 $('.ha-waypoint').each(function (i) {
-	var $el = $(this),
-	    animClassDown = $el.data('animateDown'),
-	    animClassUp = $el.data('animateUp');
+  var $el = $(this),
+      animClassDown = $el.data('animateDown'),
+      animClassUp = $el.data('animateUp');
 
-	$el.waypoint(function (direction) {
-		if (direction === 'down' && animClassDown) {
-			$head.attr('class', 'ha-header ' + animClassDown);
-		} else if (direction === 'up' && animClassUp) {
-			$head.attr('class', 'ha-header ' + animClassUp);
-		}
-	}, { offset: '100%' });
+  $el.waypoint(function (direction) {
+    if (direction === 'down' && animClassDown) {
+      $head.attr('class', 'ha-header ' + animClassDown);
+    } else if (direction === 'up' && animClassUp) {
+      $head.attr('class', 'ha-header ' + animClassUp);
+    }
+  }, { offset: '100%' });
 });
 
-},{"./mei-app.js":52,"./modules/Test.vue":54,"./vue/components/animate/AnimatedWords.vue":66,"./vue/components/animate/IntroFlyAway.vue":67,"./vue/components/materialTheme/MainMenu.vue":68,"./vue/components/materialTheme/MenuButton.vue":69,"./vue/components/materialTheme/SubMenuButton.vue":70,"./vue/components/navigation/NavPage.vue":71,"./vue/partials/BlueHero.vue":72,"./vue/partials/BrandBox.vue":73,"vue":48,"vue-resource":40,"vue-touch":47}],54:[function(require,module,exports){
-var __vueify_style__ = require("vueify-insert-css").insert("\n")
+// BP TOGGLE SWITCHES
+// =================================================================
+// Require Admin Core Javascript
+// Require Switchery
+// =================================================================
+
+var switchOptions = {
+  //size: 'small',
+  color: '#C927D7',
+  secondaryColor: '#15A2EB'
+};
+
+//jackColor: '#000',
+var switchElems = Array.prototype.slice.call(document.querySelectorAll('.switchery'));
+switchElems.forEach(function (html) {
+  var switchery = new Switchery(html, switchOptions);
+});
+// TODO: This needs to implement anaming system of sorts
+// switcher.onchange = function() {};
+
+},{"./mei-app.js":57,"./vue-router/router":71,"./vue-router/routerMap":72,"./vue/components/animate/AnimatedWords.vue":73,"./vue/components/animate/IntroFlyAway.vue":74,"./vue/components/controllers/EditableCopy.vue":75,"./vue/components/controllers/ObjectEditor.vue":76,"./vue/components/navigation/NavpageButton.vue":78,"./vue/components/navigation/materialTheme/MainMenu.vue":79,"./vue/components/navigation/materialTheme/MenuButton.vue":80,"./vue/components/navigation/materialTheme/SubMenuButton.vue":81,"./vue/components/navigation/nifty/MainNav.vue":82,"./vue/components/navigation/nifty/MainNavButton.vue":83,"./vue/components/navigation/nifty/MenuWidget.vue":84,"./vue/components/navigation/nifty/ShortcutButtons.vue":85,"./vue/components/projector/projector.vue":90,"./vue/filters/Currency.js":92,"./vue/filters/VisibilityMode.js":93,"./vue/mixins/HooksMixin.js":94,"./vue/mixins/SettingsWatcher.js":95,"./vue/partials/BlueHero.vue":96,"./vue/partials/BrandBox.vue":97,"./vuex/store":104,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],59:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = {
-  name: 'Test',
-  changeTabTitle: true,
-  logHooksToConsole: true,
-  watchMode: true,
-  data: function data() {
-    return {
-      pageTitle: 'test'
+// Setting for the main menu
+module.exports = [{
+	id: 0,
+	menu_name: 'primary',
+	active: false,
+	label: 'Home',
+	url: '/home',
+	sub: [{
+		id: 14,
+		active: false,
+		label: 'About TOTO',
+		url: '/about'
+	}, {
+		id: 15,
+		active: false,
+		label: 'News',
+		url: '/news'
+	}, {
+		id: 16,
+		active: false,
+		label: 'Contact',
+		url: '/shout'
+	}]
+}, {
+	id: 1,
+	menu_name: 'primary',
+	active: false,
+	label: 'Events',
+	url: '/events',
+	sub: [{
+		id: 5,
+		active: false,
+		label: 'Deer Pile',
+		url: 'deer-pile'
+	}, {
+		id: 6,
+		active: false,
+		label: 'Mercury Cafe',
+		url: 'mercury-cafe'
+	}]
+}, {
+	id: 2,
+	menu_name: 'primary',
+	active: false,
+	label: 'Particapate',
+	url: '/particapate',
+	sub: [{
+		id: 7,
+		active: false,
+		label: 'Meet Up Details',
+		url: 'meetup'
+	}, {
+		id: 8,
+		active: false,
+		label: 'Donate',
+		url: 'donations'
+	}]
+}, {
+	id: 3,
+	menu_name: 'primary',
+	active: false,
+	label: 'Communication',
+	url: '/comunication',
+	sub: [{
+		id: 9,
+		active: false,
+		label: 'Shout To Us',
+		url: 'shout'
+	}, {
+		id: 10,
+		active: false,
+		label: 'Group Conversations',
+		url: 'conversations'
+	}]
+}, {
+	id: 4,
+	menu_name: 'primary',
+	active: false,
+	label: 'Group Assets',
+	url: '/group-assets',
+	sub: [{
+		id: 11,
+		active: false,
+		label: 'Glossery',
+		url: 'glossery'
+	}, {
+		id: 12,
+		active: false,
+		label: 'Theater Games',
+		url: '/theater-games'
+	}, {
+		id: 13,
+		active: false,
+		label: 'Media Gallery',
+		url: '/media-gallery'
+	}]
+}];
 
-    };
-  },
-
-
-  methods: {},
-
-  ready: function ready() {}
-};
-if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"Test\">\n  <h1> BANG! </h1>\n</div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/modules/Test.vue"
-  module.hot.dispose(function () {
-    require("vueify-insert-css").cache["\n"] = false
-    document.head.removeChild(__vueify_style__)
-  })
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
-  }
-})()}
-},{"vue":48,"vue-hot-reload-api":38,"vueify-insert-css":49}],55:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 "use strict";
 
 // Static Settings for Brand Identity
@@ -15494,7 +18648,7 @@ module.exports = {
 	}
 };
 
-},{}],56:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 
 // Static dummy conversation data
@@ -15513,32 +18667,47 @@ module.exports = [{
 	photo: "/images/logos/logo.png"
 }];
 
-},{}],57:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-   // These two are for saving method
-   focusedField: '',
-   focusedSection: '',
-   // Dummy Data
-   introTitle: 'Welcome to the Internets',
-   introSubTitle: 'Please enjoy these details',
-   introText: 'We host conventions focused on household products and useful new technologies. Providing you with the opportunity to be light years ahead of the Joneses.',
-   introButtonText: 'download now<br /><center><i class="fa fa-arrow-circle-o-down fa-3x"></i>',
-   vendorsTitle: 'FEATURED VENDORS',
-   vendorsSubTitle: 'Here are some of our vendor highlights.',
-   eventTitle: 'Upcoming Events',
-   eventSubTitle: 'Here are the main details for the upcoming spring 2016-2017 show seasons. Have any questions please ask.',
-   eventDetailsTitle: 'Event Details',
-   eventTicketsTitle: 'Event Tickets',
-   eventDetailsTabsTitle: 'All Event Details',
-   galleryTitle: 'Photo Gallery',
-   gallerySubTitle: '"An image, captured in time" -Bad guy from Firewalker Movie',
-   factsTitle: 'Fun Facts',
-   factsSubTitle: 'Whaw, never thought learning would be so.... well nevermind.'
+  // These two are for saving method
+  front: [{
+    id: 1,
+    copy: 'Welcome to the Internets',
+    versionList: '{0:0}',
+    version: 0,
+    height: 1,
+    parent_name: 'MEiApp',
+    parent_id: 0,
+    base_view: 'front',
+    instance_number: 0
+  }, {
+    id: 2,
+    copy: 'Please enjoy these details',
+    versionList: '{0:1}',
+    version: 0,
+    height: 2,
+    parent_name: 'MEiApp',
+    parent_id: 0,
+    base_view: 'front',
+    instance_number: 1
+  }, {
+    id: 3,
+    copy: '',
+    versionList: '{0:1}',
+    version: 0,
+    height: 2,
+    parent_name: 'MEiApp',
+    parent_id: 0,
+    base_view: 'front',
+    instance_number: 2
+  }],
+  dash: []
+
 };
 
-},{}],58:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 'use strict';
 
 module.exports = [{
@@ -15623,7 +18792,7 @@ module.exports = [{
     dates: []
 }];
 
-},{}],59:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15666,7 +18835,7 @@ exports.default = {
 	}]
 };
 
-},{}],60:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -15726,108 +18895,108 @@ module.exports = {
   }]
 };
 
-},{}],61:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 
 // Setting for the main menu
 module.exports = [{
 	id: 0,
-	type: 'primary',
-	hovering: false,
+	menu_name: 'primary',
+	active: false,
 	label: 'Home',
 	url: '/home',
 	sub: [{
 		id: 14,
-		hovering: false,
+		active: false,
 		label: 'About TOTO',
 		url: '/about'
 	}, {
 		id: 15,
-		hovering: false,
+		active: false,
 		label: 'News',
 		url: '/news'
 	}, {
 		id: 16,
-		hovering: false,
+		active: false,
 		label: 'Contact',
 		url: '/shout'
 	}]
 }, {
 	id: 1,
-	type: 'primary',
-	hovering: false,
+	menu_name: 'primary',
+	active: false,
 	label: 'Events',
 	url: '/events',
 	sub: [{
 		id: 5,
-		hovering: false,
+		active: false,
 		label: 'Deer Pile',
 		url: 'deer-pile'
 	}, {
 		id: 6,
-		hovering: false,
+		active: false,
 		label: 'Mercury Cafe',
 		url: 'mercury-cafe'
 	}]
 }, {
 	id: 2,
-	type: 'primary',
-	hovering: false,
+	menu_name: 'primary',
+	active: false,
 	label: 'Particapate',
 	url: '/particapate',
 	sub: [{
 		id: 7,
-		hovering: false,
+		active: false,
 		label: 'Meet Up Details',
 		url: 'meetup'
 	}, {
 		id: 8,
-		hovering: false,
+		active: false,
 		label: 'Donate',
 		url: 'donations'
 	}]
 }, {
 	id: 3,
-	type: 'primary',
-	hovering: false,
+	menu_name: 'primary',
+	active: false,
 	label: 'Communication',
 	url: '/comunication',
 	sub: [{
 		id: 9,
-		hovering: false,
+		active: false,
 		label: 'Shout To Us',
 		url: 'shout'
 	}, {
 		id: 10,
-		hovering: false,
+		active: false,
 		label: 'Group Conversations',
 		url: 'conversations'
 	}]
 }, {
 	id: 4,
-	type: 'primary',
-	hovering: false,
+	menu_name: 'primary',
+	active: false,
 	label: 'Group Assets',
 	url: '/group-assets',
 	sub: [{
 		id: 11,
-		hovering: false,
+		active: false,
 		label: 'Glossery',
 		url: 'glossery'
 	}, {
 		id: 12,
-		hovering: false,
+		active: false,
 		label: 'Theater Games',
 		url: '/theater-games'
 	}, {
 		id: 13,
-		hovering: false,
+		active: false,
 		label: 'Media Gallery',
 		url: '/media-gallery'
 	}]
 }];
 
-},{}],62:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 
 // Static dummy news data
@@ -15845,81 +19014,87 @@ module.exports = {
 	photo: "/images/logos/logo.png"
 };
 
-},{}],63:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = {
-    current: '',
-    map: {
-        '/': {
-            component: '',
-            name: 'NavPage'
-        },
-        '/customers': {
-            component: '',
-            name: 'Customers'
-        },
-        '/employees': {
-            component: '',
-            name: 'Employees'
-        },
-        '/inventory/calculator': {
-            component: '',
-            name: 'InventoryCalculator'
-        },
-        '/projects': {
-            component: '',
-            name: 'Projector'
-        },
-        '/communications': {
-            component: '',
-            name: 'Communications'
-        },
-        '/singleConversation': {
-            component: '',
-            name: 'SingleConversation'
-        },
-        '/pos': {
-            component: '',
-            name: 'Pos'
-        }
+module.exports = {
+    '/home': {
+        component: require('../vue/components/navigation/NavPage.vue'),
+        name: 'home'
     }
 };
+// '/home': {
+//     component: NavPage,
+//     name: 'home',
+//},
+// '/customers': {
+//     component: '',
+//     name: 'Customers',
+// },
+// '/employees': {
+//     component: '',
+//     name: 'Employees',
+// },
+// '/inventory/calculator': {
+//     component: '',
+//     name: 'InventoryCalculator',
+// },
+// '/projects': {
+//     component: '',
+//     name: 'Projector',
+// },
+// '/communications': {
+//     component: '',
+//     name: 'Communications',
+// },
+// '/singleConversation': {
+//     component: '',
+//     name: 'SingleConversation',
+// },
+// '/pos': {
+//     component: '',
+//     name: 'Pos',
+// },
+//}
 
-},{}],64:[function(require,module,exports){
+},{"../vue/components/navigation/NavPage.vue":77}],69:[function(require,module,exports){
 'use strict';
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _module$exports;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Static App Setting
 
-module.exports = {
-	useSideMenu: false,
-	pageEdit: false,
-	loggedIn: false,
-	menuOpen: false,
-	asideOpen: false,
-	animateHeader: false,
+module.exports = (_module$exports = {
+  useSideMenu: false,
+  pageEdit: false,
+  loggedIn: false,
+  primaryOpen: false,
+  asideOpen: false,
+  animateHeader: false,
 
-	currentRoute: "home",
-	appName: 'MEi',
-	viewTitle: 'Home',
-	currentView: 'home',
-	currentNavigation: 'mainnav',
-	editMode: false,
-	editAll: false,
-	dataMode: false,
-	showLanguageSelector: false,
-	//currentUser: mei.currentUser,
+  currentRoute: "home",
+  appName: 'MEi',
+  viewTitle: 'Home',
+  currentView: 'home',
+  currentNavigation: 'mainnav',
+  editMode: false,
+  editAll: false,
+  dataMode: false,
 
-	metaTags: [{
-		tag: ""
-	}]
+  baseView: 'front',
 
-};
+  showLanguageSelector: false
+}, (0, _defineProperty3.default)(_module$exports, 'showLanguageSelector', false), (0, _defineProperty3.default)(_module$exports, 'logGood', "color:black; background:lightGreen; font-size: 12pt"), (0, _defineProperty3.default)(_module$exports, 'logBad', "color:white; background:Red; font-size: 12pt"), (0, _defineProperty3.default)(_module$exports, 'logErr', "color:black; background:yellow; font-size: 12pt"), (0, _defineProperty3.default)(_module$exports, 'metaTags', [{
+  tag: ""
+}]), _module$exports);
 
-},{}],65:[function(require,module,exports){
+},{"babel-runtime/helpers/defineProperty":3}],70:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -15935,7 +19110,8 @@ exports.default = {
 	conversations: require('./conversationData'),
 
 	menus: {
-		primary: require('./mainMenuData')
+		primary: require('./mainMenuData'),
+		adminPrimary: require('./adminMenuData')
 	},
 
 	copyText: require('./copyText'),
@@ -15950,7 +19126,80 @@ exports.default = {
 
 };
 
-},{"./companyData":55,"./conversationData":56,"./copyText":57,"./eventsData":58,"./imagesData":59,"./infoSectionData":60,"./mainMenuData":61,"./newsData":62,"./routeMap":63,"./settingsData":64}],66:[function(require,module,exports){
+},{"./adminMenuData":59,"./companyData":60,"./conversationData":61,"./copyText":62,"./eventsData":63,"./imagesData":64,"./infoSectionData":65,"./mainMenuData":66,"./newsData":67,"./routeMap":68,"./settingsData":69}],71:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _vueRouter = require('vue-router');
+
+var _vueRouter2 = _interopRequireDefault(_vueRouter);
+
+var _vue = require('vue');
+
+var _vue2 = _interopRequireDefault(_vue);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_vue2.default.use(_vueRouter2.default);
+
+exports.default = new _vueRouter2.default({
+  hashbang: false,
+  history: true,
+  linkActiveClass: 'active-link'
+});
+
+},{"vue":49,"vue-router":47}],72:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+    '/': {
+        component: require('../vue/components/navigation/NavPage.vue'),
+        name: 'welcome'
+    },
+    '/dashboard': {
+        component: require('../vue/components/navigation/NavPage.vue'),
+        name: 'dashboard'
+    },
+    '/dashboard/pos': {
+        component: require('../vue/components/pos/Checkout.vue'),
+        name: 'Pos'
+    }
+};
+// '/home': {
+//     component: NavPage,
+//     name: 'home',
+//},
+// '/customers': {
+//     component: '',
+//     name: 'Customers',
+// },
+// '/employees': {
+//     component: '',
+//     name: 'Employees',
+// },
+// '/inventory/calculator': {
+//     component: '',
+//     name: 'InventoryCalculator',
+// },
+// '/projects': {
+//     component: '',
+//     name: 'Projector',
+// },
+// '/communications': {
+//     component: '',
+//     name: 'Communications',
+// },
+// '/singleConversation': {
+//     component: '',
+//     name: 'SingleConversation',
+// },
+
+//}
+
+},{"../vue/components/navigation/NavPage.vue":77,"../vue/components/pos/Checkout.vue":86}],73:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16012,7 +19261,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":48,"vue-hot-reload-api":38}],67:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],74:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".fly-away-image {\n  -webkit-transition: 1s ease-out;\n  transition: 1s ease-out;\n  height: 100px;\n}\n.fly-away-image > img {\n  -webkit-transition: 1s ease-out;\n  transition: 1s ease-out;\n  max-height: 100px;\n  width: 100%;\n  right: 0;\n}\n.fly-away-image .fly-away {\n  top: -600px;\n}\n.intro-fly-away .section-title {\n  font-size: 80px;\n  font-weight: 900px;\n  color: #fff;\n}\n@media (min-width: 300px) {\n  .hero {\n    padding: 30px 0;\n  }\n  .fly-away-image {\n    height: 120px;\n  }\n  .fly-away-image > img {\n    max-height: 120px;\n  }\n  .fly-away {\n    top: -300px;\n  }\n}\n@media (min-width: 568px) {\n  .hero {\n    padding: 100px 0;\n  }\n  .fly-away-image {\n    height: 250px;\n  }\n  .fly-away-image > img {\n    max-height: 250px;\n  }\n}\n@media (min-width: 1000px) {\n  .fly-away-image {\n    height: 400px;\n  }\n  .fly-away-image > img {\n    max-height: 400px;\n  }\n  .fly-away {\n    top: -600px;\n  }\n}\n")
 'use strict';
 
@@ -16060,16 +19309,209 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":48,"vue-hot-reload-api":38,"vueify-insert-css":49}],68:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],75:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _getters = require('../../../vuex/getters.js');
+var _actions = require('../../../vuex/actions');
+
+exports.default = {
+  name: 'editable-copy',
+  watchMode: true,
+  changeTabTitle: false,
+  logHooksToConsole: false,
+  props: ['instanceNumber', 'currentVersion', 'nameOfParent', 'useHtml', 'overideText'],
+  data: function data() {
+    return {
+      names: 'text edit Aplic',
+      html: false,
+      editMode: this.$root.pubSettings.editMode,
+      parent: this.nameOfParent,
+      routePrefix: this.$parent.copy.texts[this.$root.baseView],
+      copyObject: {}
+    };
+  },
+
+
+  vuex: {
+    actions: {
+      setCopyText: _actions.setCopyText
+    }
+  },
+
+  methods: {
+    // listen for edit to get turned on
+    // if user is allowed to edit
+    // switch field to editable text area
+    // persist vux on update
+
+    persistCopyText: function persistCopyText(e) {
+      this.setCopyText(this.copyObject, e.target.value);
+    },
+    saveVersion: function saveVersion() {
+      var that = this;
+      var data = this.copyObject;
+      console.log(data.copy);
+      this.$http.put('/api/copyText/' + data.id, { data: data }, function (data, status, request) {
+        console.log("%c saveVersion() in EditableCopy.vue", that.$root.settings.logGood);
+      }).error(function (data, status, request) {
+        console.log("%c saveVersion() Err in EditableCopy", that.$root.settings.logErr);
+      });
+    }
+  },
+
+  // findParentName(){
+  //   if(this.nameOfParent == undefined){
+  //     return this.$parent.name+'_'+this.$parent.id
+  //   }
+  //   return this.nameOfParent+'_0'
+  // },
+  ready: function ready() {
+    this.copyObject = this.routePrefix[this.instanceNumber - 1];
+    this.$watch('$parent.getCopy', function () {
+      this.copyObject = this.routePrefix[this.instanceNumber - 1];
+    }, { deep: true });
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"editable-copy\">\n    <span v-if=\"!editMode &amp; html\" v-html=\"copyObject.copy\" style=\"width:100%\"></span>\n    <span v-if=\"!editMode &amp; !html\" v-text=\"copyObject.copy\" style=\"width:100%\"></span> \n<!-- :rows=\"copyObject.height\" -->\n    <textarea v-if=\"editMode\" :value=\"copyObject.copy\" @blur=\"saveVersion\" @input=\"persistCopyText | debounce 500\" placeholder=\"start typing to save new copy\" style=\"width:100%\"></textarea>\n\n    <!-- <a class=\"mtrl-btn mtrl-primary mtrl-raised\"\n      v-if=\"editMode\"\n      @click=\"saveVersion\"\n    >Save</a> -->\n  </div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/controllers/EditableCopy.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../../vuex/actions":98,"vue":49,"vue-hot-reload-api":38}],76:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+
+  props: ['object'],
+
+  data: function data() {
+    return {
+      iconList: require('../../../api/data/iconListForSelectBox'),
+      editAll: true
+    };
+  },
+
+  computed: {},
+  methods: {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div id=\"{{ object.id }}-form-holder\" style=\"display:none\"> \n    <form id=\"object-{{ object.id }}-editing-form\" action=\"/interfaceObject/{{object.id}}\" method=\"POST\">\n        <!-- // <input type=\"hidden\" name=\"_method\" value=\"PUT\"> -->\n        <!-- // <input type=\"hidden\" name=\"_token\" value=\"{{ csrf_token() }}\"> -->\n        <input type=\"hidden\" id=\"id\" name=\"id\" value=\"{{ object.id }}\">\n        <div class=\"row\">\n            <div class=\"col-sm-12\">\n                <div class=\"col-sm-6\">\n                    <h5>Parent ID: {{ object.menu_id }}</h5>\n                </div>\n                <div class=\"col-sm-6\">\n                    <h5>Parent Menu: {{ object.menu_name }}</h5>\n                </div>\n            </div>\n        </div>\n        <div class=\"row\">\n            <div class=\"col-sm-12\">\n                <div class=\"col-sm-6\">\n                    <label> Button Label\n                        <input class=\"form-control input-lg\" type=\"text\" name=\"label\" v-model=\"object.label\">\n                    </label>\n                    <label> Button Name                 \n                        <input class=\"form-control input-lg\" type=\"text\" name=\"name\" v-model=\"object.name\">\n                    </label>\n                    <label> Button URL                 \n                        <input class=\"form-control input-lg\" type=\"text\" name=\"href\" v-model=\"object.href\"></label>\n                    <label> Button icon\n                        <div class=\"input-group\">\n                            <select name=\"icon\" data-live-search=\"true\" :data-placeholder=\"object.icon\" :id=\"'selectpicker-'+object.id\" v-html=\"iconList.default.iconList\">\n                            <!-- // {{-- this will prob be a problem --}} -->\n                                \n                            </select>\n                            <i :id=\"'chosen-fa-icon-'+object.id\" :class=\"'pad-lft fa fa-3x ' + object.icon\"></i>\n                        </div> \n                    </label>\n                    <label v-show=\"editAll\">  Button Family\n                        <input class=\"form-control input-lg\" type=\"text\" dname=\"family\" v-model=\"object.family\">\n                    </label>\n                    <label v-show=\"editAll\"> Button Type\n                        <input class=\"form-control input-lg\" type=\"text\" name=\"type\" v-model=\"object.type\">\n                    </label>\n                </div>\n                <div class=\"col-sm-6\">\n                    <label> Button  Menu ID\n                        <input class=\"form-control input-lg\" type=\"text\" name=\"menu_id\" v-model=\"object.menu_id\">\n                    </label>\n                    <label> Button Menu Name\n                    <input class=\"form-control input-lg\" type=\"text\" name=\"menu_name\" v-model=\"object.menu_name\">\n                    </label>\n                    <label> Button Menu Order\n                        <input class=\"form-control input-lg\" type=\"text\" name=\"menu_order\" v-model=\"object.menu_order\">\n                    </label>\n                    <label v-show=\"editAll\"> Button Owner ID\n                        <input class=\"form-control input-lg\" type=\"text\" name=\"owner_id\" v-model=\"object.owner_id\">\n                    </label>\n                    <label v-show=\"editAll\"> Button Owner Type \n                        <input class=\"form-control input-lg\" type=\"text\" name=\"owner_type\" v-model=\"object.owner_type\">\n                    </label>\n                    <label v-show=\"editAll\"> Button Value\n                        <input class=\"form-control input-lg\" type=\"text\" name=\"value\" v-model=\"object.value\">\n                    </label>\n                    \n                </div>\n            </div>\n        </div>\n    </form>\n</div>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/controllers/ObjectEditor.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../../api/data/iconListForSelectBox":54,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],77:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _actions = require('../../../vuex/actions.js');
+
+exports.default = {
+  name: 'DashboardHome',
+  data: function data() {
+    return {};
+  },
+
+
+  vuex: {
+    getters: {
+      menuData: function menuData(_ref) {
+        var menus = _ref.menus;
+        return menus.DashboardMenu;
+      }
+    },
+    actions: {
+      setMenuActive: _actions.setMenuActive,
+      setMenu: _actions.setMenu
+    }
+  },
+  ready: function ready() {
+    this.setMenu('DashboardMenu');
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div id=\"main-nav-menu\">\n    <div class=\"inline-block pad-all\" v-for=\"button in menuData\">\n      <navpagebutton :button=\"button\" :edit-mode=\"editMode\"></navpagebutton>\n    </div>\n    \n    <button class=\"btn btn-default\" @click=\"$root.addNavButton()\"><i class=\"fa fa-4x fa-plus\"></i></button>\n   <!-- <pre v-if=\"dataMode\">{{ $data | json }}</pre> -->\n</div>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/NavPage.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../../vuex/actions.js":98,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],78:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".edit-btn {\n  position: absolute;\n}\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  props: ['button', 'editMode']
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"pad-no edit-btn\" v-if=\"editMode\">\n  <a style=\"padding:10px 5px\" @click=\"$root.editButton(button.id)\" class=\"pad-no text-bold text-bright\"><i class=\"fa fa-edit\"></i></a>\n</div>\n  <objecteditor v-if=\"editMode\" :object=\"button\"></objecteditor>\n  <a :id=\"button.id\" v-link=\"button.href\" :class=\"button.class\">\n  <i :class=\"'fa fa-4x ' + button.icon\"></i>\n  <span class=\"dashboard-text\" v-text=\"button.label\"></span>\n  <span v-if=\"button.notification_text\" :class=\"'pull-right badge badge-'+button.notification_color+' '+button.notification_style\" v-text=\"button.notification_text\">\n  </span>\n</a>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/NavpageButton.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".edit-btn {\n  position: absolute;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],79:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _actions = require('../../../../vuex/actions.js');
 
 exports.default = {
   name: 'PrimaryMenu',
@@ -16080,28 +19522,24 @@ exports.default = {
 
   vuex: {
     getters: {
-      menuData: function menuData(state) {
-        return state.truth.menus.primary;
+      menuData: function menuData(_ref) {
+        var menus = _ref.menus;
+        return menus.primary;
       }
-      //menuData: getPrimaryMenu ,
     },
     actions: {
-      setPrimaryMenuHover: _actions.setPrimaryMenuHover
-    }
-  },
-  computed: {
-    menuData: function menuData() {
-      return this.data;
+      setMenuActive: _actions.setMenuActive,
+      setMenu: _actions.setMenu
     }
   },
   events: {
-    menuHover: function menuHover(id) {
-
-      this.setPrimaryMenuHover(id);
+    menuActive: function menuActive(btn) {
+      this.setMenuActive(btn);
+      return true;
     }
   },
   ready: function ready() {
-    console.log(this.data);
+    this.setMenu('primary');
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
@@ -16110,46 +19548,47 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/materialTheme/MainMenu.vue"
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/materialTheme/MainMenu.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":74,"../../../vuex/getters.js":75,"vue":48,"vue-hot-reload-api":38}],69:[function(require,module,exports){
+},{"../../../../vuex/actions.js":98,"vue":49,"vue-hot-reload-api":38}],80:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-
-//import {getPrimaryMenuHover} from '../../../vuex/getters.js'
-// import {setPrimaryMenuHover} from '../../../vuex/actions.js'
 exports.default = {
   name: 'PrimaryMenuButton',
   parent: 'PrimaryMenu',
   props: ['button'],
   data: function data() {
     return {
-      hover: false, //this.hovering,
+      active: false, //this.active,
+      menuLoaded: false,
       subMenuId: 'sub-menu-' + this.button.id,
       subHeight: 0,
       subMenuExists: ''
     };
   },
 
-  // vuex:{
-  //   getters:{
-  //     //hovering: getPrimaryMenu,
-  //   },
-  //   actions:{
-  //     setPrimaryMenuHover,
-  //   },
-  // },
-
+  computed: {
+    active: function active() {
+      if (this.menuLoaded) {
+        var subMenu = document.getElementById(this.subMenuId);
+        if (this.button.active) {
+          this.openSub(subMenu);
+        } else {
+          this.closeSub(subMenu);
+        }
+        return this.button.active;
+      }
+    }
+  },
   methods: {
     closeSub: function closeSub(el) {
       dynamics.animate(el, {
@@ -16163,30 +19602,30 @@ exports.default = {
     },
     openSub: function openSub(el) {
       var that = this;
+
       dynamics.animate(el, {
         opacity: 1,
-        height: that.button.sub.length * 32
+        height: that.button.sub.length * 35
       }, {
         type: dynamics.spring,
         frequency: 100,
         friction: 300,
-        duration: 800
+        duration: 1000
       });
     },
-    fireHoverEvent: function fireHoverEvent() {
-      if (this.button.type == 'primary') {
-        this.$dispatch('menuHover', this.button.id);
+    fireButtonEvent: function fireButtonEvent() {
+      if (this.button.menu_name == 'primary') {
+        this.$dispatch('menuActive', this.button);
       }
     }
   },
   events: {
     handelSubMenu: function handelSubMenu(id) {
-      //console.log(id +' '+ this.button.id)
       if (id == this.button.id) {
-        this.hover = true;
+        this.active = true;
         this.openSub(this.subMenuId);
       } else {
-        this.hover = false;
+        this.active = false;
         this.closeSub(this.subMenuId);
       }
     }
@@ -16202,15 +19641,16 @@ exports.default = {
       friction: 100
     });
     this.closeSub(subMenu);
+    this.menuLoaded = true;
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t\t<!-- :class=\"{'hover-active' : hover}\" -->\n<div class=\"mtrl\" :class=\" hover ? 'mtrl-hover-enter' : 'mtrl-hover-leave'\">\n  <a :href=\"button.url\" class=\"btn menu-button\" :class=\"hover ? 'active' : ''\" @mouseover=\"fireHoverEvent\" v-text=\"button.label\"></a>\n\t<div :id=\"subMenuId\">\n    <submenubutton v-for=\"button in button.sub\" :button=\"button\"></submenubutton>\n\t</div>\n</div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t\t<!-- :class=\"{'hover-active' : hover}\" -->\n<div class=\"mtrl\" :class=\" active ? 'mtrl-hover-enter' : 'mtrl-hover-leave'\">\n    <!-- :href=\"button.url\"  -->\n  <a class=\"btn menu-button\" :class=\"active ? 'active' : ''\" @click=\"fireButtonEvent\" v-link=\"button.href\" v-text=\"button.label\"></a>\n\t<div :id=\"subMenuId\">\n    <submenubutton v-for=\"button in button.sub\" :button=\"button\"></submenubutton>\n\t</div>\n</div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/materialTheme/MenuButton.vue"
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/materialTheme/MenuButton.vue"
   module.hot.dispose(function () {
     require("vueify-insert-css").cache[".btn {\n  border-radius: 0;\n  border: 0;\n}\n"] = false
     document.head.removeChild(__vueify_style__)
@@ -16221,7 +19661,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":48,"vue-hot-reload-api":38,"vueify-insert-css":49}],70:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],81:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -16249,7 +19689,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/materialTheme/SubMenuButton.vue"
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/materialTheme/SubMenuButton.vue"
   module.hot.dispose(function () {
     require("vueify-insert-css").cache[".btn {\n  border-radius: 0;\n  border: 0;\n}\n"] = false
     document.head.removeChild(__vueify_style__)
@@ -16260,7 +19700,742 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":48,"vue-hot-reload-api":38,"vueify-insert-css":49}],71:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],82:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n/*.v-link-active \n  color: purple\n  padding-left: 20px\n  font-weight: bold\n  box-shadow:inset 2px 2px 2px  4px #999*/\n")
+'use strict';
+
+var _actions = require('../../../../vuex/actions');
+
+var _getters = require('../../../../vuex/getters');
+
+module.exports = {
+  name: 'Primary Navigation',
+  logHooksToConsole: true,
+  watchModes: true,
+
+  data: function data() {
+    return {
+      pageTitle: 'Main Navigation',
+      editMode: false,
+      dataMode: false,
+      //objectResource: this.$root.mainnav,
+      //buttonEditorTemplate: $('#object-editing-form').html(),
+      currentIcon: 'fa-question',
+      menuId: 1
+    };
+  },
+
+
+  vuex: {
+    getters: {
+      //getMenuData,
+      _menuData: function _menuData(_ref) {
+        var menus = _ref.menus;
+        return menus.adminPrimary;
+      },
+      changedRoute: _getters.getRoute
+    },
+    actions: {
+      setMenuActive: _actions.setMenuActive,
+      changeRoute: _actions.changeRoute,
+      setMenu: _actions.setMenu
+    }
+  },
+
+  computed: {
+    menuData: function menuData() {
+      return this._menuData;
+    }
+  },
+
+  events: {
+    menuActive: function menuActive(btn) {
+      //this.setMenuActive(btn)
+      this.$broadcast('checkButton', btn);
+      return true;
+    }
+  },
+
+  methods: {
+    clicked: function clicked(btn) {
+      this.setMenuActive(btn);
+    },
+    addButton: function addButton() {
+      // click add new button
+      // details for button entered by user
+      //    - walk through details step by step
+      //    - new page or popup with general form for backup (exists first)
+      // button details are persisted to database
+      // button added to live Vue
+      //var newButton = this.buttonTemplate;
+      var newButton = {
+        id: null,
+        label: 'New Button',
+        href: '#',
+        icon: 'fa-question',
+        name: 'new_button',
+        menu_id: 0,
+        menu_name: 'mainnav',
+        menu_order: this.menudata.length + 1,
+        family: 'button',
+        type: 'navigation',
+        owner_id: this.menuId,
+        owner_type: 'mainnav'
+      };
+
+      this.objectResource.save({ objectType: "interfaceObjects" }, newButton, function (data, status, request) {
+        this.menudata.push(data);
+      }).error(function (data, status, request) {
+        //console.log("%cSomething went wrong with (mainnav.js->addButton->object.save) Error Stat = %s here is the request = %s", this.$root.logErr, status, request)
+      });
+    }
+  },
+  ready: function ready() {
+    this.setMenu('adminPrimary');
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <!-- MAIN NAVIGATION -->\n  <!--===================================================-->\n<div id=\"mainnav-container\">\n  <div id=\"mainnav\">\n  <shortcutbuttons></shortcutbuttons>\n    <!--Menu--> \n    <!--================================-->\n    <div id=\"mainnav-menu-wrap\">\n      <div class=\"nano\">\n        <div class=\"nano-content\">\n          <ul id=\"mainnav-menu\" class=\"list-group\">\n\n            <!--Category name-->\n            <li class=\"list-header\">Navigation </li>\n\n            <!--Menu list item-->\n            <mainnavbutton v-for=\"button in menuData\" :button=\"button\"></mainnavbutton>\n\n            <li v-if=\"editMode\" @click=\"addButton\">\n            <a> + Create New Button</a></li>\n          </ul>\n\n          <li class=\"list-divider\"></li>\n\n          <menuwidget></menuwidget>\n \n        </div>\n      </div>\n    </div>\n    <!--================================-->\n    <!--End menu-->\n\n  </div>\n</div>\n<!--===================================================-->\n<!--END MAIN NAVIGATION-->\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/nifty/MainNav.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n/*.v-link-active \n  color: purple\n  padding-left: 20px\n  font-weight: bold\n  box-shadow:inset 2px 2px 2px  4px #999*/\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../../../vuex/actions":98,"../../../../vuex/getters":99,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],83:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'mainnavbutton',
+  props: ['button'],
+  watchModes: true,
+
+  data: function data() {
+    return {
+      objectResource: this.$resource('/:objectType'),
+      currentView: false,
+      editMode: false,
+      view: "MainNav",
+      active: false
+    };
+  },
+
+
+  computed: {
+    isFolder: function isFolder() {
+      return this.button.submenu && this.button.submenu.length;
+    }
+  },
+
+  methods: {
+    // When a Menu Button is clicked tell parent to inform all buttons
+
+    buttonClicked: function buttonClicked(btn) {
+      this.$dispatch('menuActive', btn);
+    },
+
+    // When parent broadcasts even if this is the button
+    // original call came from handel it here.
+    clickHandler: function clickHandler(btn) {
+      if (btn.value === 'isFirstFolder') {
+        this.active = !this.active;
+      }
+      if (btn.value === 'isThirdTier' || btn.value === 'isSecondTier' || btn.value === 'isSecondFolder') {
+        console.log('Bang from 2nd tier');
+        this.$parent.active = true;
+        this.active = !this.active;
+      }
+    },
+
+
+    // TODO make this work by altering the store
+    changeType: function changeType() {
+      if (!this.isFolder && this.button.value != 'isThirdTier') {
+        this.button.$add('submenu', []);
+        this.button.value = 'isFolder';
+        this.addButton();
+        this.open = true;
+        this.save(this.button.id);
+      }
+    },
+
+    addButton: function addButton() {
+      var newButton = {
+        id: null,
+        href: '',
+        icon: 'fa-question',
+        label: 'New Button',
+        name: 'new_button',
+        value: '',
+        menu_id: this.button.id,
+        menu_name: this.button.name,
+        menu_order: this.button.submenu.length + 1,
+        family: 'button',
+        type: 'navigation',
+        owner_id: this.button.id,
+        owner_type: 'mainnav'
+      };
+
+      this.objectResource.save({ objectType: "interfaceObjects" }, { newButton: newButton }, function (data, status, request) {
+        console.log("%cmainnavbutton.js->addButton->objectArray.save)", this.$root.logGood);
+        this.button.submenu.push(data);
+      }).error(function (data, status, request) {
+        console.log("%cmainnavbutton.js->addButton->objectArray.save) Error", this.$root.logErr);
+      });
+    }
+  },
+
+  created: function created() {
+    this.$watch("$root.editMode", function (response) {
+      this.editMode = response;
+    });
+    this.$watch("$root.dataMode", function (response) {
+      this.dataMode = response;
+    });
+
+    this.$on('checkButton', function (btn) {
+      if (btn === this.button) {
+        this.clickHandler(btn);
+      } else {
+        this.active = false;
+      }
+      return true;
+    });
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<li :class=\"active ? 'active' : ''\">\n  <div class=\"col-xs-2 pad-no\" v-if=\"editMode\"> \n    <a style=\"padding:10px 10px\" @click=\"$root.editButton(button)\" class=\"pad-no text-bold text-bright\"><i class=\"fa fa-edit\"></i></a>\n  </div>\n  <objecteditor :object=\"button\"></objecteditor>\n    <a @click=\"buttonClicked(button)\" @dblclick=\"changeType\" v-link=\"{name: button.href}\"><i :class=\"'fa ' +button.icon\"></i>\n      <span class=\"menu-title\">\n        <strong v-text=\"button.label\"></strong>\n      </span>\n          <i :class=\"{'arrow': isFolder}\"></i>\n        <span v-if=\"hasBadge\" class=\"pull-right badge badge-success\"></span>\n    </a>\n    <ul class=\"collapse\" :class=\"{'in': active}\">\n      <mainnavbutton v-for=\"button in button.submenu\" :button=\"button\"></mainnavbutton>\n        <li v-if=\"editMode\" @click=\"addButton\">\n      <a> + Create New Button</a></li>\n    </ul>\n</li>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/nifty/MainNavButton.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],84:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'Menu Widget',
+  changeTabTitle: false,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {};
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"menu-widget\">\n            <!--Widget-->\n        <!--================================-->\n        <div class=\"mainnav-widget\">\n\n          <!-- Show the button on collapsed navigation -->\n          <div class=\"show-small\">\n            <a href=\"#\" data-toggle=\"menu-widget\" data-target=\"#demo-wg-server\">\n              <i class=\"fa fa-desktop\"></i>\n            </a>\n          </div>\n\n          <!-- Hide the content on collapsed navigation -->\n          <div id=\"demo-wg-server\" class=\"hide-small mainnav-widget-content\">\n            <ul class=\"list-group\">\n              <li class=\"list-header pad-no pad-ver\">Server Status</li>\n              <li class=\"mar-btm\">\n                <span class=\"label label-primary pull-right\">15%</span>\n                <p>CPU Usage</p>\n                <div class=\"progress progress-sm\">\n                  <div class=\"progress-bar progress-bar-primary\" style=\"width: 15%;\">\n                    <span class=\"sr-only\">15%</span>\n                  </div>\n                </div>\n              </li>\n              <li class=\"mar-btm\">\n                <span class=\"label label-purple pull-right\">75%</span>\n                <p>Bandwidth</p>\n                <div class=\"progress progress-sm\">\n                  <div class=\"progress-bar progress-bar-purple\" style=\"width: 75%;\">\n                    <span class=\"sr-only\">75%</span>\n                  </div>\n                </div>\n              </li>\n              <li class=\"pad-ver\"><a href=\"#\" class=\"btn btn-success btn-bock\">View Details</a></li>\n            </ul>\n          </div>\n        </div>\n        <!--================================-->\n        <!--End widget-->\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/nifty/MenuWidget.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],85:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'Shortcut Buttons',
+  changeTabTitle: false,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {};
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!--Shortcut buttons--> \n<!--================================-->\n<div id=\"mainnav-shortcut\">\n  <ul class=\"list-unstyled\">\n    <li class=\"col-xs-4\" data-content=\"Sidebar Menu\">\n      <a id=\"demo-toggle-aside\" class=\"shortcut-grid\" href=\"#\">\n        <i class=\"fa fa-magic\"></i>\n      </a>\n    </li>\n    <li class=\"col-xs-4\" data-content=\"A Demo Notification\">\n      <a id=\"demo-alert\" class=\"shortcut-grid\" href=\"#\">\n        <i class=\"fa fa-bullhorn\"></i>\n      </a>\n    </li>\n    <li class=\"col-xs-4 pad-top\" data-content=\"Go Home\">\n      <a id=\"dash-to-home\" class=\"shortcut-grid\" v-link=\"{name: 'welcome'}\"><i class=\"fa fa-home\"></i>\n      </a>\n    </li>\n  </ul>\n</div>\n<!--================================-->\n<!--End shortcut buttons-->\t\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/nifty/ShortcutButtons.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],86:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".checkout {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n}\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _NumPad = require('./NumPad.vue');
+
+var _NumPad2 = _interopRequireDefault(_NumPad);
+
+var _SalesReceipt = require('./SalesReceipt.vue');
+
+var _SalesReceipt2 = _interopRequireDefault(_SalesReceipt);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    name: 'pos',
+    changeTabTitle: true,
+    logHooksToConsole: true,
+    watchMode: true,
+    data: function data() {
+        return {
+            pageTitle: 'pos',
+            numpadEntry: '',
+            fullNumber: 0,
+            numbers: []
+        };
+    },
+
+
+    computed: {},
+
+    methods: {},
+
+    components: {
+        'numberpad': _NumPad2.default,
+        'salewindow': _SalesReceipt2.default
+    }
+
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"checkout\">\n    <salewindow :numpad-entry=\"numpadEntry\"></salewindow>\n    <numberpad></numberpad>\n    \n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/pos/Checkout.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".checkout {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"./NumPad.vue":87,"./SalesReceipt.vue":88,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],87:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".numbers {\n  width: 370px;\n  border: 1px #000 solid;\n  background: #999;\n}\n.numbers .numbers-pad {\n  width: 100%;\n  height: 340px;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  border: 1px #33abb7 solid;\n}\n.numbers .numbers-pad > button {\n  margin: 2.2% 2.8% 2.8% 2.2%;\n  width: 15%;\n  height: 19%;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: center;\n  -webkit-justify-content: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  background: -webkit-linear-gradient(top, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  background: linear-gradient(to bottom, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  box-shadow: 2px 2px 6px #000;\n  border-radius: 5px;\n}\n.numbers .numbers-pad > button:active {\n  color: #33abb7;\n  margin: 2.5% 2.5% 2.5% 2.5%;\n  box-shadow: 0px 0px 3px #000;\n}\n.numbers .numbers-pad > button > span {\n  font-size: 2em;\n  line-height: 1em;\n}\n.numbers .numbers-pad .tall {\n  height: 30%;\n}\n.numbers .numbers-entry-field {\n  width: 100%;\n  font-size: 3em;\n  font-weight: bold;\n  text-align: right;\n  padding: 4px;\n}\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+
+/**
+ * Number.prototype.format(n, x, s, c)
+ * 
+ * @param integer n: length of decimal
+ * @param integer x: length of whole part
+ * @param mixed   s: sections delimiter
+ * @param mixed   c: decimal delimiter
+ */
+Number.prototype.format = function (n, x, s, c) {
+    var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
+        num = this.toFixed(Math.max(0, ~ ~n));
+    return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
+};
+
+exports.default = {
+    props: ['fire'],
+    data: function data() {
+        return {
+            buttons: [{ name: 1, value: 1, style: ' single' }, { name: 4, value: 4, style: ' single' }, { name: 7, value: 7, style: ' single' }, { name: '.', value: '.', style: ' single' }, { name: 2, value: 2, style: ' single' }, { name: 5, value: 5, style: ' single' }, { name: 8, value: 8, style: ' single' }, { name: 0, value: 0, style: ' single' }, { name: 3, value: 3, style: ' single' }, { name: 6, value: 6, style: ' single' }, { name: 9, value: 9, style: ' single' }, { name: '00', value: '00', style: ' single' }, { name: '/', value: '/', style: ' single' }, { name: 'X', value: '*', style: ' single' }, { name: '-', value: '-', style: ' single' }, { name: '+', value: '+', style: ' single' }, { name: '', icon: 'money', value: 'fire', style: ' tall' }, { name: '', icon: 'trash', value: 'kill', style: ' tall' }],
+            workingNumber: '',
+            savedNumbers: []
+        };
+    },
+
+
+    computed: {
+        displayNumber: function displayNumber() {
+            return Number(this.workingNumber).format(2, 3, ',', '.');
+        }
+    },
+
+    methods: {
+        btnHandeler: function btnHandeler(value) {
+            this.numpadKeypress(value);
+        },
+        numpadKeypress: function numpadKeypress(key) {
+            if (key == 'fire') {
+                this.saveNumber();
+                this.clearNumber();
+                return;
+            }
+            if (key == 'kill') {
+                this.clearNumber();
+                return;
+            }
+            return this.workingNumber += key;
+        },
+        saveNumber: function saveNumber() {
+            this.savedNumbers.push(Number(this.workingNumber).toFixed(2));
+        },
+        clearNumber: function clearNumber() {
+            this.workingNumber = '0';
+            return;
+        },
+        clearInput: function clearInput() {
+            this.numpadEntry = '';
+        }
+    },
+    ready: function ready() {
+        console.log('<<< numberpad.vue >>> Ready!');
+    }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"numbers\">\n    <input class=\"numbers-entry-field\" v-model=\"displayNumber\">\n    <div class=\"numbers-pad\">\n        <button v-for=\"btn in buttons\" :class=\"btn.style\" class=\"\" @click=\"btnHandeler(btn.value)\" @tap=\"btnHandeler(btn.value)\"><span><i class=\"fa fa-{{btn.icon}}\"></i>{{ btn.name }}</span></button>\n        \n    </div>\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/pos/NumPad.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".numbers {\n  width: 370px;\n  border: 1px #000 solid;\n  background: #999;\n}\n.numbers .numbers-pad {\n  width: 100%;\n  height: 340px;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  border: 1px #33abb7 solid;\n}\n.numbers .numbers-pad > button {\n  margin: 2.2% 2.8% 2.8% 2.2%;\n  width: 15%;\n  height: 19%;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: center;\n  -webkit-justify-content: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  background: -webkit-linear-gradient(top, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  background: linear-gradient(to bottom, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  box-shadow: 2px 2px 6px #000;\n  border-radius: 5px;\n}\n.numbers .numbers-pad > button:active {\n  color: #33abb7;\n  margin: 2.5% 2.5% 2.5% 2.5%;\n  box-shadow: 0px 0px 3px #000;\n}\n.numbers .numbers-pad > button > span {\n  font-size: 2em;\n  line-height: 1em;\n}\n.numbers .numbers-pad .tall {\n  height: 30%;\n}\n.numbers .numbers-entry-field {\n  width: 100%;\n  font-size: 3em;\n  font-weight: bold;\n  text-align: right;\n  padding: 4px;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],88:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".receipt-window {\n  width: 370px;\n  height: 400px;\n/* TODO Attach nano scroller to this */\n  overflow: auto;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  border: 1px #000 solid;\n  background: #eee;\n}\n.receipt-window .receipt-item {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  padding: 5px;\n}\n.receipt-window .receipt-item .item-controls {\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details {\n  font-size: 1.5em;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  width: 85%;\n}\n.receipt-window .receipt-item .item-details > input {\n  width: 100%;\n  border: none;\n  background-color: none;\n}\n.receipt-window .receipt-item .item-details .item-id {\n  width: 10%;\n}\n.receipt-window .receipt-item .item-details .item-name {\n  width: 50%;\n}\n.receipt-window .receipt-item .item-details .item-price {\n  text-align: right;\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details .item-sku {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-rfid {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-field-sm {\n  width: 20%;\n}\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    name: 'receipt-window',
+    logHooksToConsole: true,
+    props: ['numpadEntry'],
+    data: function data() {
+        return {
+            name: 'receipt-window',
+            editField: true,
+            discounts: []
+        };
+    },
+
+
+    computed: {
+        items: function items() {
+            return this.$root.inventories;
+        }
+    }
+
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"receipt-window\">\n    <div v-for=\"item in items\" class=\"receipt-item\">\n        <div class=\"btn-group-vertical item-controls\">\n            <button class=\"btn btn-info\" @click=\"editField = !editField\"><i class=\"fa fa-edit\"></i></button>\n            <button class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i></button>\n        </div>\n        <div class=\"item-details\">\n            <div class=\"item-id\">\n                <span v-text=\"item.id\"></span>\n            </div>\n            <input class=\"item-name\" :disabled=\"editField\" v-model=\"item.inventory.name\">\n            <span>$</span>\n            <input class=\"item-price\" :disabled=\"editField\" v-model=\"item.unit_price\">\n            <span>.00</span>\n            <span>SKU:&nbsp;&nbsp;</span>\n            <input class=\"item-sku\" :disabled=\"editField\" v-model=\"item.product_id\">\n            <span>RFID:&nbsp;&nbsp;</span>\n            <input class=\"item-rfid\" :disabled=\"editField\" v-model=\"item.inventory.rfid\">\n            <span>Count:&nbsp;&nbsp;</span>\n            <input class=\"item-field-sm\" :disabled=\"editField\" v-model=\"item.inventory.unit_count\">\n            <span>Type:&nbsp;&nbsp;</span>\n            <input class=\"item-field-sm\" :disabled=\"editField\" v-model=\"item.inventory.unit_type\">\n        </div> \n    </div>\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/pos/SalesReceipt.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".receipt-window {\n  width: 370px;\n  height: 400px;\n/* TODO Attach nano scroller to this */\n  overflow: auto;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  border: 1px #000 solid;\n  background: #eee;\n}\n.receipt-window .receipt-item {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  padding: 5px;\n}\n.receipt-window .receipt-item .item-controls {\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details {\n  font-size: 1.5em;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  width: 85%;\n}\n.receipt-window .receipt-item .item-details > input {\n  width: 100%;\n  border: none;\n  background-color: none;\n}\n.receipt-window .receipt-item .item-details .item-id {\n  width: 10%;\n}\n.receipt-window .receipt-item .item-details .item-name {\n  width: 50%;\n}\n.receipt-window .receipt-item .item-details .item-price {\n  text-align: right;\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details .item-sku {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-rfid {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-field-sm {\n  width: 20%;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],89:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n")
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    props: {
+        visibleScope: 'active',
+        softDelete: {},
+        currentUserId: { type: Number },
+        conversations: {},
+        project: {},
+        tasks: {}
+    },
+
+    data: function data() {
+        return {
+            completed: this.project.deleted,
+            typingTimer: {}
+        };
+    },
+
+
+    computed: {
+        autoHeightFix: function autoHeightFix() {
+            return "'height:" + (this.project.description_height + 4) + "px; margin:5px 0;'";
+            /* 
+            *  Adding the 4px here is a little necessary tweak 
+            *  otherwise the field will resize itself 
+            *  improperly when saved.
+            */
+        }
+    },
+
+    methods: {
+        /*
+        * Report a change in the project
+        * Handles textField height : e = event
+        * Calls onChange if the timer is allowed to count down
+        * Requests parent to persist item
+        */
+        projectChanged: function projectChanged(e) {
+            if (e.target.type == 'textarea') {
+                autosize(e.target);
+                var targetID = '#' + e.target.id;
+                this.project.description_height = $(targetID).height();
+            }
+            clearTimeout(this.typingTimer);
+            this.typingTimer = setTimeout(function () {
+                e.targetVM.onChange(e.targetVM.project, 'projects', 'update');
+            }, 2500);
+        },
+        toggleSoftDelete: function toggleSoftDelete(e) {
+            this.onDelete(e.path[3], 'update');
+        },
+        trashThis: function trashThis(e) {
+            this.onTrash(e.path[3], 'delete');
+        },
+
+        createNewConversation: function createNewConversation() {
+            var newConversation = {
+                "title": "Note Title",
+                "description": "A new note",
+                "description_height": 100,
+                "class": "info",
+                "owner_id": this.project.id,
+                "owner_type": 'project',
+                "facility_id": 1,
+                "user_id": this.currentUser
+            };
+            this.onChange(newConversation, 'conversations', 'new');
+        }
+    },
+    ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"panel panel-bordered panel-{{ project.class }}\">\n    <div class=\"panel-heading\" style=\"display: flex; width: 100%;\">\n        <h4 class=\"panel-title\" style=\"width: 100%;\">\n            <a data-parent=\"#accordion\" data-toggle=\"collapse\" href=\"#project{{ project.id }}\" class=\"collapsed\" aria-expanded=\"false\">\n                <input class=\"form-textarea project-message-body project-title\" @keyup=\"projectChanged\" v-model=\"project.title\">\n            </a>\n        </h4>\n        <button class=\"btn btn-danger pull-right\" @click=\"toggleSoftDelete\" v-show=\"!completed\">\n            <i class=\"fa fa-close\"></i> Delete\n        </button>\n        <button class=\"btn btn-success mar-rgt\" @click=\"toggleSoftDelete\" v-show=\"completed\">\n            <span class=\"fa fa-check\"></span> &nbsp; Restore</button>\n\n        <button class=\"btn btn-danger\" @click=\"trashThis\" v-show=\"completed\">\n            <span class=\"fa fa-trash\"></span> &nbsp; Trash</button>\n    </div>\n    <!--Accordion content collapsible container-->\n    <div class=\"panel-collapse collapse\" id=\"project{{ project.id }}\" aria-expanded=\"false\" style=\"height: 0px;\">\n        <div class=\"bg-dark\">\n            <div class=\"tab-base accordion-tab-base tab-stacked-left bg-trans\">\n                <!--Project Navigation Tabs-->\n                <ul class=\"nav nav-tabs\">\n                    <li class=\"active\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-details\" aria-expanded=\"true\">Details</a>\n                    </li>\n                    <li class=\"\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-tasks\" aria-expanded=\"false\">Tasks</a>\n                    </li>\n                    <li class=\"\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-conversations\" aria-expanded=\"false\">Notes</a>\n                    </li>\n                </ul>\n                <!--Tab Content-->\n                <div class=\"tab-content bg-gray-dark\">\n                    <!-- Details -->\n                    <div id=\"project{{ project.id }}-details\" class=\"tab-pane fade active in\">\n                        <textarea id=\"project{{project.id}}_description\" class=\"col-sm-12 list-group-item-text form-textarea project-message-body\" :style=\"autoHeightFix\" v-model=\"project.description\" @keyup=\"projectChanged\"></textarea>\n                        <input class=\"form-textarea project-message-body\" @keyup=\"projectChanged\" v-model=\"project.updated_at\" :disabled=\"true\">\n                    </div>\n                    <!-- Details -->\n\n                    <!-- Tasks -->\n                    <tasks :current-user-id=\"currentUserId\" :project-id=\"project.id\" :conversation-id=\"project.conversation_id\" :tasks=\"tasks\"></tasks>\n                    <!-- Tasks end -->\n\n                    <!-- conversation start -->\n                    <conversations :conversations=\"conversations\" :current-user-id=\"currentUserId\" :project-id=\"project.id\"></conversations>\n                    <!-- conversation end -->\n\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/projector/project.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],90:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _project = require('./project.vue');
+
+var _project2 = _interopRequireDefault(_project);
+
+var _task = require('./task.vue');
+
+var _task2 = _interopRequireDefault(_task);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    name: 'projector',
+    changeTabTitle: true,
+    logHooksToConsole: true,
+    watchMode: true,
+    data: function data() {
+        return {
+            pageTitle: 'projector',
+            showDeleted: false,
+            visibleScope: 'active',
+            currentUserId: this.$root.currentUser.profile.id
+        };
+    },
+
+    computed: {
+        projects: function projects() {
+            return this.$root.projects;
+        },
+        tasks: function tasks() {
+            return this.$root.tasks;
+        },
+        conversations: function conversations() {
+            return this.$root.conversations;
+        },
+        messages: function messages() {
+            return this.$root.messages;
+        }
+    },
+
+    methods: {
+        /*
+        * New Objects
+        * each calls save method to persist
+        */
+        createNewProject: function createNewProject(user_id) {
+            var newProject = {
+                "title": "Title",
+                "description": "Details",
+                "description_height": 100,
+                "class": "info",
+                "due_time": "12:00:00",
+                "due_date": "2017-01-20",
+                "owner_id": 0,
+                "conversation_id": 0,
+                "delegated_id": 0,
+                "facility_id": 1,
+                "creator_id": user_id,
+                "deleted_at": null
+            };
+            this.save(newProject, 'projects', 'new');
+        },
+
+        /*
+         * Persistence Success methods
+         * each handles its actions success
+         */
+        newPersisted: function newPersisted(objectList, newObject) {
+            //console.log('saved', newObject[newObject.length - 1].id,'pushing to',objectList);
+            this[objectList].push(newObject[newObject.length - 1]);
+        },
+        updatePersisted: function updatePersisted(type, returned, obj) {
+            //console.log('saved',type, obj.id); //
+        },
+        deletePersisted: function deletePersisted(objectType, deletedObject, obj) {
+            var list = this[objectType];
+            for (var i in this[objectType]) {
+                if (list[i].id == obj.id) {
+                    list.splice(i, 1);
+                }
+            } // Find deleted object and remove it from list
+        },
+        /*
+         * Component called  methods
+         * each handles its components requested action
+         */
+        softDelete: function softDelete(objectID, action) {
+            var model = this.pullApartObjectID(objectID);
+            console.log(objectID, model);
+            for (var i in model.obj) {
+                if (model.obj[i].id == model.id) {
+                    //console.log(model.obj[i].deleted)
+                    model.obj[i].deleted = !model.obj[i].deleted; //Toggle deleted Var
+                    //console.log(model.obj[i].deleted)
+                    this.save(model.obj[i], model.type, action); // Persist
+                }
+            }
+        },
+        permanentTrash: function permanentTrash(objectID) {
+            var model = this.pullApartObjectID(objectID);
+            for (var i in model.obj) {
+                if (model.obj[i].id == model.id) {
+                    this.save(model.obj[i], model.type, 'delete');
+                }
+            }
+        },
+        /*
+         * Vue Object persistence
+          * obj = component/object to persist
+          * objType = name of object
+          * action = will accept (update, new, delete)
+         */
+        save: function save(obj, objType, action) {
+            this.$http.post('/api/' + action + '/' + objType, obj, function (model, status, request) {}).success(function (model) {
+                this.$set(objType, model);
+                //this[action+'Persisted'](objType, model, obj)
+            });
+        },
+
+        /*
+         * Helper Methods
+         */
+        pullApartObjectID: function pullApartObjectID(objectID) {
+            var modelId = objectID.id.substr(objectID.id.indexOf('_') + 1, objectID.id.length);
+            var modelType = objectID.id.substr(0, objectID.id.indexOf('_'));
+            var that = this[modelType];
+            return { obj: that, id: modelId, type: modelType };
+        }
+    }
+
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div id=\"projecter-directory\">\n        <!--Accordion Grouping-->\n        <div class=\"panel-group accordion\" id=\"accordion\">\n\n            <!-- item template -->\n            \n            <visibilityswitch></visibilityswitch>\n\n            <button @click=\"createNewProject( currentUserId )\" class=\"btn btn-block btn-info mar-btm\"><span class=\"fa fa-plus\"></span></button>\n            <div v-for=\"project in projects | orderBy 'id' -1 | visibilityMode visibleScope\" id=\"projects_{{ project.id }}\" class=\"panel\"> <!--  --> \n                <project :project=\"project\" :tasks=\"tasks\" :conversations=\"conversations\" :current-user-id=\"currentUserId\" soft-delete=\"true\"></project>\n            </div>\n        </div>\n    </div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/projector/projector.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"./project.vue":89,"./task.vue":91,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],91:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -16268,15 +20443,43 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = {
-    name: 'Home'
+    props: {
+        task: {},
+        currentUserId: { type: Number },
+        projectId: { type: Number }
+    },
+    data: function data() {
+        return {
+            completed: this.task.deleted,
+            typingTimer: {}
+        };
+    },
+
+    methods: {
+        // Report a change in the project
+        // Handles textField height
+        // Requests parent to persist item
+
+        taskChanged: function taskChanged(e) {
+            if (e.target.type == 'textarea') {
+                autosize(e.target);
+                var targetID = '#' + e.target.id;
+                this.task.description_height = $(targetID).height();
+            }
+            clearTimeout(this.typingTimer);
+            this.typingTimer = setTimeout(function () {
+                e.targetVM.onChange(e.targetVM.task, 'tasks', 'update');
+            }, 2500);
+        }
+    }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <!-- <div id=\"main-nav-menu\">\n      <div class=\"inline-block pad-all\" v-for=\"button in menudata\">\n          <navpagebutton :button=\"button\" :edit-mode=\"editMode\">\n          </navpagebutton>\n      </div>\n      TODO\n\n      <button \n        class=\"btn btn-default\"\n        @click=\"$root.addNavButton()\"\n      ><i class=\"fa fa-4x fa-plus\"></i></button>\n     <pre v-if=\"dataMode\">{{ $data | json }}</pre>\n  </div> -->\n<h1>BANG!!</h1>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"row mar-btm\">\n        <div class=\"col-sm-12\">\n            <a class=\"col-sm-12 list-group-item mar-no\">\n                <input class=\"col-sm-12 list-group-item-heading form-textarea project-message-body\" v-model=\"task.title\" @keyup=\"taskChanged\">\n                <textarea class=\"col-sm-12 list-group-item-text form-textarea project-message-body\" v-model=\"task.description\" @keyup=\"taskChanged\"></textarea>\n            </a>\n        </div>\n        <div class=\"btn-group mar-lft\">\n            <button class=\"btn btn-mint\">\n                <span class=\"fa fa-user\"></span> Delegate\n            </button>\n            <button class=\"btn btn-warning\" v-show=\"!completed\" @click=\"$parent.$parent.toggleSoftDelete\"><span class=\"fa fa-close\"></span> Delete</button>\n            <button class=\"btn btn-success\" v-show=\"completed\" @click=\"$parent.$parent.toggleSoftDelete\"><span class=\"fa fa-check\"></span> Restore</button>\n            <button class=\"btn btn-danger\" v-show=\"completed\" @click=\"$parent.$parent.trashThis\"><span class=\"fa fa-trash\"></span> Trash</button>\n        </div>\n    </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/NavPage.vue"
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/projector/task.vue"
   module.hot.dispose(function () {
     require("vueify-insert-css").cache["\n"] = false
     document.head.removeChild(__vueify_style__)
@@ -16287,7 +20490,115 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":48,"vue-hot-reload-api":38,"vueify-insert-css":49}],72:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],92:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  // model -> view
+  // formats the value when updating the input element.
+  read: function read(val) {
+    return '$' + val.toFixed(2);
+  },
+  // view -> model
+  // formats the value when writing to the data.
+  write: function write(val, oldVal) {
+    var number = +val.replace(/[^\d.]/g, '');
+    return isNaN(number) ? 0 : parseFloat(number.toFixed(2));
+  }
+};
+
+},{}],93:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+    read: function read(value, input) {
+        //console.log('visibilty mode filter read method called');
+        switch (input) {
+            case 'all':
+                return value;
+                break;
+            case 'active':
+                return value.filter(function (value) {
+                    return !value.deleted;
+                });
+                break;
+            case 'completed':
+                return value.filter(function (value) {
+                    return value.deleted;
+                });
+                break;
+        }
+    },
+
+    write: function write(value, input) {
+        console.log('visModeFilter val, input = ' + value + ' ' + input);
+    }
+};
+
+},{}],94:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _getters = require('../../vuex/getters.js');
+
+exports.default = {
+    vuex: {
+        getters: {
+            settings: _getters.getPublicSettings
+        }
+    },
+    created: function created() {
+        var changeTabTitle = this.$options.changeTabTitle;
+        if (changeTabTitle) {
+            var host = this.settings.appName;
+            var title = this.pageTitle;
+            $("title").contents().last().remove();
+            $('title').append(host + " | " + title);
+            this.settings.viewTitle = title;
+        }
+        var logHooksToConsole = this.$options.logHooksToConsole;
+        if (logHooksToConsole) {
+            console.log("%c<< %s.vue >> Created!", this.settings.logGood, this.pageTitle);
+        }
+    },
+    ready: function ready() {
+        var logHooksToConsole = this.$options.logHooksToConsole;
+        if (logHooksToConsole) {
+            console.log("%c<< %s.vue >> Ready!", this.settings.logGood, this.pageTitle);
+        }
+    },
+    beforeDestroy: function beforeDestroy() {
+        var logHooksToConsole = this.$options.logHooksToConsole;
+        if (logHooksToConsole) {
+            console.log("%c<< %s.vue >> Destroying!", this.settings.logGood, this.pageTitle);
+        }
+    }
+};
+
+},{"../../vuex/getters.js":99}],95:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    created: function created() {
+        var watchModes = this.$options.watchMode;
+        if (watchModes) {
+            this.$watch("$root.pubSettings.editMode", function (res) {
+                this.editMode = res;
+            });
+            this.$watch("$root.pubSettings.editAll", function (res) {
+                this.editAll = res;
+            });
+            this.$watch("$root.pubSettings.dataMode", function (res) {
+                this.dataMode = res;
+            });
+        }
+    }
+};
+
+},{}],96:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16324,7 +20635,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":48,"vue-hot-reload-api":38}],73:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],97:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".brand-box {\n  position: relative;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  margin: auto 2px auto 2px;\n  -webkit-box-flex: 1;\n  -webkit-flex: 1;\n      -ms-flex: 1;\n          flex: 1;\n}\n.brand-logo {\n  max-height: 50px;\n  min-height: 40px;\n  padding: 0 5px 5px 5px;\n}\n.brand-text-box {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  line-height: 20px;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n}\n.brand-title {\n  font-size: 18px;\n  margin: 5px 0 0 0;\n  font-weight: 600;\n}\n.brand-sub-title {\n  font-size: 14px;\n  margin: 5px 0 0 0;\n  font-weight: 400;\n}\n")
 'use strict';
 
@@ -16343,7 +20654,7 @@ exports.default = {
   vuex: {
     getters: {
       company: _getters.getCompanyDetails,
-      settings: _getters.getPublicSettings
+      pubSettings: _getters.getPublicSettings
     },
     actions: {
       setCompanyBrandingDetail: _actions.setCompanyBrandingDetail
@@ -16355,11 +20666,11 @@ exports.default = {
     }
   },
   ready: function ready() {
-    console.log(document.querySelector('.brand-title').value);
+    //console.log( document.querySelector('.brand-title').value )
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- VUE Brand Box -->\n  <div class=\"brand-box\">\n    <img class=\"brand-logo\" :src=\"company.branding.smallLogo\">\n    <div class=\"brand-text-box\">\n      <h1 class=\"brand-title\" v-if=\"!settings.editMode\" v-text=\"company.branding.name\"></h1>\n      <input id=\"branding-title\" type=\"textBox\" v-if=\"settings.editMode\" class=\"brand-title vue-model-input\" :value=\"company.branding.name\" @input=\"updateMessage\">\n      <h3 class=\"brand-sub-title \" v-if=\"!settings.editMode\" v-text=\"company.branding.tagLine\"></h3>\n      <input id=\"branding-tagLine\" class=\"brand-sub-title vue-model-input\" v-model=\"company.branding.tagLine\" v-if=\"settings.editMode\">\n    </div>\n  </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- VUE Brand Box -->\n  <div class=\"brand-box\">\n    <img class=\"brand-logo\" :src=\"company.branding.smallLogo\">\n    <div class=\"brand-text-box\">\n      <h1 class=\"brand-title\" v-if=\"!pubSettings.editMode\" v-text=\"company.branding.name\"></h1>\n      <input id=\"branding-title\" type=\"textBox\" v-if=\"pubSettings.editMode\" class=\"brand-title vue-model-input\" :value=\"company.branding.name\" @input=\"updateMessage\">\n      <h3 class=\"brand-sub-title \" v-if=\"!pubSettings.editMode\" v-text=\"company.branding.tagLine\"></h3>\n      <input id=\"branding-tagLine\" type=\"textBox\" class=\"brand-sub-title vue-model-input\" :value=\"company.branding.tagLine\" v-if=\"pubSettings.editMode\" @input=\"updateMessage\">\n    </div>\n  </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -16375,13 +20686,13 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../vuex/actions.js":74,"../../vuex/getters.js":75,"vue":48,"vue-hot-reload-api":38,"vueify-insert-css":49}],74:[function(require,module,exports){
+},{"../../vuex/actions.js":98,"../../vuex/getters.js":99,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],98:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.setPage = exports.setPrimaryMenuHover = exports.setSetting = exports.setCompanyBrandingDetail = exports.setMainMenuHover = exports.setModel = exports.setRoute = undefined;
+exports.setPage = exports.setCopy = exports.setCopyText = exports.setMenuActive = exports.setMenu = exports.toggleSetting = exports.setSetting = exports.setCompanyBrandingDetail = exports.setModel = exports.setRoute = undefined;
 
 var _typeof2 = require('babel-runtime/helpers/typeof');
 
@@ -16390,6 +20701,10 @@ var _typeof3 = _interopRequireDefault(_typeof2);
 var _mutationTypes = require('./mutation-types');
 
 var types = _interopRequireWildcard(_mutationTypes);
+
+var _menus = require('../api/vuex/menus.js');
+
+var _menus2 = _interopRequireDefault(_menus);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -16404,6 +20719,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // An action will recieve the store as the first argument.
 // Since we are only interested in the dispatch (and optionally the state)
 // We can pull those two parameters using the ES6 destructuring feature
+
 var setRoute = exports.setRoute = function setRoute(_ref) {
   var dispatch = _ref.dispatch;
   var state = _ref.state;
@@ -16416,44 +20732,71 @@ var setModel = exports.setModel = function setModel(_ref2) {
 
   dispatch(types.SET_MODEL, state);
 };
-var setMainMenuHover = exports.setMainMenuHover = function setMainMenuHover(_ref3, id) {
+
+var setCompanyBrandingDetail = exports.setCompanyBrandingDetail = function setCompanyBrandingDetail(_ref3, id, value) {
   var dispatch = _ref3.dispatch;
 
-  if (id != null) {
-    dispatch(types.SET_MENU, id);
-  }
-};
-var setCompanyBrandingDetail = exports.setCompanyBrandingDetail = function setCompanyBrandingDetail(_ref4, id, value) {
-  var dispatch = _ref4.dispatch;
-
-  console.log(value + ' ' + id);
+  //console.log(value +' '+ id)
   if (typeof id == 'string') {
     dispatch(types.SET_COMPANY_BRAND_DETAIL, [id, value]);
   }
 };
-var setSetting = exports.setSetting = function setSetting(_ref5, id, value) {
-  var dispatch = _ref5.dispatch;
+var setSetting = exports.setSetting = function setSetting(_ref4, id, value) {
+  var dispatch = _ref4.dispatch;
 
   if (typeof id == 'string') {
     dispatch(types.SET_SETTING, [id, value]);
   }
 };
-var setPrimaryMenuHover = exports.setPrimaryMenuHover = function setPrimaryMenuHover(_ref6, button) {
-  var dispatch = _ref6.dispatch;
 
-  if ((typeof button === 'undefined' ? 'undefined' : (0, _typeof3.default)(button)) == 'object') {
-    dispatch(types.RESET_ALL_MENU_HOVER);
-    dispatch(types.SET_PRIMARY_MENU_HOVER, [button.type, button.id]);
+var toggleSetting = exports.toggleSetting = function toggleSetting(_ref5, container) {
+  var dispatch = _ref5.dispatch;
+
+  dispatch(types.TOGGLE_SETTING, container);
+};
+
+var setMenu = exports.setMenu = function setMenu(_ref6, menuName) {
+  var dispatch = _ref6.dispatch;
+  var state = _ref6.state;
+  var menu = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+  if (menu != null) {
+    dispatch(types.SET_MENU, [menu, menuName]);
+  } else {
+    _menus2.default.getMenu(menuName, function (menu) {
+      return dispatch(types.SET_MENU, [menu, menuName]);
+    });
   }
 };
-var setPage = exports.setPage = function setPage(_ref7) {
+
+var setMenuActive = exports.setMenuActive = function setMenuActive(_ref7, button) {
   var dispatch = _ref7.dispatch;
-  var state = _ref7.state;
+
+  dispatch(types.RESET_ALL_MENU_ACTIVE), dispatch(types.SET_MENU_ACTIVE, button);
+};
+
+var setCopyText = exports.setCopyText = function setCopyText(_ref8, object, payload) {
+  var dispatch = _ref8.dispatch;
+
+  if ((typeof object === 'undefined' ? 'undefined' : (0, _typeof3.default)(object)) == 'object') {
+    dispatch(types.SET_COPY_TEXT, object, payload);
+  }
+};
+
+var setCopy = exports.setCopy = function setCopy(_ref9, payload) {
+  var dispatch = _ref9.dispatch;
+
+  dispatch(types.SET_COPY, payload);
+};
+
+var setPage = exports.setPage = function setPage(_ref10) {
+  var dispatch = _ref10.dispatch;
+  var state = _ref10.state;
 
   dispatch(types.SET_PAGE, state);
 };
 
-},{"./mutation-types":77,"babel-runtime/helpers/typeof":4}],75:[function(require,module,exports){
+},{"../api/vuex/menus.js":55,"./mutation-types":103,"babel-runtime/helpers/typeof":4}],99:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16464,6 +20807,7 @@ exports.getModels = getModels;
 exports.getPublicSettings = getPublicSettings;
 exports.getCompanyDetails = getCompanyDetails;
 exports.getPrimaryMenu = getPrimaryMenu;
+exports.getMenuData = getMenuData;
 exports.getHomeMenu = getHomeMenu;
 exports.getHomePage = getHomePage;
 // This getter is a function which just returns the count
@@ -16489,6 +20833,11 @@ function getPrimaryMenu(state) {
     return menu === 'primary';
   });
 }
+function getMenuData(state) {
+  return state.truth.menus.filter(function (menu) {
+    return menu === 'primary';
+  });
+}
 // export function getPrimaryMenuHover (state) {
 //   return state.truth.menus.primary
 // }
@@ -16500,7 +20849,7 @@ function getHomePage(state) {
   return state.pages.home;
 }
 
-},{}],76:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16523,41 +20872,139 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // initial state
 var state = {
-  menus: _truth2.default.menus
+  all: _truth2.default.copyText
 };
 
-// mutations
-var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, GET_PRIMARY_MENU, function (state, payload) {
-  state.truth.menus[payload];
-}), (0, _defineProperty3.default)(_mutations, _mutationTypes.RESET_ALL_MENU_HOVER, function (state) {
-  console.log(state.truth.menus['primary']);
-  for (var menu in state.truth.menus) {
-    for (var button in state.truth.menus[menu]) {
-      state.truth.menus[menu][button].hovering = false;
-    }
+var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_COPY_TEXT, function (state, object, payload) {
+  console.log(payload);
+  var route = state.all[object.base_view][object.instance_number];
+  route.id = object.id;
+  route.copy = payload;
+  route.height = object.height;
+  route.version = object.version;
+  route.versionList = object.versionList;
+}), (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_COPY, function (state, payload) {
+  console.log(payload);
+  for (var i = payload.length - 1; i >= 0; i--) {
+    console.log(payload[i]);
+    var route = state.all[payload[i].base_view][payload[i].instance_number];
+    route.id = payload[i].id;
+    route.copy = payload[i].copy;
+    route.height = payload[i].height;
+    route.version = payload[i].version;
+    route.versionList = payload[i].versionList;
   }
-}), (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_PRIMARY_MENU_HOVER, function (state, payload) {
-  // state.truth(
-  //   menus => menus === payload[0](
-  //     btn => btn.id === payload[1]
-  //   ).hovering = true
-  // )
-  state.truth.menus[payload[0] + ''][payload[1]].hovering = true;
 }), _mutations);
 
-// [RECEIVE_PRODUCTS] (state, products) {
-//   state.all = products
-// },
-
-// [ADD_TO_CART] (state, productId) {
-//   state.all.find(p => p.id === productId).inventory--
-// }
 exports.default = {
   state: state,
   mutations: mutations
 };
 
-},{"../../truth/truth.js":65,"../mutation-types":77,"babel-runtime/helpers/defineProperty":3}],77:[function(require,module,exports){
+},{"../../truth/truth.js":70,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],101:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _mutations;
+
+var _mutationTypes = require('../mutation-types');
+
+var _menus = require('../../api/vuex/menus.js');
+
+var _menus2 = _interopRequireDefault(_menus);
+
+var _truth = require('../../truth/truth.js');
+
+var _truth2 = _interopRequireDefault(_truth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// initial state
+var state = {
+  primary: _truth2.default.menus.primary,
+  adminPrimary: _truth2.default.menus.adminPrimary,
+  DashboardMenu: _truth2.default.menus.DashboardMenu
+};
+
+var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_MENU, function (state, payload) {
+  state[payload[1]] = payload[0];
+}), (0, _defineProperty3.default)(_mutations, _mutationTypes.RESET_ALL_MENU_ACTIVE, function (state) {
+  for (var menu in state) {
+    for (var button in state[menu]) {
+      state[menu][button].active = false;
+      for (var sub in button.submenu) {
+        state[menu][button].submenu[sub].active = false;
+      }
+    }
+  }
+}), (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_MENU_ACTIVE, function (state, button) {
+  var menu = state[button['menu_name']];
+  if (menu != undefined) {
+    menu[menu.indexOf(button)].active = !menu[menu.indexOf(button)].active;
+  } else {
+    var menu = state[button['owner_type']];
+    for (var btn in menu) {
+      if (menu[btn].id == button.menu_id) {
+        var subMenu = menu[btn].submenu;
+        menu[btn].active = true;
+        subMenu[subMenu.indexOf(button)].active = !subMenu[subMenu.indexOf(button)].active;
+      }
+    }
+  }
+}), _mutations);
+
+exports.default = {
+  state: state,
+  mutations: mutations
+};
+
+},{"../../api/vuex/menus.js":55,"../../truth/truth.js":70,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],102:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _mutations;
+//import menus from '../../api/vuex/settings.js'
+
+
+var _mutationTypes = require('../mutation-types');
+
+var _truth = require('../../truth/truth.js');
+
+var _truth2 = _interopRequireDefault(_truth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// initial state
+var state = {
+  all: _truth2.default.settings
+};
+
+var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_SETTING, function (state, payload) {
+  state.all[payload[0] + ''] = payload[1];
+}), (0, _defineProperty3.default)(_mutations, _mutationTypes.TOGGLE_SETTING, function (state, payload) {
+  state.all[payload] = !state.all[payload];
+}), _mutations);
+
+exports.default = {
+  state: state,
+  mutations: mutations
+};
+
+},{"../../truth/truth.js":70,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],103:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16565,41 +21012,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 var SET_ROUTE = exports.SET_ROUTE = 'SET_ROUTE';
 var SET_MODEL = exports.SET_MODEL = 'SET_MODEL';
-var SET_PRIMARY_MENU_HOVER = exports.SET_PRIMARY_MENU_HOVER = 'SET_PRIMARY_MENU_HOVER';
-var RESET_ALL_MENU_HOVER = exports.RESET_ALL_MENU_HOVER = 'RESET_ALL_MENU_HOVER';
+
+var RESET_ALL_MENU_ACTIVE = exports.RESET_ALL_MENU_ACTIVE = 'RESET_ALL_MENU_ACTIVE';
+var SET_MENU_ACTIVE = exports.SET_MENU_ACTIVE = 'SET_MENU_ACTIVE';
+var SET_MENU = exports.SET_MENU = 'SET_MENU';
+
+var TOGGLE_SETTING = exports.TOGGLE_SETTING = 'TOGGLE_SETTING';
+
 var SET_PAGE = exports.SET_PAGE = 'SET_PAGE';
 var SET_SETTING = exports.SET_SETTING = 'SET_SETTING';
 var SET_COMPANY_BRAND_DETAIL = exports.SET_COMPANY_BRAND_DETAIL = 'SET_COMPANY_BRAND_DETAIL';
 
-},{}],78:[function(require,module,exports){
-'use strict';
+var SET_COPY_TEXT = exports.SET_COPY_TEXT = 'SET_COPY_TEXT';
+var SET_COPY = exports.SET_COPY = 'SET_COPY';
 
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _vue = require('vue');
-
-var _vue2 = _interopRequireDefault(_vue);
-
-var _vueResource = require('vue-resource');
-
-var _vueResource2 = _interopRequireDefault(_vueResource);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_vue2.default.use(_vueResource2.default);
-
-exports.default = new _vue2.default({
-	methods: {
-		save: function save(d) {
-			console.log(d);
-			return true;
-		}
-	}
-});
-
-},{"vue":48,"vue-resource":40}],79:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16619,17 +21046,25 @@ var _menus = require('./modules/menus.js');
 
 var _menus2 = _interopRequireDefault(_menus);
 
-var _persistance = require('./persistance.js');
+var _copyText = require('./modules/copyText.js');
+
+var _copyText2 = _interopRequireDefault(_copyText);
+
+var _settings = require('./modules/settings.js');
+
+var _settings2 = _interopRequireDefault(_settings);
+
+var _persistance = require('../api/vuex/persistance.js');
 
 var _persistance2 = _interopRequireDefault(_persistance);
-
-var _truth = require('../truth/truth.js');
-
-var _truth2 = _interopRequireDefault(_truth);
 
 var _logger = require('vuex/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
+
+var _truth = require('../truth/truth.js');
+
+var _truth2 = _interopRequireDefault(_truth);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -16661,11 +21096,14 @@ var mutations = exports.mutations = {
   SET_PAGE: function SET_PAGE(state, payload) {
     state.pages[payload[0] + ''] = payload[1];
   },
+
+
+  // SET_COPY_TEXT (state, location, payload) {
+  //   state.copyText[location['base']][location['name']][location['instance']] = location[1]
+  // },
+
   SET_COMPANY_BRAND_DETAIL: function SET_COMPANY_BRAND_DETAIL(state, payload) {
     state.truth.company.branding[payload[0] + ''] = payload[1];
-  },
-  SET_SETTING: function SET_SETTING(state, payload) {
-    state.truth.settings[payload[0] + ''] = payload[1];
   }
 };
 
@@ -16699,12 +21137,14 @@ exports.default = new _vuex2.default.Store({
   middlewares: [(0, _logger2.default)(), persistToDatabase],
   strict: true,
   modules: {
-    menus: _menus2.default
+    menus: _menus2.default,
+    copyText: _copyText2.default,
+    settings: _settings2.default
   },
   state: state,
   mutations: mutations
 });
 
-},{"../truth/truth.js":65,"./modules/menus.js":76,"./persistance.js":78,"vue":48,"vuex":50,"vuex/logger":51}]},{},[53]);
+},{"../api/vuex/persistance.js":56,"../truth/truth.js":70,"./modules/copyText.js":100,"./modules/menus.js":101,"./modules/settings.js":102,"vue":49,"vuex":52,"vuex/logger":53}]},{},[58]);
 
 //# sourceMappingURL=mei-core.js.map

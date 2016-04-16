@@ -1,4 +1,4 @@
-// This getter is a function which just returns the count
+ // This getter is a function which just returns the count
 // With ES6 you can also write it as:
 // export const getCount = state => state.count
 
@@ -17,6 +17,11 @@ export function getCompanyDetails (state) {
 }
 
 export function getPrimaryMenu (state) {
+  return state.truth.menus.filter(menu => {
+    return menu === 'primary'
+  })
+}
+export function getMenuData (state) {
   return state.truth.menus.filter(menu => {
     return menu === 'primary'
   })

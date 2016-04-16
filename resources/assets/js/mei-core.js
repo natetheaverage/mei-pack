@@ -1,24 +1,39 @@
-import Vue from 'vue'
 import VueResource from 'vue-resource'
 import VueTouch from 'vue-touch'
+import VueRouter from 'vue-router'
+import Vue from 'vue'
+Vue.use(VueRouter)
 Vue.use(VueResource)
 Vue.use(VueTouch)
 
+import SettingsWatcher from './vue/mixins/SettingsWatcher.js';
+Vue.mixin(SettingsWatcher);
+
+import VisibilityMode from './vue/filters/VisibilityMode.js';
+Vue.filter('visibilityMode', VisibilityMode)
+
+import CurrencyDisplay from './vue/filters/Currency.js';
+Vue.filter('currencyDisplay', CurrencyDisplay)
+
+import HooksMixin from './vue/mixins/HooksMixin.js';
+Vue.mixin(HooksMixin);
 
 // REQUESTS HEADER
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('#token').getAttribute('value');
 
-import MainMenu from './vue/components/materialTheme/MainMenu.vue';
+import MainMenu from './vue/components/navigation/materialTheme/MainMenu.vue';
 Vue.component('mainmenu', MainMenu)
-import MenuButton from './vue/components/materialTheme/MenuButton.vue';
+import MenuButton from './vue/components/navigation/materialTheme/MenuButton.vue';
 Vue.component('menubutton', MenuButton)
-import SubMenuButton from './vue/components/materialTheme/SubMenuButton.vue';
+import SubMenuButton from './vue/components/navigation/materialTheme/SubMenuButton.vue';
 Vue.component('submenubutton', SubMenuButton)
  
 import BrandBox from './vue/partials/BrandBox.vue';
 Vue.component('brand-box', BrandBox)
+
 import BlueHero from './vue/partials/BlueHero.vue';
 Vue.component('blue-hero', BlueHero)
+
 import AnimatedWords from './vue/components/animate/AnimatedWords.vue';
 Vue.component('animated-words', AnimatedWords)
 
@@ -44,6 +59,10 @@ Vue.component('intro-fly-away', IntroFlyAway)
 
 // import MapBox from './vue/components/controllers/MapBox.vue';
 // Vue.component('map_box', MapBox)
+
+import EditableCopy from './vue/components/controllers/EditableCopy.vue';
+Vue.component('editableCopy', EditableCopy)
+
 // import AddressForm from './vue/components/form/AddressForm.vue';
 // Vue.component('address_form', AddressForm)
 // import ContactsForm from './vue/components/form/ContactsForm.vue';
@@ -85,17 +104,23 @@ Vue.component('intro-fly-away', IntroFlyAway)
 // Vue.mixin(SettingsWatcher)
 
 
-//import MainNav from './vue/components/navigation/nifty/MainNav.vue';
-//Vue.component('dashmainnav', require('./vue/components/navigation/nifty/MainNav.vue'));
+import MainNav from './vue/components/navigation/nifty/MainNav.vue';
+Vue.component('mainnav', MainNav);
 
-import NavPage from './vue/components/navigation/NavPage.vue'
-Vue.component('home', NavPage );
+import MainNavButton from './vue/components/navigation/nifty/MainNavButton.vue';
+Vue.component('mainnavbutton', MainNavButton )
 
-// import MainNavButton from './vue/components/navigation/nifty/MainNavButton.vue';
-// Vue.component('mainnavbutton', MainNavButton )
+import ShortcutButtons from './vue/components/navigation/nifty/ShortcutButtons.vue';
+Vue.component('shortcutbuttons', ShortcutButtons )
 
-// import ObjectEditor from './vue/components/controllers/ObjectEditor.vue';
-// Vue.component('objecteditor', ObjectEditor )
+import MenuWidget from './vue/components/navigation/nifty/MenuWidget.vue';
+Vue.component('menuwidget', MenuWidget )
+
+// import NavPage from './vue/components/navigation/NavPage.vue'
+// Vue.component('home', NavPage );
+
+import ObjectEditor from './vue/components/controllers/ObjectEditor.vue';
+Vue.component('objecteditor', ObjectEditor )
 
 // import Project from './vue/components/projector/Project.vue'
 // Vue.component('project', Project )
@@ -124,30 +149,36 @@ Vue.component('home', NavPage );
 // import VisibilitySwitch from './vue/components/controllers/VisibilitySwitch.vue';
 // Vue.component('visibilityswitch',  VisibilitySwitch )
 
-// import NavPageButton from './vue/components/navigation/NavpageButton.vue';
-// Vue.component('navpagebutton',  NavPageButton )
-
-// import VisibilityMode from './vue/filters/VisibilityMode.js';
-// Vue.filter('visibilityMode', VisibilityMode)
-
-// import CurrencyDisplay from './vue/filters/Currency.js';
-// Vue.filter('currencyDisplay', CurrencyDisplay)
-
-// import HooksMixin from './vue/mixins/HooksMixin.js';
-// Vue.mixin(HooksMixin);
-
-// import SettingsWatcher from './vue/mixins/SettingsWatcher.js';
-// Vue.mixin(SettingsWatcher);
-
-import MeiApp from './mei-app.js'
-
-import Test from './modules/Test.vue'
-Vue.component('test', Test)
-
-module.exports = new Vue(MeiApp).$mount('body')
+import NavPageButton from './vue/components/navigation/NavpageButton.vue';
+Vue.component('navpagebutton',  NavPageButton )
 
 
 
+
+import MEiApp from './mei-app.js'
+//import RouterMap from './truth/routeMap'
+
+
+
+
+// Instanciate Vue Router
+var MEiCore = Vue.extend(MEiApp)
+import Router from './vue-router/router' 
+import RouterMap from './vue-router/routerMap' 
+import projector from './vue/components/projector/projector.vue'
+Router.map(RouterMap)
+Router.start(MEiCore, 'body')
+Router.go({name: mei.vueRoute})
+//module.exports = Router
+
+import { sync } from 'vuex-router-sync'
+import store from './vuex/store'
+sync(store, Router)
+
+//module.exports = new Vue(MeiApp).$mount('body')
+
+
+// TODO FIND A BETTER HOME FOR THIS
 var $head = $( '#ha-header' );
 	$( '.ha-waypoint' ).each( function(i) {
 	var $el = $( this ),
@@ -163,3 +194,27 @@ var $head = $( '#ha-header' );
 		}
 	}, { offset: '100%' } );
 } );
+
+	 // BP TOGGLE SWITCHES
+    // =================================================================
+    // Require Admin Core Javascript
+    // Require Switchery
+    // =================================================================
+    
+    var switchOptions = { 
+        //size: 'small', 
+        color: '#C927D7', 
+        secondaryColor: '#15A2EB',
+        //jackColor: '#000',
+    }
+
+    var switchElems = Array.prototype.slice.call(document.querySelectorAll('.switchery'));
+    switchElems.forEach(function(html) {
+            var switchery = new Switchery(html, switchOptions);
+    });
+    // TODO: This needs to implement anaming system of sorts
+    // switcher.onchange = function() {};
+
+
+
+

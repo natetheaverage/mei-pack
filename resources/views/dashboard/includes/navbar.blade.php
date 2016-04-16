@@ -7,9 +7,9 @@
 		<!--================================-->
 		<div class="navbar-header">
 			<a href="/" class="navbar-brand">
-				<img src="{!! asset('img/logo.png') !!}" alt="Nifty Logo" class="brand-icon">
+				<img src="{!! asset('images/logos/logo.png') !!}" alt="Logo" class="brand-icon">
 				<div class="brand-title">
-					<span class="brand-text">| {!! $app['title'] !!}</span>
+					<span class="brand-text">|{!! config('app.name') !!}</span>
 				</div>
 			</a>
 		</div>

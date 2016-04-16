@@ -5,11 +5,19 @@
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&amp;subset=latin" rel="stylesheet">
  
     <!--Bootstrap Stylesheet -->
-    <link href="{!! asset('css/vendor/bootstrap.min.css') !!}" rel="stylesheet">
+    <link href="{!! asset('/css/bootstrap.min.css') !!}" rel="stylesheet">
 
-    <!--Compiled nifty and app [ NEEDS WORK ]-->
-    <link href=" {!! elixir('css/final.css') !!} " rel="stylesheet" type="text/css"/>
+    <!--Bnifty Stylesheet -->
+    <link href="{!! asset('/css/nifty.css') !!}" rel="stylesheet">
 
+    <!--app Stylesheet -->
+    {{--}}
+    <link href="{!! asset('/css/app.css') !!}" rel="stylesheet">
+    {{--}}
+    
+    <!--Compiled nifty and app [ NEEDS WORK ]
+    <link href=" {{--!! elixir('css/final.css') !!--}} " rel="stylesheet" type="text/css"/> -->
+ 
     <!--Font Awesome [ OPTIONAL ]-->
     <link href="{!! asset('plugins/font-awesome/css/font-awesome.min.css') !!}" rel="stylesheet">
  

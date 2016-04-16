@@ -1,4 +1,4 @@
-import { getPublicSettings } from './../vuex/getters.js'
+import { getPublicSettings } from '../../vuex/getters.js'
 
 export default {
     vuex:{

@@ -29,22 +29,28 @@
                         <input class="form-control input-lg" type="text" name="name" v-model="object.name">
                     </label>
                     <label> Button URL                 
-                        <input class="form-control input-lg" type="text" name="href" v-model="object.href">
-                    </label>
+                        <input 
+                            class="form-control input-lg" 
+                            type="text" 
+                            name="href" 
+                            v-model="object.href"
+                        /></label>
                     <label> Button icon
                         <div class="input-group">
-                            
                             <select 
                               name="icon" 
-                              data-placeholder="{{object.icon}}" 
-                              id="selectpicker-{{object.id}}"  
                               data-live-search="true"
-                              v-html="iconList.iconList"
+                              :data-placeholder="object.icon" 
+                              :id="'selectpicker-'+object.id"  
+                              v-html="iconList.default.iconList"
                               >
                             <!-- // {{-- this will prob be a problem --}} -->
                                 
                             </select>
-                            <i id="chosen-fa-icon-{{object.id}}" class="pad-lft fa fa-3x {{object.icon}}"></i>
+                            <i 
+                                :id="'chosen-fa-icon-'+object.id" 
+                                :class="'pad-lft fa fa-3x ' + object.icon"
+                            ></i>
                         </div> 
                     </label>
                     <label v-show="editAll">  Button Family
@@ -89,7 +95,7 @@ export default {
 
     data() {
       return {
-        iconList: require('./iconListForSelectBox'),
+        iconList: require('../../../api/data/iconListForSelectBox'),
         editAll: true,
       }
     },

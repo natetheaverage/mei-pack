@@ -1,6 +1,6 @@
 <div 
-	class="app-aside pad-all"
-	:class="asideOpen ? 'aside-menu-enter' : 'aside-menu-leave'"
+	class="app-aside pad-all bg-off-white mtrl-fixed mtrl-raised"
+	:class="pubSettings.asideOpen ? 'aside-menu-enter' : 'aside-menu-leave'"
 	v-if="true"
 >
 	<div v-if="true" class="waffel waffel-card">

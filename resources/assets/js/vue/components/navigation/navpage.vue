@@ -1,50 +1,45 @@
 <template>
-  <!-- <div id="main-nav-menu">
-      <div class="inline-block pad-all" v-for="button in menudata">
-          <navpagebutton :button="button" :edit-mode="editMode">
-          </navpagebutton>
+  <div id="main-nav-menu">
+      <div 
+        class="inline-block pad-all" 
+        v-for="button in menuData" 
+      >
+        <navpagebutton 
+          :button="button" 
+          :edit-mode="editMode"
+        ></navpagebutton>
       </div>
-      TODO
-
+      
       <button 
         class="btn btn-default"
         @click="$root.addNavButton()"
       ><i class="fa fa-4x fa-plus"></i></button>
-     <pre v-if="dataMode">{{ $data | json }}</pre>
-  </div> -->
-<h1>BANG!!</h1>
+     <!-- <pre v-if="dataMode">{{ $data | json }}</pre> -->
+  </div>
+
 </template>
 
 <script>
+import { changeRoute, setMenuActive, setMenu } from '../../../vuex/actions.js'
 
 export default {
-    name: 'Home',
-    // changeTabTitle: true,
-    // logHooksToConsole: true,
-    // watchModes: true,
-    // menudata: $store.menus.home,
-    // data() 
-    // {
-    //   return { 
-    //     name: 'Home',
-    //     editMode: false,
-    //     dataMode: false,
-    //   }
-    // },
+  name: 'DashboardHome', 
+  data(){
+    return{}
+  },
 
-    // computed:{
-    //   // menudata()
-    //   // {
-    //   //   return $store.navPage.menulayout;
-    //   // }
-    // },
-
-    // components: {
-    //   'navpagebutton': NavPageButton,
-    // },
-    // created(){
-      
-    // },
+  vuex:{ 
+    getters:{
+      menuData: ({ menus }) => menus.DashboardMenu
+    },
+    actions:{
+      setMenuActive,
+      setMenu
+    },
+  },
+  ready(){
+    this.setMenu('DashboardMenu')
+  },
 
 }
 </script>

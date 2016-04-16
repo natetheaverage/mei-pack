@@ -63,10 +63,9 @@
 		</div>
 		<div class="pad-ver">
 			<a href="password-reminder" class="btn-link mar-rgt">Forgot password ?</a>
-			<a href="{{asset('pages-register.html') }}" class="btn-link mar-lft">Create a new account</a>
+			<a href="register" class="btn-link mar-lft">Create a new account</a>
 		</div>
 	</div>
 	<!--===================================================-->
-
 @stop
 

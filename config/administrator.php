@@ -7,7 +7,7 @@ return array(
 	 *
 	 * @type string
 	 */
-	'uri' => 'admin',
+	'uri' => 'modelAdmin',
 
 	/**
 	 *  Domain for routing.
@@ -21,7 +21,7 @@ return array(
 	 *
 	 *  @type array
 	 */
-	'middleware' => array(),
+	'middleware' => array('web'),
 
 	/**
 	 * Page title
@@ -35,14 +35,14 @@ return array(
 	 *
 	 * @type string
 	 */
-	'model_config_path' => config_path('administrator'),
+	'model_config_path' => app('path').'/Config/Admin/',
 
 	/**
 	 * The path to your settings config directory
 	 *
 	 * @type string
 	 */
-	'settings_config_path' => config_path('administrator/settings'),
+	'settings_config_path' => app('path').'/Config/Admin/Settings',
 
 	/**
 	 * The menu structure of the site. For models, you should either supply the name of a model config file or an array of names of model config
@@ -65,7 +65,38 @@ return array(
 	 * 		'Analytics' => array('E-Commerce' => 'page.ecommerce.analytics'),
 	 *	)
 	 */
-	'menu' => array(),
+	'menu' => [
+		'User Assets' => [
+			'User',
+			'Profiles',
+			'Roles',
+			'Permissions',
+		],
+		'Copy & Communication' => [
+			'CopyText', 
+			'News', 
+			'Conversations', 
+			'Messages', 
+		],
+		'Events'  => [
+			'Events', 
+			'Dates', 
+			'Features', 
+			'Prices', 
+			'Discounts', 
+			'Tickets'
+		],
+		'Images & Files' => [
+			'ImageGallery',  
+			'ImageFiles', 
+			'PdfFiles',
+			'Pdfs', 
+		], 
+		'Settings' => [
+			'settings.site'
+		], 
+
+	],
 
 	/**
 	 * The permission option is the highest-level authentication check that lets you define a closure that should return true if the current user
@@ -75,7 +106,8 @@ return array(
 	 */
 	'permission'=> function()
 	{
-		return Auth::check();
+		
+		return Auth::check();//true;
 	},
 
 	/**
@@ -91,14 +123,14 @@ return array(
 	 *
 	 * @type string
 	 */
-	'dashboard_view' => '',
+	'dashboard_view' => 'dashboard',
 
 	/**
 	 * The menu item that should be used as the default landing page of the administrative section
 	 *
 	 * @type string
 	 */
-	'home_page' => '',
+	'home_page' => 'User',
 
 	/**
 	 * The route to which the user will be taken when they click the "back to site" button
@@ -112,14 +144,14 @@ return array(
 	 *
 	 * @type string
 	 */
-	'login_path' => 'auth/login',
+	'login_path' => '/auth/login',
 
 	/**
 	 * The logout path is the path where Administrator will send the user when they click the logout link
 	 *
 	 * @type string
 	 */
-	'logout_path' => false,
+	'logout_path' => '/auth/logout',
 
 	/**
 	 * This is the key of the return path that is sent with the redirection to your login_action. Session::get('redirect') will hold the return URL.

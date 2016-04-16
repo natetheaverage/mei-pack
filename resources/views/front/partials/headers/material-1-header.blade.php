@@ -1,21 +1,21 @@
 <div class="app-header mtrl bg-primary pad-all-sm">
 
   <a 
-  	@click="setMainMenuOpen = !getMainMenuOpen"
+  	@click="togglePrimary"
   	class="mtrl-btn mtrl-hover orange"
   ><i class="fa fa-bars fa-menu"></i></a>
   
   <brand-box></brand-box>
 	
 	<a  
-		@click="setAsideOpen = !getAsideOpen"
+		@click="toggleAside"
 		class="mtrl-btn"
 	><i class="fa fa-menu fa-comments-o"></i></a>
 
 	<a 
-		:click="signup"
+		href="/modelAdmin"
 		class="mtrl-btn"
-		><i class="fa fa-menu fa-user-plus"></i>
+		><i class="fa fa-menu fa-edit"></i>
 	</a>
 	<a 
 		@click="login"

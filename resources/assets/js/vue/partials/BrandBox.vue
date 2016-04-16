@@ -8,27 +8,29 @@
     <div class="brand-text-box">
       <h1 
         class="brand-title" 
-        v-if="!settings.editMode"
+        v-if="!pubSettings.editMode"
         v-text="company.branding.name"
       ></h1>
       <input
         id="branding-title"
         type="textBox"
-        v-if="settings.editMode" 
+        v-if="pubSettings.editMode" 
         class="brand-title vue-model-input" 
         :value="company.branding.name" 
         @input="updateMessage"
       />
       <h3 
         class="brand-sub-title " 
-        v-if="!settings.editMode"
+        v-if="!pubSettings.editMode"
         v-text="company.branding.tagLine"
       ></h3>
       <input
         id="branding-tagLine"
+        type="textBox"
         class="brand-sub-title vue-model-input" 
-        v-model="company.branding.tagLine" 
-        v-if="settings.editMode"  
+        :value="company.branding.tagLine" 
+        v-if="pubSettings.editMode" 
+        @input="updateMessage"
       />
     </div>
   </div>
@@ -47,7 +49,7 @@ export default {
   vuex:{
     getters:{ 
       company: getCompanyDetails,
-      settings: getPublicSettings
+      pubSettings: getPublicSettings
     },   
     actions:{ 
       setCompanyBrandingDetail
@@ -60,7 +62,7 @@ export default {
 
   },
   ready(){
-    console.log( document.querySelector('.brand-title').value )
+    //console.log( document.querySelector('.brand-title').value )
   }
 }
 </script>

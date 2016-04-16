@@ -31,7 +31,7 @@
 
 	<!-- Visible when footer positions are static -->
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-	<div class="hide-fixed pull-right pad-rgt">Currently v0.3</div>
+	<div class="hide-fixed pull-right pad-rgt">Currently v0.6.3</div>
 
 
 
@@ -39,7 +39,7 @@
 	<!-- Remove the class name "show-fixed" and "hide-fixed" to make the content always appears. -->
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-	<p class="pad-lft">&#0169; 2015 BossPos  -  editMode: @{{ $root.editMode }}</p>
+	<p class="pad-lft">&#0169; 2016 MEi  -  editMode: @{{ $root.editMode }}</p>
 
 
 
@@ -50,55 +50,56 @@
 <!--=================================================-->
 
 <!--jQuery [ REQUIRED ]-->
-<script src="js/jquery-2.1.1.min.js"></script>
+<!-- <script src="/js/jquery-2.1.1.min.js"></script> -->
+<script src="/js/jquery.js"></script>
 
 
 <!--BootstrapJS [ RECOMMENDED ]-->
-<script src="js/bootstrap.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
 
 
 <!--Fast Click [ OPTIONAL ]-->
-<script src="{!! asset('plugins/fast-click/fastclick.min.js') !!}"></script>
+<script src="{!! asset('/plugins/fast-click/fastclick.min.js') !!}"></script>
 
 
 <!--BootBox Modual-->
-<script src="{!! asset('plugins/bootbox/bootbox.min.js') !!}"></script>
+<script src="{!! asset('/plugins/bootbox/bootbox.min.js') !!}"></script>
 
 
 <!--AutoSize -->
-<script src="{!! asset('plugins/autosize/autosize.min.js') !!}"></script>
+<script src="{!! asset('/plugins/autosize/autosize.min.js') !!}"></script>
 
-
-<!--Nifty Admin [ RECOMMENDED ]-->
-{{-- <script src="{!! asset('js/nifty2.min.js') !!}"></script> --}}
-<script src="{!! asset('js/nifty.js') !!}"></script>
 
 
 <!--SweetAlert-->
-<script src="{!! asset('plugins/sweetalert/dist/sweetalert.min.js') !!}"></script>
+<script src="{!! asset('/plugins/sweetalert/dist/sweetalert.min.js') !!}"></script>
 
 
 <!--Skycons [ OPTIONAL ]-->
-<script src="{!! asset('plugins/skycons/skycons.min.js') !!}"></script>
+<script src="{!! asset('/plugins/skycons/skycons.min.js') !!}"></script>
 
 
 <!--Switchery [ OPTIONAL ]-->
-<script src="{!! asset('plugins/switchery/switchery.min.js') !!}"></script>
+<script src="{!! asset('/plugins/switchery/switchery.min.js') !!}"></script>
 
 
 <!--Bootstrap Select [ OPTIONAL ]-->
-<script src="{!! asset('plugins/bootstrap-select/bootstrap-select.min.js') !!}"></script>
+<script src="{!! asset('/plugins/bootstrap-select/bootstrap-select.min.js') !!}"></script>
 
 <!--Chosen [ OPTIONAL ]-->
-<script src="{!! asset('plugins/chosen/chosen.jquery.min.js') !!}"></script> 
+<script src="{!! asset('/plugins/chosen/chosen.jquery.min.js') !!}"></script>
+
+<!--Nifty Admin [ RECOMMENDED ]-->
+{{-- <script src="{!! asset('js/nifty2.min.js') !!}"></script> --}}
+<script src="{!! asset('/js/nifty.js') !!}"></script>
 
 
 <!-- Vue Compiled-->
- <script  src="{!! asset('js/bp-app.js') !!}"></script>
+ <script  src="{!! asset('/js/mei-core.js') !!}"></script>
 
  
 <!--Demo script [ DEMONSTRATION ]-->
-<script src="{!! asset('js/demo/nifty-demo.js') !!}"></script>
+<script src="{!! asset('/js/demo/nifty-demo.js') !!}"></script>
 
 
 <!--Bosspos  [ Local editing scripts ]-->
