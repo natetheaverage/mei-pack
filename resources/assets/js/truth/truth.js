@@ -21,6 +21,6 @@ export default {
 	
 	images: require('./imagesData'),
 
-	routes: require('./routeMap'),
+	// routes: require('./routeMap'),
 
 }  

@@ -17925,7 +17925,7 @@ exports.default = {
 	}
 };
 
-},{"../../truth/truth.js":70}],56:[function(require,module,exports){
+},{"../../truth/truth.js":69}],56:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18198,7 +18198,7 @@ exports.default = {
   }
 };
 
-},{"./vue-router/router":71,"./vuex/actions.js":98,"./vuex/getters.js":99,"./vuex/store":104}],58:[function(require,module,exports){
+},{"./vue-router/router":70,"./vuex/actions.js":97,"./vuex/getters.js":98,"./vuex/store":103}],58:[function(require,module,exports){
 'use strict';
 
 var _vueResource = require('vue-resource');
@@ -18495,7 +18495,7 @@ switchElems.forEach(function (html) {
 // TODO: This needs to implement anaming system of sorts
 // switcher.onchange = function() {};
 
-},{"./mei-app.js":57,"./vue-router/router":71,"./vue-router/routerMap":72,"./vue/components/animate/AnimatedWords.vue":73,"./vue/components/animate/IntroFlyAway.vue":74,"./vue/components/controllers/EditableCopy.vue":75,"./vue/components/controllers/ObjectEditor.vue":76,"./vue/components/navigation/NavpageButton.vue":78,"./vue/components/navigation/materialTheme/MainMenu.vue":79,"./vue/components/navigation/materialTheme/MenuButton.vue":80,"./vue/components/navigation/materialTheme/SubMenuButton.vue":81,"./vue/components/navigation/nifty/MainNav.vue":82,"./vue/components/navigation/nifty/MainNavButton.vue":83,"./vue/components/navigation/nifty/MenuWidget.vue":84,"./vue/components/navigation/nifty/ShortcutButtons.vue":85,"./vue/components/projector/projector.vue":90,"./vue/filters/Currency.js":92,"./vue/filters/VisibilityMode.js":93,"./vue/mixins/HooksMixin.js":94,"./vue/mixins/SettingsWatcher.js":95,"./vue/partials/BlueHero.vue":96,"./vue/partials/BrandBox.vue":97,"./vuex/store":104,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],59:[function(require,module,exports){
+},{"./mei-app.js":57,"./vue-router/router":70,"./vue-router/routerMap":71,"./vue/components/animate/AnimatedWords.vue":72,"./vue/components/animate/IntroFlyAway.vue":73,"./vue/components/controllers/EditableCopy.vue":74,"./vue/components/controllers/ObjectEditor.vue":75,"./vue/components/navigation/NavpageButton.vue":77,"./vue/components/navigation/materialTheme/MainMenu.vue":78,"./vue/components/navigation/materialTheme/MenuButton.vue":79,"./vue/components/navigation/materialTheme/SubMenuButton.vue":80,"./vue/components/navigation/nifty/MainNav.vue":81,"./vue/components/navigation/nifty/MainNavButton.vue":82,"./vue/components/navigation/nifty/MenuWidget.vue":83,"./vue/components/navigation/nifty/ShortcutButtons.vue":84,"./vue/components/projector/projector.vue":89,"./vue/filters/Currency.js":91,"./vue/filters/VisibilityMode.js":92,"./vue/mixins/HooksMixin.js":93,"./vue/mixins/SettingsWatcher.js":94,"./vue/partials/BlueHero.vue":95,"./vue/partials/BrandBox.vue":96,"./vuex/store":103,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],59:[function(require,module,exports){
 'use strict';
 
 // Setting for the main menu
@@ -19017,84 +19017,43 @@ module.exports = {
 },{}],68:[function(require,module,exports){
 'use strict';
 
-module.exports = {
-    '/home': {
-        component: require('../vue/components/navigation/NavPage.vue'),
-        name: 'home'
-    }
-};
-// '/home': {
-//     component: NavPage,
-//     name: 'home',
-//},
-// '/customers': {
-//     component: '',
-//     name: 'Customers',
-// },
-// '/employees': {
-//     component: '',
-//     name: 'Employees',
-// },
-// '/inventory/calculator': {
-//     component: '',
-//     name: 'InventoryCalculator',
-// },
-// '/projects': {
-//     component: '',
-//     name: 'Projector',
-// },
-// '/communications': {
-//     component: '',
-//     name: 'Communications',
-// },
-// '/singleConversation': {
-//     component: '',
-//     name: 'SingleConversation',
-// },
-// '/pos': {
-//     component: '',
-//     name: 'Pos',
-// },
-//}
-
-},{"../vue/components/navigation/NavPage.vue":77}],69:[function(require,module,exports){
-'use strict';
-
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
-var _module$exports;
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // Static App Setting
 
-module.exports = (_module$exports = {
-  useSideMenu: false,
+module.exports = {
   pageEdit: false,
   loggedIn: false,
   primaryOpen: false,
   asideOpen: false,
   animateHeader: false,
 
-  currentRoute: "home",
   appName: 'MEi',
+  currentRoute: "home",
   viewTitle: 'Home',
   currentView: 'home',
   currentNavigation: 'mainnav',
+
   editMode: false,
   editAll: false,
   dataMode: false,
+  asideOn: false,
+  primaryOn: false,
 
   baseView: 'front',
 
-  showLanguageSelector: false
-}, (0, _defineProperty3.default)(_module$exports, 'showLanguageSelector', false), (0, _defineProperty3.default)(_module$exports, 'logGood', "color:black; background:lightGreen; font-size: 12pt"), (0, _defineProperty3.default)(_module$exports, 'logBad', "color:white; background:Red; font-size: 12pt"), (0, _defineProperty3.default)(_module$exports, 'logErr', "color:black; background:yellow; font-size: 12pt"), (0, _defineProperty3.default)(_module$exports, 'metaTags', [{
-  tag: ""
-}]), _module$exports);
+  showLanguageSelector: false,
+  //currentUser: mei.currentUser,
 
-},{"babel-runtime/helpers/defineProperty":3}],70:[function(require,module,exports){
+  logGood: "color:black; background:lightGreen; font-size: 12pt",
+  logBad: "color:white; background:Red; font-size: 12pt",
+  logErr: "color:black; background:yellow; font-size: 12pt",
+
+  metaTags: [{
+    tag: ""
+  }]
+
+};
+
+},{}],69:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19120,13 +19079,11 @@ exports.default = {
 
 	infoSection: require('./infoSectionData'),
 
-	images: require('./imagesData'),
-
-	routes: require('./routeMap')
+	images: require('./imagesData')
 
 };
 
-},{"./adminMenuData":59,"./companyData":60,"./conversationData":61,"./copyText":62,"./eventsData":63,"./imagesData":64,"./infoSectionData":65,"./mainMenuData":66,"./newsData":67,"./routeMap":68,"./settingsData":69}],71:[function(require,module,exports){
+},{"./adminMenuData":59,"./companyData":60,"./conversationData":61,"./copyText":62,"./eventsData":63,"./imagesData":64,"./infoSectionData":65,"./mainMenuData":66,"./newsData":67,"./settingsData":68}],70:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19151,7 +19108,7 @@ exports.default = new _vueRouter2.default({
   linkActiveClass: 'active-link'
 });
 
-},{"vue":49,"vue-router":47}],72:[function(require,module,exports){
+},{"vue":49,"vue-router":47}],71:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -19199,7 +19156,7 @@ module.exports = {
 
 //}
 
-},{"../vue/components/navigation/NavPage.vue":77,"../vue/components/pos/Checkout.vue":86}],73:[function(require,module,exports){
+},{"../vue/components/navigation/NavPage.vue":76,"../vue/components/pos/Checkout.vue":85}],72:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19261,7 +19218,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],74:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],73:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".fly-away-image {\n  -webkit-transition: 1s ease-out;\n  transition: 1s ease-out;\n  height: 100px;\n}\n.fly-away-image > img {\n  -webkit-transition: 1s ease-out;\n  transition: 1s ease-out;\n  max-height: 100px;\n  width: 100%;\n  right: 0;\n}\n.fly-away-image .fly-away {\n  top: -600px;\n}\n.intro-fly-away .section-title {\n  font-size: 80px;\n  font-weight: 900px;\n  color: #fff;\n}\n@media (min-width: 300px) {\n  .hero {\n    padding: 30px 0;\n  }\n  .fly-away-image {\n    height: 120px;\n  }\n  .fly-away-image > img {\n    max-height: 120px;\n  }\n  .fly-away {\n    top: -300px;\n  }\n}\n@media (min-width: 568px) {\n  .hero {\n    padding: 100px 0;\n  }\n  .fly-away-image {\n    height: 250px;\n  }\n  .fly-away-image > img {\n    max-height: 250px;\n  }\n}\n@media (min-width: 1000px) {\n  .fly-away-image {\n    height: 400px;\n  }\n  .fly-away-image > img {\n    max-height: 400px;\n  }\n  .fly-away {\n    top: -600px;\n  }\n}\n")
 'use strict';
 
@@ -19309,7 +19266,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],75:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],74:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19389,7 +19346,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions":98,"vue":49,"vue-hot-reload-api":38}],76:[function(require,module,exports){
+},{"../../../vuex/actions":97,"vue":49,"vue-hot-reload-api":38}],75:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -19427,7 +19384,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../api/data/iconListForSelectBox":54,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],77:[function(require,module,exports){
+},{"../../../api/data/iconListForSelectBox":54,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],76:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -19477,7 +19434,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":98,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],78:[function(require,module,exports){
+},{"../../../vuex/actions.js":97,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],77:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".edit-btn {\n  position: absolute;\n}\n")
 'use strict';
 
@@ -19488,7 +19445,7 @@ exports.default = {
   props: ['button', 'editMode']
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"pad-no edit-btn\" v-if=\"editMode\">\n  <a style=\"padding:10px 5px\" @click=\"$root.editButton(button.id)\" class=\"pad-no text-bold text-bright\"><i class=\"fa fa-edit\"></i></a>\n</div>\n  <objecteditor v-if=\"editMode\" :object=\"button\"></objecteditor>\n  <a :id=\"button.id\" v-link=\"button.href\" :class=\"button.class\">\n  <i :class=\"'fa fa-4x ' + button.icon\"></i>\n  <span class=\"dashboard-text\" v-text=\"button.label\"></span>\n  <span v-if=\"button.notification_text\" :class=\"'pull-right badge badge-'+button.notification_color+' '+button.notification_style\" v-text=\"button.notification_text\">\n  </span>\n</a>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"pad-no edit-btn\" v-if=\"editMode\">\n  <a style=\"padding:10px 5px\" @click=\"$root.editButton(button.id)\" class=\"pad-no text-bold text-bright\"><i class=\"fa fa-edit\"></i></a>\n</div>\n  <objecteditor v-if=\"editMode\" :object=\"button\"></objecteditor>\n  <a :id=\"button.id\" v-link=\"button.href\" :class=\"button.class\" class=\"mtrl-btn mtrl-raised mtrl-btn-dashboard\">\n  <i :class=\"'fa fa-4x ' + button.icon\"></i>\n  <span class=\"dashboard-text\" v-text=\"button.label\"></span>\n  <span v-if=\"button.notification_text\" :class=\"'pull-right badge badge-'+button.notification_color+' '+button.notification_style\" v-text=\"button.notification_text\">\n  </span>\n</a>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -19504,7 +19461,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],79:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],78:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19555,7 +19512,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../../vuex/actions.js":98,"vue":49,"vue-hot-reload-api":38}],80:[function(require,module,exports){
+},{"../../../../vuex/actions.js":97,"vue":49,"vue-hot-reload-api":38}],79:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -19661,7 +19618,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],81:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],80:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -19700,7 +19657,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],82:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],81:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n/*.v-link-active \n  color: purple\n  padding-left: 20px\n  font-weight: bold\n  box-shadow:inset 2px 2px 2px  4px #999*/\n")
 'use strict';
 
@@ -19811,7 +19768,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../../vuex/actions":98,"../../../../vuex/getters":99,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],83:[function(require,module,exports){
+},{"../../../../vuex/actions":97,"../../../../vuex/getters":98,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],82:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19928,7 +19885,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],84:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],83:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19961,7 +19918,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],85:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],84:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19994,7 +19951,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],86:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],85:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".checkout {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n}\n")
 'use strict';
 
@@ -20054,7 +20011,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./NumPad.vue":87,"./SalesReceipt.vue":88,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],87:[function(require,module,exports){
+},{"./NumPad.vue":86,"./SalesReceipt.vue":87,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],86:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".numbers {\n  width: 370px;\n  border: 1px #000 solid;\n  background: #999;\n}\n.numbers .numbers-pad {\n  width: 100%;\n  height: 340px;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  border: 1px #33abb7 solid;\n}\n.numbers .numbers-pad > button {\n  margin: 2.2% 2.8% 2.8% 2.2%;\n  width: 15%;\n  height: 19%;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: center;\n  -webkit-justify-content: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  background: -webkit-linear-gradient(top, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  background: linear-gradient(to bottom, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  box-shadow: 2px 2px 6px #000;\n  border-radius: 5px;\n}\n.numbers .numbers-pad > button:active {\n  color: #33abb7;\n  margin: 2.5% 2.5% 2.5% 2.5%;\n  box-shadow: 0px 0px 3px #000;\n}\n.numbers .numbers-pad > button > span {\n  font-size: 2em;\n  line-height: 1em;\n}\n.numbers .numbers-pad .tall {\n  height: 30%;\n}\n.numbers .numbers-entry-field {\n  width: 100%;\n  font-size: 3em;\n  font-weight: bold;\n  text-align: right;\n  padding: 4px;\n}\n")
 'use strict';
 
@@ -20142,7 +20099,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],88:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],87:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".receipt-window {\n  width: 370px;\n  height: 400px;\n/* TODO Attach nano scroller to this */\n  overflow: auto;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  border: 1px #000 solid;\n  background: #eee;\n}\n.receipt-window .receipt-item {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  padding: 5px;\n}\n.receipt-window .receipt-item .item-controls {\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details {\n  font-size: 1.5em;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  width: 85%;\n}\n.receipt-window .receipt-item .item-details > input {\n  width: 100%;\n  border: none;\n  background-color: none;\n}\n.receipt-window .receipt-item .item-details .item-id {\n  width: 10%;\n}\n.receipt-window .receipt-item .item-details .item-name {\n  width: 50%;\n}\n.receipt-window .receipt-item .item-details .item-price {\n  text-align: right;\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details .item-sku {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-rfid {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-field-sm {\n  width: 20%;\n}\n")
 'use strict';
 
@@ -20186,7 +20143,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],89:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],88:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n")
 "use strict";
 
@@ -20280,7 +20237,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],90:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],89:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n\n")
 'use strict';
 
@@ -20435,7 +20392,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./project.vue":89,"./task.vue":91,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],91:[function(require,module,exports){
+},{"./project.vue":88,"./task.vue":90,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],90:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -20490,7 +20447,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],92:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],91:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20507,7 +20464,7 @@ module.exports = {
   }
 };
 
-},{}],93:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20535,7 +20492,7 @@ module.exports = {
     }
 };
 
-},{}],94:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20578,7 +20535,7 @@ exports.default = {
     }
 };
 
-},{"../../vuex/getters.js":99}],95:[function(require,module,exports){
+},{"../../vuex/getters.js":98}],94:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -20598,7 +20555,7 @@ module.exports = {
     }
 };
 
-},{}],96:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20635,7 +20592,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],97:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],96:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".brand-box {\n  position: relative;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  margin: auto 2px auto 2px;\n  -webkit-box-flex: 1;\n  -webkit-flex: 1;\n      -ms-flex: 1;\n          flex: 1;\n}\n.brand-logo {\n  max-height: 50px;\n  min-height: 40px;\n  padding: 0 5px 5px 5px;\n}\n.brand-text-box {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  line-height: 20px;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n}\n.brand-title {\n  font-size: 18px;\n  margin: 5px 0 0 0;\n  font-weight: 600;\n}\n.brand-sub-title {\n  font-size: 14px;\n  margin: 5px 0 0 0;\n  font-weight: 400;\n}\n")
 'use strict';
 
@@ -20686,7 +20643,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../vuex/actions.js":98,"../../vuex/getters.js":99,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],98:[function(require,module,exports){
+},{"../../vuex/actions.js":97,"../../vuex/getters.js":98,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],97:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20796,7 +20753,7 @@ var setPage = exports.setPage = function setPage(_ref10) {
   dispatch(types.SET_PAGE, state);
 };
 
-},{"../api/vuex/menus.js":55,"./mutation-types":103,"babel-runtime/helpers/typeof":4}],99:[function(require,module,exports){
+},{"../api/vuex/menus.js":55,"./mutation-types":102,"babel-runtime/helpers/typeof":4}],98:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20849,7 +20806,7 @@ function getHomePage(state) {
   return state.pages.home;
 }
 
-},{}],100:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20901,7 +20858,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":70,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],101:[function(require,module,exports){
+},{"../../truth/truth.js":69,"../mutation-types":102,"babel-runtime/helpers/defineProperty":3}],100:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20965,7 +20922,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../api/vuex/menus.js":55,"../../truth/truth.js":70,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],102:[function(require,module,exports){
+},{"../../api/vuex/menus.js":55,"../../truth/truth.js":69,"../mutation-types":102,"babel-runtime/helpers/defineProperty":3}],101:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21004,7 +20961,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":70,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],103:[function(require,module,exports){
+},{"../../truth/truth.js":69,"../mutation-types":102,"babel-runtime/helpers/defineProperty":3}],102:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21026,7 +20983,7 @@ var SET_COMPANY_BRAND_DETAIL = exports.SET_COMPANY_BRAND_DETAIL = 'SET_COMPANY_B
 var SET_COPY_TEXT = exports.SET_COPY_TEXT = 'SET_COPY_TEXT';
 var SET_COPY = exports.SET_COPY = 'SET_COPY';
 
-},{}],104:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21145,6 +21102,6 @@ exports.default = new _vuex2.default.Store({
   mutations: mutations
 });
 
-},{"../api/vuex/persistance.js":56,"../truth/truth.js":70,"./modules/copyText.js":100,"./modules/menus.js":101,"./modules/settings.js":102,"vue":49,"vuex":52,"vuex/logger":53}]},{},[58]);
+},{"../api/vuex/persistance.js":56,"../truth/truth.js":69,"./modules/copyText.js":99,"./modules/menus.js":100,"./modules/settings.js":101,"vue":49,"vuex":52,"vuex/logger":53}]},{},[58]);
 
 //# sourceMappingURL=mei-core.js.map

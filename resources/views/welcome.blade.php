@@ -4,6 +4,7 @@
 @section('content')
 	@parent
 
+@include('TwentyTwenty')
 <!-- <animated_words
 	type="cao"
 	words="If you don’t DO anything different, there won’t BE anything different!"
@@ -17,13 +18,13 @@
 	<!-- <section id="IpadIntro" class="header-section align-left hero blue-hero">
 		{{-- @include('front.partials.ipadIntro') --}}
 	</section> -->
-
+{{--}}
 	<section id="Intro" class="header-section align-left hero blue-hero">
 		@include('front.partials.intro')
 	</section>
 
 	<div class="divider"></div>
-
+{{--}}
 	<!-- <section id="Features">
 		{{-- @include('front.partials.features.ipadFeatures') --}}
 	</section> --><!--/#features-->
