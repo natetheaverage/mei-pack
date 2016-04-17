@@ -6,7 +6,7 @@ return array(
 
 'single' => 'ImageFile',
 
-'model' => 'App\Models\imagefile',
+'model' => 'App\Models\ImageFile',
 
 'columns' => array(
     'label' => array(

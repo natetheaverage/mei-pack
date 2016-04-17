@@ -29,9 +29,11 @@
 	@include('front.twenty.ipadPricing')
 </section> <!--/#pricing-->
 
+{{--}}
 <section id="Testimonial">
 	@include('front.partials.news.testimonials')
 </section>   <!-- #testimonial -->
+{{--}}
 
 <section id="get-in-touch" class="blue-hero">
 	<blue-hero

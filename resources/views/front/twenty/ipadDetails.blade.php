@@ -17,14 +17,14 @@
           <div class="media-body">
             <h4 class="media-heading">Accurate & Up to Date!</h4>
             <ul>
-              <li>details types
+              <li><span>Daily stock price changes</span>
                 <ul>
-                  <li><small>this is good</small></li>
-                  <li><small>this is great</small></li>
+                  <li><small>Compare market caps</small></li>
+                  <li><small>Compare revenue and earnings multipes</small></li>
                 </ul>
-              <li>Also this...</li>
-              <li>And this...</li>
-              <li>Dont Forget This...</li>
+              <li>Regulatory updates on FDA changes</li>
+              <li>Quarterly breakdown of drug sales</li>
+              <li>Two years of updated financial metrics</li>
             </ul>
           </div>
         </div>
@@ -39,13 +39,13 @@
                   <i class="fa fa-dollar"></i>
               </div>
               <div class="media-body">
-                  <h4 class="media-heading">Reasons to use!</h4>
+                  <h4 class="media-heading">Reasons to Use!</h4>
                   <ul>
 
-                    <li>Bennefit 1</li>
-                    <li>Bennefit 2</li>
-                    <li>Bennefit 3 these can be medium length they layout nicely</li>
-                    <li>Bennefit 4</li>
+                    <li>Easy to Navigate</li>
+                    <li>Deep and useful content</li>
+                    <li>Compare one company or one drug vs. another</li>
+                    <li>Ability to sort and categorize</li>
                   </ul>
               </div>
           </div>
@@ -60,12 +60,12 @@
               <i class="fa fa-link"></i>
             </div>
             <div class="media-body">
-              <h4 class="media-heading">Links?!</h4>
+              <h4 class="media-heading">Links!</h4>
               <ul>
-                <li><a href="#">Go Here</a></li>
-                <li><a href="#">Maybe Here</a></li>
-                <li><a href="#">or Here</a></li>
-                <li><a href="#">Defenatly Here</a></li>
+                <li><a href="http://twitter.com">Follow us on Twitter</a></li>
+                <li><a href="http://stocktwits.com">Follow us on Stock Twits</a></li>
+                <li><a href="http://facebook.com">Follow us on Facebook</a></li>
+                <!-- <li><a href="#">Defenatly Here</a></li> -->
               </ul>
             </div>
           </div>

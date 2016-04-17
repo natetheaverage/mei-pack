@@ -20,9 +20,9 @@
               BASIC PACKAGE
             </div>
           </li>
-          <li><strong>Unlimited</strong> Company Searching</li>
-          <li><strong>Unlimited</strong> Ailment Searching</li>
-          <li><strong>Unlimited</strong> Industry Leads</li>
+          <li><strong>Company List</strong> with key financial metrics</li>
+          <li><strong>Drug List</strong> with company names and annual sales</li>
+          <li><strong>Condition List</strong> with WW and U.S. prevalence/incidence</li>
           <li> &nbsp;</li>
           <li class="plan-purchase">
             <a 
@@ -38,7 +38,7 @@
           <li class="plan-header">
             <div class="price-duration">
               <span class="price">
-                  $4.50
+                  $4.99
               </span>
               <span class="duration">
                   Yearly
@@ -48,10 +48,10 @@
                 Ultimate Package
             </div>
           </li>
-          <li><strong>Unlimited</strong> Company Searching</li>
-          <li><strong>Unlimited</strong> Ailment Searching</li>
-          <li><strong>Unlimited</strong> Industry Leads</li>
-          <li><strong>Unlimited</strong> Company Metrics</li>
+          <li><strong>Detailed</strong> company financial info and stock chart</li>
+          <li><strong>Detailed</strong> drugs made/sold by any company</li>
+          <li><strong>Detailed</strong> quarterly drug sales figures</li>
+          <li><strong>Competing drugs</strong> for any medical condition</li>
           <li class="plan-purchase">
             <a 
               class="mtrl-btn mtrl-raised bg-blue" 

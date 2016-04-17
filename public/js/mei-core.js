@@ -18613,11 +18613,11 @@ module.exports = [{
 
 // Static Settings for Brand Identity
 module.exports = {
-	name: 'Twenty Twenty',
+	name: '20-20 Investing',
 	addresses: [{
 		label: "Main Office",
 		type: "Office",
-		active: true,
+		active: false,
 		street: "123 Anywhere Drive",
 		unit: "#456",
 		city: "Dust City",
@@ -18628,32 +18628,32 @@ module.exports = {
 		phones: [{
 			label: "Office",
 			type: "landLine",
-			active: true,
+			active: false,
 			number: "123-456-7890",
 			ext: ""
 		}, {
 			label: "Fax",
 			type: "fax",
-			active: true,
+			active: false,
 			number: "123-456-7890",
 			ext: ""
 		}],
 		emails: [{
-			label: "Denver",
+			label: "General Inqueries",
 			type: "main",
 			active: true,
-			emailAddress: "us@here.com",
+			emailAddress: "contactus@20-20investing.com",
 			user_id: ""
 		}, {
 			label: "Tech Support",
 			type: "I.T.",
-			active: true,
+			active: false,
 			emailAddress: "us@here.com",
 			user_id: ""
 		}]
 	},
 	branding: {
-		name: "20/20 Investment",
+		name: "20-20 Investment",
 		tagLine: "Your key to financial success in the medical market!",
 		smallLogo: '/images/logos/logo.png',
 		largeLogo: '/images/logos/logo.png'

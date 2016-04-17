@@ -45,7 +45,7 @@
 <a class="mtrl-btn mtrl-raised bg-orange"
 style="position:fixed; top:120px; left:20px; width:100px"
 v-if="settings.loggedIn"
-href="#"> SAVE </a>
+href=""> SAVE </a>
 @endrole
 	</div><!--/.container-->
 </nav><!--/nav-->
