@@ -16,11 +16,11 @@ class CreateFeaturesTable extends Migration
             $table->increments('id');
             $table->integer('order_column');
             $table->string('title');
-            $table->string('sub_title');
-            $table->string('img');
-            $table->string('description');
-            $table->string('button_label');
+            $table->text('content');
+            $table->string('image');
             $table->string('link');
+            $table->string('icon');
+            $table->string('parent');
             $table->timestamps();
         });
     }

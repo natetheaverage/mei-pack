@@ -17925,7 +17925,7 @@ exports.default = {
 	}
 };
 
-},{"../../truth/truth.js":69}],56:[function(require,module,exports){
+},{"../../truth/truth.js":70}],56:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17983,32 +17983,29 @@ exports.default = {
       id: 0,
       objectResource: this.$resource('/api/:objectType/:objectOptions'),
       apiResource: this.$resource('/api/:model/:id'),
-      editMode: this.pubSettings.editMode,
-      editAll: this.pubSettings.editAll,
-      dataMode: this.pubSettings.dataMode,
-      baseView: this.pubSettings.baseView,
-      copy: {
-        order: [],
-        texts: this.getCopy
-      }
-
+      editMode: false,
+      editAll: false,
+      dataMode: false,
+      baseView: 'front'
     };
   },
+  //copy: this.copy,
 
   store: _store2.default,
   vuex: {
     getters: {
-      getCopy: function getCopy(_ref) {
+      copy: function copy(_ref) {
         var copyText = _ref.copyText;
         return copyText.all;
       },
       company: _getters.getCompanyDetails,
-      pubSettings: _getters.getPublicSettings
+      settings: _getters.getPublicSettings
     },
     actions: {
       setSetting: _actions.setSetting,
-      setCopy: _actions.setCopy,
       toggleSetting: _actions.toggleSetting,
+      setCopy: _actions.setCopy,
+      setFeatures: _actions.setFeatures,
       setMenu: _actions.setMenu
     }
   },
@@ -18153,7 +18150,7 @@ exports.default = {
               type: 'success'
             }, function (isConfirmed) {
               if (isConfirmed) {
-                window.location.replace('dashboard');
+                window.location.replace('modelAdmin');
               }
             }); //End Login Success handler
           };
@@ -18164,20 +18161,16 @@ exports.default = {
     loadMenus: function loadMenus() {
       var that = this;
       this.objectResource.get({ objectType: "interfaceObjects", objectOptions: "navpage.DashboardMenu" }, function (menu, status, request) {
-        console.log("%cloadMenus() menu data fetched in Truth", this.pubSettings.logGood);
+        console.log("%cloadMenus() menu data fetched in Truth", this.settings.logGood);
         that.setMenu('DashboardMenu', menu);
       }).error(function (data, status, request) {
         console.log("%c loadMenus() Errrrrr in Truth", this.$root.logErr);
       });
       this.objectResource.get({ objectType: "interfaceObjects", objectOptions: "navigation.adminPrimary" }, function (menu, status, request) {
-        console.log("%cloadMenus() menu data fetched in Truth", this.pubSettings.logGood);
+        console.log("%cloadMenus() menu data fetched in Truth", this.settings.logGood);
         that.setMenu('adminPrimary', menu);
-        // nifty.document.ready(function(){
-        //   nifty.document.trigger("nifty.ready")
-        // })
-        //nifty.document.trigger('nifty.ready');
+
         nifty.mainNav.unbindSmallNav();
-        //nifty.document.trigger('update');
       }).error(function (data, status, request) {
         console.log("%c loadMenus() Errrrrr in Truth", this.$root.logErr);
       });
@@ -18186,20 +18179,29 @@ exports.default = {
       var that = this;
       this.$http.get('/api/copyText', function (data, status, request) {
         console.log("%c loadCopy() in mei-app.js", that.$root.settings.logGood);
-        console.log(data[1]);
         that.setCopy(data[1]);
       }).error(function (data, status, request) {
         console.log("%c loadCopy() Err in mei-app.js", that.$root.settings.logErr);
+      });
+    },
+    loadFeatures: function loadFeatures() {
+      var that = this;
+      this.$http.get('/api/feature', function (data, status, request) {
+        console.log("%c loadFeatures() in mei-app.js", that.$root.settings.logGood);
+        that.setFeatures(data[1]);
+      }).error(function (data, status, request) {
+        console.log("%c loadFeatures() Err in mei-app.js", that.$root.settings.logErr);
       });
     }
   },
   ready: function ready() {
     this.loadMenus();
     this.loadCopy();
+    this.loadFeatures();
   }
 };
 
-},{"./vue-router/router":70,"./vuex/actions.js":98,"./vuex/getters.js":99,"./vuex/store":104}],58:[function(require,module,exports){
+},{"./vue-router/router":71,"./vuex/actions.js":99,"./vuex/getters.js":100,"./vuex/store":106}],58:[function(require,module,exports){
 'use strict';
 
 var _vueResource = require('vue-resource');
@@ -18499,7 +18501,7 @@ switchElems.forEach(function (html) {
 // TODO: This needs to implement anaming system of sorts
 // switcher.onchange = function() {};
 
-},{"./mei-app.js":57,"./vue-router/router":70,"./vue-router/routerMap":71,"./vue/components/animate/AnimatedWords.vue":72,"./vue/components/animate/IntroFlyAway.vue":73,"./vue/components/animate/iPad3DMenu.vue":74,"./vue/components/controllers/EditableCopy.vue":75,"./vue/components/controllers/ObjectEditor.vue":76,"./vue/components/navigation/NavpageButton.vue":78,"./vue/components/navigation/materialTheme/MainMenu.vue":79,"./vue/components/navigation/materialTheme/MenuButton.vue":80,"./vue/components/navigation/materialTheme/SubMenuButton.vue":81,"./vue/components/navigation/nifty/MainNav.vue":82,"./vue/components/navigation/nifty/MainNavButton.vue":83,"./vue/components/navigation/nifty/MenuWidget.vue":84,"./vue/components/navigation/nifty/ShortcutButtons.vue":85,"./vue/components/projector/projector.vue":90,"./vue/filters/Currency.js":92,"./vue/filters/VisibilityMode.js":93,"./vue/mixins/HooksMixin.js":94,"./vue/mixins/SettingsWatcher.js":95,"./vue/partials/BlueHero.vue":96,"./vue/partials/BrandBox.vue":97,"./vuex/store":104,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],59:[function(require,module,exports){
+},{"./mei-app.js":57,"./vue-router/router":71,"./vue-router/routerMap":72,"./vue/components/animate/AnimatedWords.vue":73,"./vue/components/animate/IntroFlyAway.vue":74,"./vue/components/animate/iPad3DMenu.vue":75,"./vue/components/controllers/EditableCopy.vue":76,"./vue/components/controllers/ObjectEditor.vue":77,"./vue/components/navigation/NavpageButton.vue":79,"./vue/components/navigation/materialTheme/MainMenu.vue":80,"./vue/components/navigation/materialTheme/MenuButton.vue":81,"./vue/components/navigation/materialTheme/SubMenuButton.vue":82,"./vue/components/navigation/nifty/MainNav.vue":83,"./vue/components/navigation/nifty/MainNavButton.vue":84,"./vue/components/navigation/nifty/MenuWidget.vue":85,"./vue/components/navigation/nifty/ShortcutButtons.vue":86,"./vue/components/projector/projector.vue":91,"./vue/filters/Currency.js":93,"./vue/filters/VisibilityMode.js":94,"./vue/mixins/HooksMixin.js":95,"./vue/mixins/SettingsWatcher.js":96,"./vue/partials/BlueHero.vue":97,"./vue/partials/BrandBox.vue":98,"./vuex/store":106,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],59:[function(require,module,exports){
 'use strict';
 
 // Setting for the main menu
@@ -18930,6 +18932,46 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.default = {
+	sections: [{
+		title: 'Welcome',
+		image: 'ipad-screen-twenty.png',
+		link: '#',
+		icon: 'link',
+		content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+	}, {
+		title: "Company's",
+		image: 'ipad-screen-twenty.png',
+		link: '#',
+		icon: 'link',
+		content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+	}, {
+		title: 'Ailments',
+		image: 'ipad-screen-twenty.png',
+		link: '#',
+		icon: 'link',
+		content: ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+	}, {
+		title: 'Company content',
+		image: 'ipad-screen-twenty.png',
+		link: '#',
+		icon: 'link',
+		content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+	}, {
+		title: 'Company Details 2',
+		image: 'ipad-screen-twenty.png',
+		link: '#',
+		icon: 'link',
+		content: ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+	}]
+};
+
+},{}],65:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.default = {
 	categories: ['these', 'those', 'thems'],
 	collection: [{
 		title: 'one',
@@ -18966,7 +19008,7 @@ exports.default = {
 	}]
 };
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -19026,7 +19068,7 @@ module.exports = {
   }]
 };
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 'use strict';
 
 // Setting for the main menu
@@ -19127,7 +19169,7 @@ module.exports = [{
 	}]
 }];
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 "use strict";
 
 // Static dummy news data
@@ -19145,7 +19187,7 @@ module.exports = {
 	photo: "/images/logos/logo.png"
 };
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 'use strict';
 
 // Static App Setting
@@ -19184,7 +19226,7 @@ module.exports = {
 
 };
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19210,11 +19252,13 @@ exports.default = {
 
 	infoSection: require('./infoSectionData'),
 
-	images: require('./imagesData')
+	images: require('./imagesData'),
+
+	features: require('./features')
 
 };
 
-},{"./adminMenuData":59,"./companyData":60,"./conversationData":61,"./copyText":62,"./eventsData":63,"./imagesData":64,"./infoSectionData":65,"./mainMenuData":66,"./newsData":67,"./settingsData":68}],70:[function(require,module,exports){
+},{"./adminMenuData":59,"./companyData":60,"./conversationData":61,"./copyText":62,"./eventsData":63,"./features":64,"./imagesData":65,"./infoSectionData":66,"./mainMenuData":67,"./newsData":68,"./settingsData":69}],71:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19239,7 +19283,7 @@ exports.default = new _vueRouter2.default({
   linkActiveClass: 'active-link'
 });
 
-},{"vue":49,"vue-router":47}],71:[function(require,module,exports){
+},{"vue":49,"vue-router":47}],72:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -19287,7 +19331,7 @@ module.exports = {
 
 //}
 
-},{"../vue/components/navigation/NavPage.vue":77,"../vue/components/pos/Checkout.vue":86}],72:[function(require,module,exports){
+},{"../vue/components/navigation/NavPage.vue":78,"../vue/components/pos/Checkout.vue":87}],73:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19349,7 +19393,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],73:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],74:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".fly-away-image {\n  -webkit-transition: 1s ease-out;\n  transition: 1s ease-out;\n  height: 100px;\n}\n.fly-away-image > img {\n  -webkit-transition: 1s ease-out;\n  transition: 1s ease-out;\n  max-height: 100px;\n  width: 100%;\n  right: 0;\n}\n.fly-away-image .fly-away {\n  top: -600px;\n}\n.intro-fly-away .section-title {\n  font-size: 80px;\n  font-weight: 900px;\n  color: #fff;\n}\n@media (min-width: 300px) {\n  .hero {\n    padding: 30px 0;\n  }\n  .fly-away-image {\n    height: 120px;\n  }\n  .fly-away-image > img {\n    max-height: 120px;\n  }\n  .fly-away {\n    top: -300px;\n  }\n}\n@media (min-width: 568px) {\n  .hero {\n    padding: 100px 0;\n  }\n  .fly-away-image {\n    background-image: -webkit-linear-gradient(90deg, #2c8cb3 0%, #2caab3 100%);\n    height: 250px;\n  }\n  .fly-away-image > img {\n    margin: 0 auto;\n    max-height: 250px;\n  }\n}\n@media (min-width: 850px) {\n  .fly-away-image {\n    background-image: -webkit-linear-gradient(90deg, #2c8cb3 0%, #2caab3 100%);\n    height: 325px;\n  }\n  .fly-away-image > img {\n    max-height: 350px;\n  }\n}\n@media (min-width: 1400px) {\n  .fly-away-image {\n    height: 450px;\n    width: 100%;\n  }\n  .fly-away-image > img {\n    max-width: 1400px;\n    max-height: 450px;\n  }\n  .fly-away {\n    top: -600px;\n  }\n}\n")
 'use strict';
 
@@ -19386,7 +19430,6 @@ exports.default = {
     var waypoint = $('#IntroFlyAway').waypoint(function (direction) {
       that.flyaway = 'fly-away';
       that.toggleSetting('animateHeader');
-      console.log('Bang from waypoint intro flyaway');
     }, {
       offset: '-5%'
     });
@@ -19409,74 +19452,53 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":98,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],74:[function(require,module,exports){
+},{"../../../vuex/actions.js":99,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],75:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".media {\n  position: absolute;\n}\n@media (min-width: 500px) {\n  .media {\n    position: inherit;\n    padding-top: 100px;\n  }\n}\n")
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 exports.default = {
-	name: 'ipad-3d-menu',
-	changeTabTitle: false,
-	logHooksToConsole: true,
-	watchMode: true,
+  name: 'IpadMenu',
+  id: 0,
+  changeTabTitle: false,
+  logHooksToConsole: true,
+  watchMode: true,
 
-	props: ['animationNumber'],
-	data: function data() {
-		return {
-			activeScreen: 1,
-			pageTitle: '3D Ipad Menu',
-			effect: "ms-effect-" + this.animationNumber,
-			open: false,
-			screens: [{
-				title: 'Welcome',
-				image: 'ipad-screen-twenty.png',
-				link: '#',
-				icon: 'link',
-				content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-			}, {
-				title: "Company's",
-				image: 'ipad-screen-twenty.png',
-				link: '#',
-				icon: 'link',
-				content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-			}, {
-				title: 'Ailments',
-				image: 'ipad-screen-twenty.png',
-				link: '#',
-				icon: 'link',
-				content: ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-			}, {
-				title: 'Company content',
-				image: 'ipad-screen-twenty.png',
-				link: '#',
-				icon: 'link',
-				content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-			}, {
-				title: 'Company Details 2',
-				image: 'ipad-screen-twenty.png',
-				link: '#',
-				icon: 'link',
-				content: ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-			}]
-		};
-	},
+  props: ['animationNumber'],
+  data: function data() {
+    return {
+      activeScreen: 1,
+      pageTitle: '3D Ipad Menu',
+      effect: "ms-effect-" + this.animationNumber,
+      open: false
+    };
+  },
 
 
-	methods: {},
+  vuex: {
+    getters: {
+      features: function features(_ref) {
+        var _features = _ref.features;
+        return _features.all;
+      }
+    }
+  },
 
-	ready: function ready() {
-		var that = this;
-		var waypoint = $('#toggle-phone-animation').waypoint(function (direction) {
-			that.open = !that.open;
-		}, {
-			offset: '25%'
-		});
-	}
+  methods: {},
+
+  ready: function ready() {
+    var that = this;
+    var waypoint = $('#toggle-phone-animation').waypoint(function (direction) {
+      that.open = !that.open;
+    }, {
+      offset: '25%'
+    });
+  }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"ipad-3d-menu\">\n\n\t  <div class=\"col-sm-6 wow fadeInLeft\">\n\t    <div class=\"ms-wrapper\" :class=\"[effect, open ? 'ms-view-layers' : '']\">\n\t\t\t\t<div id=\"toggle-phone-animation\"></div>\n\t\t\t\t \n\t\t\t\t<div class=\"ms-perspective\">\n\t\t\t\t\t<div class=\"ms-device\">\n\t\t\t\t\t\t<div class=\"ms-object\">\n\t\t\t\t\t\t\t<div class=\"ms-front\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-back\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-left ms-side\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-right ms-side\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-top ms-side\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-bottom ms-side\"></div>\n\t\t\t\t\t\t</div><!-- /ms-object -->\n\t\t\t\t\t\t<div class=\"ms-screens\">\n\t\t\t\t\t\t\t<a v-for=\"(key, screen) in screens\" :class=\"'ms-screen-'+(key+1)\" @click=\"activeScreen = (key+1)\"></a>\n\t\t\t\t\t\t\t<!-- <a class=\"ms-screen-2\"><div class=\"ms-label\">Compose</div></a> -->\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div><!-- /ms-device -->\n\t\t\t\t</div><!-- /ms-perspective -->\n\t\t\t</div><!-- /ms-wrapper -->\n\t  </div>\n  </div>\n  <div class=\"col-sm-6\">\n    <div class=\"media service-box wow fadeInRight\" v-for=\"(key, detail) in screens\" v-if=\"activeScreen == (key+1)\">\n      <div class=\"pull-left\">\n        <i class=\"fa fa-2x\" :class=\"'fa-'+detail.icon\"></i>\n      </div>\n      <div class=\"media-body\">\n        <h4 class=\"media-heading\" v-html=\"detail.title\">Company Search</h4>\n        <span v-html=\"detail.content\">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum..</span>\n      </div>\n    </div>\n\t</div>\n\t<div class=\"row\">\n\t<div class=\"col-md-12\">\n\t\t\t<center>\n\t\t\t\t<a id=\"phone-toggle-btn\" class=\"mtrl-btn bg-purple mtrl-raised mtrl-btn-icon\" @click=\"open = !open\"> \n\t\t\t\t\t<i class=\"fa fa-lg fa-caret-square-o-down\"></i>\n\t\t\t\t\t<span style=\"margin: auto 2px\"> View</span>\n\t\t\t\t</a>\n\t\t\t</center>\n\t\t</div>\n\t</div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"ipad-3d-menu\">\n\n\t  <div class=\"col-sm-6 wow fadeInLeft\">\n\t    <div class=\"ms-wrapper\" :class=\"[effect, open ? 'ms-view-layers' : '']\">\n\t\t\t\t<div id=\"toggle-phone-animation\"></div>\n\t\t\t\t \n\t\t\t\t<div class=\"ms-perspective\">\n\t\t\t\t\t<div class=\"ms-device\">\n\t\t\t\t\t\t<div class=\"ms-object\">\n\t\t\t\t\t\t\t<div class=\"ms-front\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-back\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-left ms-side\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-right ms-side\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-top ms-side\"></div>\n\t\t\t\t\t\t\t<div class=\"ms-bottom ms-side\"></div>\n\t\t\t\t\t\t</div><!-- /ms-object -->\n\t\t\t\t\t\t<div class=\"ms-screens\">\n\t\t\t\t\t\t\t<a v-for=\"(key, screen) in features\" :class=\"'ms-screen-'+(key+1)\" @click=\"activeScreen = (key+1)\"></a>\n\t\t\t\t\t\t\t<!-- <a class=\"ms-screen-2\"><div class=\"ms-label\">Compose</div></a> -->\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div><!-- /ms-device -->\n\t\t\t\t</div><!-- /ms-perspective -->\n\t\t\t</div><!-- /ms-wrapper -->\n\t  </div>\n  </div>\n  <div class=\"col-sm-6\">\n    <div class=\"media service-box wow fadeInRight\" v-for=\"(key, detail) in features\" v-if=\"activeScreen == (key+1)\">\n      <div class=\"pull-left\">\n        <i class=\"fa fa-2x\" :class=\"'fa-'+detail.icon\"></i>\n      </div>\n      <div class=\"media-body\">\n        <h4 class=\"media-heading\" v-html=\"detail.title\">Company Search</h4>\n        <span v-html=\"detail.content\">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum..</span>\n      </div>\n    </div>\n\t</div>\n\t<div class=\"row\">\n\t<div class=\"col-md-12\">\n\t\t\t<center>\n\t\t\t\t<a id=\"phone-toggle-btn\" class=\"mtrl-btn bg-purple mtrl-raised mtrl-btn-icon\" @click=\"open = !open\"> \n\t\t\t\t\t<i class=\"fa fa-lg fa-caret-square-o-down\"></i>\n\t\t\t\t\t<span style=\"margin: auto 2px\"> View</span>\n\t\t\t\t</a>\n\t\t\t</center>\n\t\t</div>\n\t</div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -19492,7 +19514,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],75:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],76:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19513,8 +19535,10 @@ exports.default = {
       html: this.useHtml,
       editMode: this.$root.settings.editMode,
       parent: this.nameOfParent,
-      routePrefix: this.$root.copy.texts[this.$root.baseView][this.findNameOfParent()],
-      copyObject: {}
+      routePrefix: this.$root.copy[this.$root.baseView][this.findNameOfParent()],
+      copyObject: {
+        copy: this.overideText
+      }
     };
   },
 
@@ -19554,9 +19578,8 @@ exports.default = {
 
   ready: function ready() {
     this.parent = this.findNameOfParent();
-    this.$watch('$root.getCopy', function () {
-      console.log(this.routePrefix);
-      console.log(this.instanceNumber);
+    this.copyObject = this.routePrefix[this.instanceNumber];
+    this.$watch('$root.copy', function () {
       this.copyObject = this.routePrefix[this.instanceNumber];
     }, { deep: true });
   }
@@ -19574,7 +19597,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions":98,"vue":49,"vue-hot-reload-api":38}],76:[function(require,module,exports){
+},{"../../../vuex/actions":99,"vue":49,"vue-hot-reload-api":38}],77:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -19612,7 +19635,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../api/data/iconListForSelectBox":54,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],77:[function(require,module,exports){
+},{"../../../api/data/iconListForSelectBox":54,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],78:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -19662,7 +19685,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":98,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],78:[function(require,module,exports){
+},{"../../../vuex/actions.js":99,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],79:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".edit-btn {\n  position: absolute;\n}\n")
 'use strict';
 
@@ -19689,7 +19712,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],79:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],80:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19740,7 +19763,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../../vuex/actions.js":98,"vue":49,"vue-hot-reload-api":38}],80:[function(require,module,exports){
+},{"../../../../vuex/actions.js":99,"vue":49,"vue-hot-reload-api":38}],81:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -19846,7 +19869,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],81:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],82:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -19885,7 +19908,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],82:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],83:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n/*.v-link-active \n  color: purple\n  padding-left: 20px\n  font-weight: bold\n  box-shadow:inset 2px 2px 2px  4px #999*/\n")
 'use strict';
 
@@ -19996,7 +20019,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../../vuex/actions":98,"../../../../vuex/getters":99,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],83:[function(require,module,exports){
+},{"../../../../vuex/actions":99,"../../../../vuex/getters":100,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],84:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20113,7 +20136,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],84:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],85:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20146,7 +20169,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],85:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],86:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20179,7 +20202,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],86:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],87:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".checkout {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n}\n")
 'use strict';
 
@@ -20239,7 +20262,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./NumPad.vue":87,"./SalesReceipt.vue":88,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],87:[function(require,module,exports){
+},{"./NumPad.vue":88,"./SalesReceipt.vue":89,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],88:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".numbers {\n  width: 370px;\n  border: 1px #000 solid;\n  background: #999;\n}\n.numbers .numbers-pad {\n  width: 100%;\n  height: 340px;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  border: 1px #33abb7 solid;\n}\n.numbers .numbers-pad > button {\n  margin: 2.2% 2.8% 2.8% 2.2%;\n  width: 15%;\n  height: 19%;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: center;\n  -webkit-justify-content: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  background: -webkit-linear-gradient(top, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  background: linear-gradient(to bottom, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  box-shadow: 2px 2px 6px #000;\n  border-radius: 5px;\n}\n.numbers .numbers-pad > button:active {\n  color: #33abb7;\n  margin: 2.5% 2.5% 2.5% 2.5%;\n  box-shadow: 0px 0px 3px #000;\n}\n.numbers .numbers-pad > button > span {\n  font-size: 2em;\n  line-height: 1em;\n}\n.numbers .numbers-pad .tall {\n  height: 30%;\n}\n.numbers .numbers-entry-field {\n  width: 100%;\n  font-size: 3em;\n  font-weight: bold;\n  text-align: right;\n  padding: 4px;\n}\n")
 'use strict';
 
@@ -20327,7 +20350,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],88:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],89:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".receipt-window {\n  width: 370px;\n  height: 400px;\n/* TODO Attach nano scroller to this */\n  overflow: auto;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  border: 1px #000 solid;\n  background: #eee;\n}\n.receipt-window .receipt-item {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  padding: 5px;\n}\n.receipt-window .receipt-item .item-controls {\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details {\n  font-size: 1.5em;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  width: 85%;\n}\n.receipt-window .receipt-item .item-details > input {\n  width: 100%;\n  border: none;\n  background-color: none;\n}\n.receipt-window .receipt-item .item-details .item-id {\n  width: 10%;\n}\n.receipt-window .receipt-item .item-details .item-name {\n  width: 50%;\n}\n.receipt-window .receipt-item .item-details .item-price {\n  text-align: right;\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details .item-sku {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-rfid {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-field-sm {\n  width: 20%;\n}\n")
 'use strict';
 
@@ -20371,7 +20394,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],89:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],90:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n")
 "use strict";
 
@@ -20465,7 +20488,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],90:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],91:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n\n")
 'use strict';
 
@@ -20620,7 +20643,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./project.vue":89,"./task.vue":91,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],91:[function(require,module,exports){
+},{"./project.vue":90,"./task.vue":92,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],92:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -20675,7 +20698,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],92:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],93:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20692,7 +20715,7 @@ module.exports = {
   }
 };
 
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20720,70 +20743,62 @@ module.exports = {
     }
 };
 
-},{}],94:[function(require,module,exports){
-'use strict';
+},{}],95:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _getters = require('../../vuex/getters.js');
-
 exports.default = {
-    vuex: {
-        getters: {
-            settings: _getters.getPublicSettings
-        }
-    },
     created: function created() {
         var changeTabTitle = this.$options.changeTabTitle;
         if (changeTabTitle) {
-            var host = this.settings.appName;
+            var host = this.$root.settings.appName;
             var title = this.pageTitle;
             $("title").contents().last().remove();
             $('title').append(host + " | " + title);
-            this.settings.viewTitle = title;
+            this.$root.settings.viewTitle = title;
         }
         var logHooksToConsole = this.$options.logHooksToConsole;
         if (logHooksToConsole) {
-            console.log("%c<< %s.vue >> Created!", this.settings.logGood, this.pageTitle);
+            console.log("%c<< %s.vue >> Created!", this.$root.settings.logGood, this.pageTitle);
         }
     },
     ready: function ready() {
         var logHooksToConsole = this.$options.logHooksToConsole;
         if (logHooksToConsole) {
-            console.log("%c<< %s.vue >> Ready!", this.settings.logGood, this.pageTitle);
+            console.log("%c<< %s.vue >> Ready!", this.$root.settings.logGood, this.pageTitle);
         }
     },
     beforeDestroy: function beforeDestroy() {
         var logHooksToConsole = this.$options.logHooksToConsole;
         if (logHooksToConsole) {
-            console.log("%c<< %s.vue >> Destroying!", this.settings.logGood, this.pageTitle);
+            console.log("%c<< %s.vue >> Destroying!", this.$root.settings.logGood, this.pageTitle);
         }
     }
 };
 
-},{"../../vuex/getters.js":99}],95:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 "use strict";
 
 module.exports = {
     created: function created() {
         var watchModes = this.$options.watchMode;
         if (watchModes) {
-            this.$watch("$root.pubSettings.editMode", function (res) {
+            this.$watch("$root.settings.editMode", function (res) {
                 this.editMode = res;
             });
-            this.$watch("$root.pubSettings.editAll", function (res) {
+            this.$watch("$root.settings.editAll", function (res) {
                 this.editAll = res;
             });
-            this.$watch("$root.pubSettings.dataMode", function (res) {
+            this.$watch("$root.settings.dataMode", function (res) {
                 this.dataMode = res;
             });
         }
     }
 };
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20812,7 +20827,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],97:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],98:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".brand-box {\n  position: relative;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  margin: auto 2px auto 2px;\n  -webkit-box-flex: 1;\n  -webkit-flex: 1;\n      -ms-flex: 1;\n          flex: 1;\n}\n.brand-logo {\n  max-height: 50px;\n  min-height: 40px;\n  padding: 0 5px 5px 5px;\n}\n.brand-text-box {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  line-height: 20px;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n}\n.brand-title {\n  font-size: 18px;\n  margin: 5px 0 0 0;\n  font-weight: 600;\n}\n.brand-sub-title {\n  font-size: 14px;\n  margin: 5px 0 0 0;\n  font-weight: 400;\n}\n")
 'use strict';
 
@@ -20863,13 +20878,13 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../vuex/actions.js":98,"../../vuex/getters.js":99,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],98:[function(require,module,exports){
+},{"../../vuex/actions.js":99,"../../vuex/getters.js":100,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],99:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.setPage = exports.setCopy = exports.setCopyText = exports.setMenuActive = exports.setMenu = exports.toggleSetting = exports.setSetting = exports.setCompanyBrandingDetail = exports.setModel = exports.setRoute = undefined;
+exports.setPage = exports.setFeatures = exports.setCopy = exports.setCopyText = exports.setMenuActive = exports.setMenu = exports.toggleSetting = exports.setSetting = exports.setCompanyBrandingDetail = exports.setModel = exports.setRoute = undefined;
 
 var _typeof2 = require('babel-runtime/helpers/typeof');
 
@@ -20966,14 +20981,20 @@ var setCopy = exports.setCopy = function setCopy(_ref9, payload) {
   dispatch(types.SET_COPY, payload);
 };
 
-var setPage = exports.setPage = function setPage(_ref10) {
+var setFeatures = exports.setFeatures = function setFeatures(_ref10, payload) {
   var dispatch = _ref10.dispatch;
-  var state = _ref10.state;
+
+  dispatch(types.SET_FEATURES, payload);
+};
+
+var setPage = exports.setPage = function setPage(_ref11) {
+  var dispatch = _ref11.dispatch;
+  var state = _ref11.state;
 
   dispatch(types.SET_PAGE, state);
 };
 
-},{"../api/vuex/menus.js":55,"./mutation-types":103,"babel-runtime/helpers/typeof":4}],99:[function(require,module,exports){
+},{"../api/vuex/menus.js":55,"./mutation-types":105,"babel-runtime/helpers/typeof":4}],100:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21026,7 +21047,7 @@ function getHomePage(state) {
   return state.pages.home;
 }
 
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21053,7 +21074,6 @@ var state = {
 };
 
 var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_COPY_TEXT, function (state, object, payload) {
-  console.log(payload);
   var route = state.all[object.base_view][payload[1]][object.instance_number];
   route.id = object.id;
   route.copy = payload[0];
@@ -21061,19 +21081,13 @@ var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, _mut
   route.version = object.version;
   route.versionList = object.versionList;
 }), (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_COPY, function (state, payload) {
-  console.log('payload');
-  console.log(payload);
   for (var i = payload.length - 1; i >= 0; i--) {
-    console.log(payload[i].parent_name);
-    console.log(state.all[payload[i].base_view][payload[i].parent_name]);
-    // var route = state.all[payload[i].base_view][payload[i].parent_name][payload[i].instance_number]
-    // console.log('route')
-    // console.log(route)
-    // route.id = payload[i].id
-    // route.copy = payload[i].copy
-    // route.height = payload[i].height
-    // route.version = payload[i].version
-    // route.versionList = payload[i].versionList
+    var route = state.all[payload[i].base_view][payload[i].parent_name][payload[i].instance_number];
+    route.id = payload[i].id;
+    route.copy = payload[i].copy;
+    route.height = payload[i].height;
+    route.version = payload[i].version;
+    route.versionList = payload[i].versionList;
   }
 }), _mutations);
 
@@ -21082,7 +21096,40 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":69,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],101:[function(require,module,exports){
+},{"../../truth/truth.js":70,"../mutation-types":105,"babel-runtime/helpers/defineProperty":3}],102:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _mutationTypes = require('../mutation-types');
+
+var _truth = require('../../truth/truth.js');
+
+var _truth2 = _interopRequireDefault(_truth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// initial state
+var state = {
+  all: _truth2.default.features
+};
+
+var mutations = (0, _defineProperty3.default)({}, _mutationTypes.SET_FEATURES, function (state, payload) {
+  state.all = payload;
+});
+
+exports.default = {
+  state: state,
+  mutations: mutations
+};
+
+},{"../../truth/truth.js":70,"../mutation-types":105,"babel-runtime/helpers/defineProperty":3}],103:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21146,7 +21193,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../api/vuex/menus.js":55,"../../truth/truth.js":69,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],102:[function(require,module,exports){
+},{"../../api/vuex/menus.js":55,"../../truth/truth.js":70,"../mutation-types":105,"babel-runtime/helpers/defineProperty":3}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21185,7 +21232,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":69,"../mutation-types":103,"babel-runtime/helpers/defineProperty":3}],103:[function(require,module,exports){
+},{"../../truth/truth.js":70,"../mutation-types":105,"babel-runtime/helpers/defineProperty":3}],105:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21207,7 +21254,9 @@ var SET_COMPANY_BRAND_DETAIL = exports.SET_COMPANY_BRAND_DETAIL = 'SET_COMPANY_B
 var SET_COPY_TEXT = exports.SET_COPY_TEXT = 'SET_COPY_TEXT';
 var SET_COPY = exports.SET_COPY = 'SET_COPY';
 
-},{}],104:[function(require,module,exports){
+var SET_FEATURES = exports.SET_FEATURES = 'SET_FEATURES';
+
+},{}],106:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21230,6 +21279,10 @@ var _menus2 = _interopRequireDefault(_menus);
 var _copyText = require('./modules/copyText.js');
 
 var _copyText2 = _interopRequireDefault(_copyText);
+
+var _features = require('./modules/features.js');
+
+var _features2 = _interopRequireDefault(_features);
 
 var _settings = require('./modules/settings.js');
 
@@ -21320,12 +21373,13 @@ exports.default = new _vuex2.default.Store({
   modules: {
     menus: _menus2.default,
     copyText: _copyText2.default,
-    settings: _settings2.default
+    settings: _settings2.default,
+    features: _features2.default
   },
   state: state,
   mutations: mutations
 });
 
-},{"../api/vuex/persistance.js":56,"../truth/truth.js":69,"./modules/copyText.js":100,"./modules/menus.js":101,"./modules/settings.js":102,"vue":49,"vuex":52,"vuex/logger":53}]},{},[58]);
+},{"../api/vuex/persistance.js":56,"../truth/truth.js":70,"./modules/copyText.js":101,"./modules/features.js":102,"./modules/menus.js":103,"./modules/settings.js":104,"vue":49,"vuex":52,"vuex/logger":53}]},{},[58]);
 
 //# sourceMappingURL=mei-core.js.map

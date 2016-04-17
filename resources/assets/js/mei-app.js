@@ -1,5 +1,5 @@
 import { getCompanyDetails, getPublicSettings } from './vuex/getters.js'
-import { setSetting, toggleSetting, setMenu, setCopy } from './vuex/actions.js'
+import { setSetting, toggleSetting, setMenu, setCopy, setFeatures } from './vuex/actions.js'
 import store from './vuex/store'
 import router from './vue-router/router' 
 
@@ -12,33 +12,28 @@ export default {
       id: 0,
       objectResource: this.$resource('/api/:objectType/:objectOptions'),
       apiResource: this.$resource('/api/:model/:id'),
-      editMode: this.pubSettings.editMode,
-      editAll: this.pubSettings.editAll,
-      dataMode: this.pubSettings.dataMode,
-      baseView: this.pubSettings.baseView,
-      copy:{
-        order:[],
-        texts: this.getCopy,
-      }
-
+      editMode: false,
+      editAll: false,
+      dataMode: false,
+      baseView: 'front',
+      //copy: this.copy,
     }
   },
 	store,
 	vuex:{
 		getters:{ 
-      getCopy: ({copyText}) => copyText.all,
+      copy: ({copyText}) => copyText.all,
 			company: getCompanyDetails,
-			pubSettings: getPublicSettings
+			settings: getPublicSettings
 		},
 		actions:{
 			setSetting,
-      setCopy,
       toggleSetting,
-      setMenu
+      setCopy,
+      setFeatures,
+      setMenu,
 		},
 	},
-
-  
 
 	methods:{
     //objectMethods: require('./vue/control/objectMethods.js'),
@@ -191,7 +186,7 @@ export default {
                   cancelButtonText: 'Edit Page',
                   type:'success',
                 },function(isConfirmed){
-                  if(isConfirmed){window.location.replace('dashboard')}
+                  if(isConfirmed){window.location.replace('modelAdmin')}
                 }); //End Login Success handler
               };
             }
@@ -203,7 +198,7 @@ export default {
       this.objectResource.get(
         {objectType:"interfaceObjects", objectOptions:"navpage.DashboardMenu"},
         function (menu, status, request) {
-          console.log("%cloadMenus() menu data fetched in Truth",this.pubSettings.logGood);
+          console.log("%cloadMenus() menu data fetched in Truth",this.settings.logGood);
           that.setMenu('DashboardMenu', menu);
       }).error(function (data, status, request) {
         console.log("%c loadMenus() Errrrrr in Truth",this.$root.logErr);
@@ -211,14 +206,10 @@ export default {
       this.objectResource.get(
         {objectType:"interfaceObjects", objectOptions:"navigation.adminPrimary"},
         function (menu, status, request) {
-          console.log("%cloadMenus() menu data fetched in Truth",this.pubSettings.logGood);
+          console.log("%cloadMenus() menu data fetched in Truth",this.settings.logGood);
           that.setMenu('adminPrimary', menu);
-          // nifty.document.ready(function(){
-          //   nifty.document.trigger("nifty.ready")
-          // })
-          //nifty.document.trigger('nifty.ready');
+
           nifty.mainNav.unbindSmallNav();
-          //nifty.document.trigger('update');
       }).error(function (data, status, request) {
         console.log("%c loadMenus() Errrrrr in Truth",this.$root.logErr);
       })
@@ -228,16 +219,26 @@ export default {
       this.$http.get('/api/copyText',
         function (data, status, request) {
           console.log("%c loadCopy() in mei-app.js",that.$root.settings.logGood);
-          console.log(data[1])
           that.setCopy(data[1]);
         }).error(function (data, status, request) {
           console.log("%c loadCopy() Err in mei-app.js", that.$root.settings.logErr);
+        })
+    },
+    loadFeatures(){
+      var that =this
+      this.$http.get('/api/feature',
+        function (data, status, request) {
+          console.log("%c loadFeatures() in mei-app.js",that.$root.settings.logGood);
+          that.setFeatures(data[1]);
+        }).error(function (data, status, request) {
+          console.log("%c loadFeatures() Err in mei-app.js", that.$root.settings.logErr);
         })
     },
 	},
   ready(){
     this.loadMenus()
     this.loadCopy()
+    this.loadFeatures()
   }
 
 }

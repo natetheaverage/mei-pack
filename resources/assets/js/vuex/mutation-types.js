@@ -13,3 +13,5 @@ export const SET_COMPANY_BRAND_DETAIL = 'SET_COMPANY_BRAND_DETAIL'
 
 export const SET_COPY_TEXT = 'SET_COPY_TEXT'
 export const SET_COPY = 'SET_COPY'
+
+export const SET_FEATURES = 'SET_FEATURES'

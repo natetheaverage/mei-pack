@@ -20,7 +20,7 @@
 						</div><!-- /ms-object -->
 						<div class="ms-screens">
 							<a 
-								v-for="(key, screen) in screens"
+								v-for="(key, screen) in features"
 								:class="'ms-screen-'+(key+1)"
 								@click="activeScreen = (key+1)"
 							></a>
@@ -34,7 +34,7 @@
   <div class="col-sm-6">
     <div 
     	class="media service-box wow fadeInRight"
-    	v-for="(key, detail) in screens"
+    	v-for="(key, detail) in features"
     	v-if="activeScreen == (key+1)"
     >
       <div class="pull-left">
@@ -70,8 +70,12 @@
 </template>
 
 <script>
+
+
+
 export default {
-    name: 'ipad-3d-menu',
+    name: 'IpadMenu',
+    id: 0,
     changeTabTitle: false,
     logHooksToConsole: true,
     watchMode: true,
@@ -83,38 +87,13 @@ export default {
       	pageTitle: '3D Ipad Menu', 
       	effect: "ms-effect-"+this.animationNumber,
       	open: false,
-      	screens: [{
-					title: 'Welcome',
-					image: 'ipad-screen-twenty.png',
-					link: '#',
-					icon: 'link',
-					content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-      	},{
-					title: "Company's",
-					image: 'ipad-screen-twenty.png',
-					link: '#',
-					icon: 'link',
-					content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'		
-      	},{
-					title: 'Ailments',
-					image: 'ipad-screen-twenty.png',
-					link: '#',
-					icon: 'link',
-					content: ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'		
-      	},{
-					title: 'Company content',
-					image: 'ipad-screen-twenty.png',
-					link: '#',
-					icon: 'link',
-					content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'		
-      	},{
-					title: 'Company Details 2',
-					image: 'ipad-screen-twenty.png',
-					link: '#',
-					icon: 'link',
-					content: ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'		
-      	}],
       }
+    },
+
+    vuex:{
+    	getters:{ 
+    		features: ( {features} ) => features.all
+    	},
     },
 
     methods: {
