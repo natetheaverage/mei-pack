@@ -1,8 +1,7 @@
-<blue_hero
+<blue-hero
   :blue="true"
-  title="YOUR <span><i class='fa fa-key'></i></span> TO CONFIDENT INVESTING !"
-  sub-title="Now you can relax and make some money."
-></blue_hero>
+  id="3"
+></blue-hero>
 
 <div class="container">
   <div class="row">

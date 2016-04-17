@@ -9,6 +9,7 @@ export default {
   data(){
     return{
       names:'MEi Aplic',
+      id: 0,
       objectResource: this.$resource('/api/:objectType/:objectOptions'),
       apiResource: this.$resource('/api/:model/:id'),
       editMode: this.pubSettings.editMode,
@@ -26,7 +27,7 @@ export default {
 	vuex:{
 		getters:{ 
       getCopy: ({copyText}) => copyText.all,
-			getCompanyDetails,
+			company: getCompanyDetails,
 			pubSettings: getPublicSettings
 		},
 		actions:{

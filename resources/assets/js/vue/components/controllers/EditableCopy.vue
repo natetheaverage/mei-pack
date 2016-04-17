@@ -1,30 +1,32 @@
 <template>
-  <div class="editable-copy">
+<div class="editable-copy">
+  <div v-if="!editMode">
     <span 
-      v-if="!editMode & html" 
+      v-if="html" 
       v-html="copyObject.copy"
       style="width:100%"
 	  ></span>
     <span 
-      v-if="!editMode & !html" 
+      v-if="!html" 
       v-text="copyObject.copy"
       style="width:100%"
-    ></span> 
+    ></span>
+  </div>
 <!-- :rows="copyObject.height" -->
-    <textarea 
-        v-if="editMode"
-        :value="copyObject.copy"
-        @blur="saveVersion"
-	      @input="persistCopyText | debounce 500"
-        placeholder="start typing to save new copy"
-        style="width:100%"
-	  ></textarea>
+  <textarea 
+      v-if="editMode"
+      :value="copyObject.copy"
+      @blur="saveVersion"
+      @input="persistCopyText | debounce 500"
+      placeholder="start typing to save new copy"
+      style="width:100%"
+  ></textarea>
 
     <!-- <a class="mtrl-btn mtrl-primary mtrl-raised"
       v-if="editMode"
       @click="saveVersion"
     >Save</a> -->
-  </div>
+</div>
 </template>
 
 <script>
@@ -46,10 +48,10 @@ export default {
     data() {
       return {
         names:'text edit Aplic',
-        html: false,
-        editMode: this.$root.pubSettings.editMode,
+        html: this.useHtml,
+        editMode: this.$root.settings.editMode,
         parent: this.nameOfParent,
-        routePrefix: this.$parent.copy.texts[this.$root.baseView],
+        routePrefix: this.$root.copy.texts[this.$root.baseView][this.findNameOfParent()],
         copyObject:{},
       }
     },
@@ -67,7 +69,7 @@ export default {
     	// persist vux on update
 
       persistCopyText(e) {
-        this.setCopyText(this.copyObject, e.target.value)
+        this.setCopyText(this.copyObject, [e.target.value, this.parent])
       },
 
       saveVersion(){
@@ -82,21 +84,21 @@ export default {
         })
       },
 
-      // findParentName(){
-      //   if(this.nameOfParent == undefined){
-      //     return this.$parent.name+'_'+this.$parent.id
-      //   }
-      //   return this.nameOfParent+'_0'
-      // },
+      findNameOfParent(){
+        if(this.nameOfParent == undefined){
+          return this.$parent.name+'_'+this.$parent.id
+        }
+        return this.nameOfParent
+      },
     },
 
     ready() {
-      this.copyObject = this.routePrefix[this.instanceNumber - 1]
-      this.$watch('$parent.getCopy', function(){
-        this.copyObject = this.routePrefix[this.instanceNumber - 1]
-        }, 
-        { deep: true }
-      )
+      this.parent = this.findNameOfParent()
+      this.$watch('$root.getCopy', function(){
+        console.log(this.routePrefix)
+        console.log(this.instanceNumber)
+        this.copyObject = this.routePrefix[this.instanceNumber]
+      }, { deep: true })
     },
   }
 </script>

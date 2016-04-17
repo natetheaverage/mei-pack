@@ -22,23 +22,23 @@ Vue.mixin(HooksMixin);
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('#token').getAttribute('value');
 
 import MainMenu from './vue/components/navigation/materialTheme/MainMenu.vue';
-Vue.component('mainmenu', MainMenu)
+Vue.component('mainMenu', MainMenu)
 import MenuButton from './vue/components/navigation/materialTheme/MenuButton.vue';
-Vue.component('menubutton', MenuButton)
+Vue.component('menuButton', MenuButton)
 import SubMenuButton from './vue/components/navigation/materialTheme/SubMenuButton.vue';
-Vue.component('submenubutton', SubMenuButton)
+Vue.component('subMenuButton', SubMenuButton)
  
 import BrandBox from './vue/partials/BrandBox.vue';
-Vue.component('brand-box', BrandBox)
+Vue.component('brandBox', BrandBox)
 
 import BlueHero from './vue/partials/BlueHero.vue';
-Vue.component('blue-hero', BlueHero)
+Vue.component('blueHero', BlueHero)
 
 import AnimatedWords from './vue/components/animate/AnimatedWords.vue';
-Vue.component('animated-words', AnimatedWords)
+Vue.component('animatedWords', AnimatedWords)
 
 import IntroFlyAway from './vue/components/animate/IntroFlyAway.vue';
-Vue.component('intro-fly-away', IntroFlyAway) 
+Vue.component('introFlyAway', IntroFlyAway) 
 
 // import DatesBox from './vue/components/events/DatesBox.vue';
 // Vue.component('dates_box', DatesBox)
@@ -82,8 +82,8 @@ Vue.component('editableCopy', EditableCopy)
 // Vue.component('content', Content)
 // import Single from './vue/components/news/Single.vue';
 
-// import iPad3DMenu from './vue/components/animate/iPad3DMenu.vue';
-// Vue.component('ipad_3d_menu', iPad3DMenu) 
+import iPad3DMenu from './vue/components/animate/iPad3DMenu.vue';
+Vue.component('ipadMenu', iPad3DMenu) 
 
 
 // Vue.component('single', Single)

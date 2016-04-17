@@ -7,7 +7,7 @@
 	    	:class="[effect, open ? 'ms-view-layers' : '']"
 	    >
 				<div id="toggle-phone-animation"></div>
-				
+				 
 				<div class="ms-perspective">
 					<div class="ms-device">
 						<div class="ms-object">

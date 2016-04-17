@@ -1,7 +1,7 @@
 <div 
 	class="app-nav"
-	:class="$root.truth.settings.menuOpen ? 'side-menu-enter' : 'side-menu-leave'"
-	v-if="$root.truth.settings.useSideMenu"
+	:class="$root.settings.menuOpen ? 'side-menu-enter' : 'side-menu-leave'"
+	v-if="$root.settings.primaryOn"
 >
 	<!-- :class="$root.truth.menuOpen ? 'slideInLeft' : 'slideOutLeft'" -->
 	<mainmenu></mainmenu>

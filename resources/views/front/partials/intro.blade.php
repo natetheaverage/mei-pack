@@ -15,7 +15,7 @@
             instance-number="2"
             use-html="true" 
             overide-text=""
-            ></editable-copy>
+          ></editable-copy>
           </h2>
           <p>
            <editable-copy

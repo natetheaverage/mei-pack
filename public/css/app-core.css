@@ -6867,8 +6867,9 @@ button.close {
   -ms-flex-item-align: center;
   align-self: center;
 }
-.align-center {
+.center {
   text-align: center;
+  margin: auto;
 }
 .align-left {
   text-align: left;
@@ -7138,12 +7139,12 @@ a {
   margin: 5px 0;
   border: none;
 }
-.mtrl-btn .mtrl-raised {
+.mtrl-btn.mtrl-raised {
   top: 0;
   left: 0;
   right: 0;
 }
-.mtrl-btn .mtrl-raised:Hover {
+.mtrl-btn.mtrl-raised:Hover {
   top: -1px;
   box-shadow: 0 2px 3px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.3);
 }

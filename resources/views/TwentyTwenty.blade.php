@@ -1,19 +1,20 @@
+
 <section id="IntroFlyAway">
-	<intro_fly_away></intro_fly_away>
+	<intro-fly-away></intro-fly-away>
 </section>
 
 <section id="Intro" class="header-section align-left hero blue-hero">
-	@include('front.partials.ipadIntro')
+	@include('front.twenty.ipadIntro')
 </section>
 
 <div class="divider"></div>
 
 <section id="Features">
-	@include('front.partials.features.ipadFeatures')
+	@include('front.twenty.ipadFeatures')
 </section><!--/#features-->
 
 <section id="Services" >
-	@include('front.partials.info.ipadDetails')
+	@include('front.twenty.ipadDetails')
 </section><!--/#services--> 
 
 
@@ -25,7 +26,7 @@
 <div class="divider"></div>
 
 <section id="Pricing">
-	@include('front.partials.info.ipadPricing')
+	@include('front.twenty.ipadPricing')
 </section> <!--/#pricing-->
 
 <section id="Testimonial">
@@ -33,7 +34,11 @@
 </section>   <!-- #testimonial -->
 
 <section id="get-in-touch" class="blue-hero">
-	@include('front.partials.cta.get-in-touch')
+	<blue-hero
+		blue="true"
+		id="5"
+	></blue-hero>
+	{{-- @include('front.partials.cta.get-in-touch') --}}
 </section><!--/#get-in-touch-->
 
 <div class="divider"></div>

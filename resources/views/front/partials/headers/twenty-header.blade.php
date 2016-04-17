@@ -1,7 +1,7 @@
 <nav 
   id="main-menu" 
   class="navbar-default navbar-fixed-top" 
-  :class="$root.truth.settings.animateHeader ? 'navbar-in' : ''" 
+  :class="$root.settings.animateHeader ? 'navbar-in' : ''" 
   role="banner"
 >
   <div class="container">
@@ -14,7 +14,7 @@
       </button>
 
       <div class="brand">
-      	<brand_box></brand_box>
+      	<brand-box></brand-box>
       </div>
 
     </div>

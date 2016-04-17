@@ -3,19 +3,27 @@
 	class="hero"
 	:class="blue ? 'blue-hero' : ''"	
 >
-<div class="container">
-  <div class="section-header">
-	  <h2 
-	  	class="section-title text-center wow fadeInDown"
-	  	v-html="title"
-	  ></h2>
-	  <p 
-	  	class="text-center wow fadeInDown" 
-	  	v-html="subTitle"
-	  ></p>
+  <div class="container ">
+    <div class="section-header center">
+  	  <h2 class="section-title wow fadeInDown">
+        <editable-copy
+          :name-of-parent="'BlueHero_'+id"
+          instance-number="0"
+          use-html="true" 
+          overide-text=""
+        ></editable-copy>
+      </h2>
+  	  <p class="wow fadeInDown" >
+        <editable-copy
+          :name-of-parent="'BlueHero_'+id"
+          instance-number="1"
+          use-html="true" 
+          overide-text=""
+        ></editable-copy>
+      </p>
+    </div>
   </div>
-  </div>
-  </div>
+</div>
 </template>
 
 <script>
@@ -24,21 +32,11 @@ export default {
     changeTabTitle: false,
     logHooksToConsole: false,
     watchMode: true,
-    props:['title', 'subTitle', 'blue'],
+    props:['blue', 'id'],
     data() {
       return {
-      	pageTitle: 'Section Header',
-
       }
     },
-
-    methods: {
-
-    },
-
-    ready() {
-
-    }
   }
 </script>
 

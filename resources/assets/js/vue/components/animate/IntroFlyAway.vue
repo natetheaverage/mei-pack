@@ -3,25 +3,24 @@
   	class="intro-fly-away" 
   	:class="flyaway"
   >
-
   	<blue-hero
 		  :blue="true"
-		  title="20/20 Investments"
-		  sub-title="Elegant medical investment research!"
+		  id="1"
 		></blue-hero>
-  	<!-- <div 
-  		class="fly-away-image"
-  		@click="$root.truth.settings.animateHeader = !$root.truth.settings.animateHeader" 
-  	> -->
-  	<img src="images/frontImages/headerImage.jpg" />
-  	
-    </div>
-    
-
+		<center>
+  	<div class="fly-away-image">
+  		<!-- @click="settings.animateHeader = !settings.animateHeader"  -->
+  		
+  			<img class=" mtrl-raised" src="images/frontImages/headerImage.jpg" />
+  		
+    </div></center>
   </div>
 </template>
 
 <script>
+
+import { toggleSetting } from '../../../vuex/actions.js'
+
 export default {
     name: 'intro-fly-away',
     changeTabTitle: false,
@@ -34,6 +33,13 @@ export default {
       	flyaway: '',
       }
     },
+
+    vuex:{
+		actions:{
+      toggleSetting
+		},
+	},
+
     computed:{
 
     },
@@ -43,6 +49,8 @@ export default {
     	var that = this;
     	var waypoint = $('#IntroFlyAway').waypoint(function(direction) {
 			  that.flyaway = 'fly-away'
+			  that.toggleSetting('animateHeader')
+			  console.log('Bang from waypoint intro flyaway')
 			}, {
 			  offset: '-5%',
 		  })
@@ -64,9 +72,9 @@ export default {
 	.fly-away
 		top -600px
 .intro-fly-away .section-title
-		font-size 80px
-		font-weight 900px
-		color #fff
+	font-size 80px
+	font-weight 900px
+	color #fff
 
 // iphone landscape
 @media (min-width 300px)
@@ -83,15 +91,26 @@ export default {
 	.hero
 		padding 100px 0
 	.fly-away-image
+		background-image: -webkit-linear-gradient(90deg, #2c8cb3 0%, #2caab3 100%);
 		height 250px
 		> img
+			margin 0 auto
 			max-height 250px
-//ipad and bigger
-@media (min-width 1000px)
+@media (min-width 850px)
 	.fly-away-image
-		height 400px
+		background-image: -webkit-linear-gradient(90deg, #2c8cb3 0%, #2caab3 100%);
+		height 325px
 		> img
-			max-height 400px
+			max-height 350px
+//ipad and bigger
+@media (min-width 1400px)
+	.fly-away-image
+		height 450px
+		width 100%
+		> img
+			max-width 1400px
+			max-height 450px
+			
 	.fly-away
 		top -600px
 </style>

@@ -1,6 +1,6 @@
 <div 
 	class="app-aside pad-all"
-	:class="$root.truth.settings.asideOpen ? 'aside-menu-enter' : 'aside-menu-leave'"
+	:class="$root.settings.asideOpen ? 'aside-menu-enter' : 'aside-menu-leave'"
 	v-if="true"
 >
 	<div v-if="false" class="waffel waffel-card">
