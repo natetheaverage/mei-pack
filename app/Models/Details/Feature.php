@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Details;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\Sortable;
@@ -28,13 +28,15 @@ class Feature extends Model
      * @var array
      */
     protected $fillable = [
-    	'title', 
-    	'sub_title', 
-    	'img', 
-    	'description',
-    	'button_label',
-    	'link',
-        'order_column', 'tag_line', 
+        'order_column',
+        'title',
+        'content',
+        'img',
+        'link',
+        'icon',
+        'parent',
+        'order_column', 
+        'tag_line', 
     	];
 
     	public function events()

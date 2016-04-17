@@ -1,10 +1,9 @@
-
-  <div class="section-header">
-    <h2 class="section-title text-center wow fadeInDown">Price</h2>
-    <p class="text-center wow fadeInDown">The basic package is FREE.<br> Get more insights in to company metrics for a small yearly charge.</p>
-  </div> 
+<blue-hero
+  :blue="false"
+  id="4"
+></blue-hero>
 <div class="container">
-  <div class="row">
+  <!-- <div class="row"> -->
     <div class="col-sm-6 col-md-6">
       <div class="wow zoomIn" data-wow-duration="400ms" data-wow-delay="0ms">
         <ul class="pricing">
@@ -61,5 +60,5 @@
         </ul>
       </div>
     </div>
-  </div>
+  <!-- </div> -->
 </div>

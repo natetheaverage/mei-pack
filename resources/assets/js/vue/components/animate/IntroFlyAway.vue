@@ -50,7 +50,6 @@ export default {
     	var waypoint = $('#IntroFlyAway').waypoint(function(direction) {
 			  that.flyaway = 'fly-away'
 			  that.toggleSetting('animateHeader')
-			  console.log('Bang from waypoint intro flyaway')
 			}, {
 			  offset: '-5%',
 		  })

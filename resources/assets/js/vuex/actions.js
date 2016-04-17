@@ -62,6 +62,10 @@ export const setCopy = ({dispatch}, payload) => {
     dispatch(types.SET_COPY, payload)
 }
 
+export const setFeatures = ({dispatch}, payload) => {
+    dispatch(types.SET_FEATURES, payload)
+}
+
 export const setPage = function ({ dispatch, state}) {
   dispatch(types.SET_PAGE, state )
 }

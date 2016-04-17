@@ -1,6 +1,5 @@
 <div class="container-wrapper">
   <div class="container">
-    <div class="row">
       <div class="col-md-6 col-sm-offset-2">
         @include('front.partials.contact.quick-form')
       </div>
@@ -39,7 +38,6 @@
         </div>
         @include('front.partials.contact.social')
       </div>
-    </div>
   </div>
 </div>
 

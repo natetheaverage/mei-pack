@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import menus from './modules/menus.js'
 import copyText from './modules/copyText.js'
+import features from './modules/features.js'
 import settings from './modules/settings.js'
 
 import Persistance from '../api/vuex/persistance.js'
@@ -86,6 +87,7 @@ export default new Vuex.Store({
     menus,
     copyText,
     settings,
+    features,
   },
   state,
   mutations

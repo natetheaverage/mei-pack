@@ -6,7 +6,7 @@ return array(
 
 'single' => 'Feature',
 
-'model' => 'App\Models\Feature',
+'model' => 'App\Models\Details\Feature',
 
 'form_width' => 600,
 
@@ -14,25 +14,21 @@ return array(
     'order_column' => array(
         'title' => 'Order',
     ),
-    'title' => array(
-        'title' => 'Title',
-        ),
-    'sub_title' => array(
-        'title' => 'Sub Title',
-        ),
+    'title',
+    'content',
     'img' => array(
         'title' => 'Image',
-        'output' => '<img src="/images/cta3/(:value)" height="100px"/>',
-        ),
-    'description' => array(
-        'title' => 'Description',
+        'output' => '<img src="/images/features/(:value)" height="100px"/>',
         ),
     'link' => array(
-        'title' => 'Calandar Link',
-        'output' => '<a href="(:value)"  target="_blank">(:value)</a>',
+        'title' => 'Link',
+        'output' => '<a href="(:value)" target="_blank">(:value)</a>',
         ),
-    'button_label' => array(
-        'title' => 'Button Label',
+    'icon' => array(
+        'title' => 'Icon',
+        ),
+    'parent' => array(
+        'title' => 'Parent',
         ),
     ),
 
@@ -41,25 +37,25 @@ return array(
         'title' => 'Title',
         'type' => 'text',
         ),
-    'sub_title' => array(
-        'title' => 'Sub Title',
-        'type' => 'text',
+    'content' => array(
+        'title' => 'Content',
+        'type' => 'wysiwyg',
         ),
     'img' => array(
         'title' => 'Image',
         'type' => 'image',
-        'location' => './images/cta3/',
+        'location' => './images/features/',
         ),
-    'description' => array(
-        'title' => 'Description',
-        'type' => 'wysiwyg',
-        ),
-    'link' => array(
-        'title' => 'Calandar Link',
+    'icon' => array(
+        'title' => 'Icon',
         'type' => 'text',
         ),
-    'button_label' => array(
-        'title' => 'Button Label',
+    'link' => array(
+        'title' => 'Link',
+        'type' => 'text',
+        ),
+    'parent' => array(
+        'title' => 'Parent',
         'type' => 'text',
         ),
     'events' => array(

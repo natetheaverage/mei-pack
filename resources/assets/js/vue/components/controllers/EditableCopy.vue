@@ -51,8 +51,10 @@ export default {
         html: this.useHtml,
         editMode: this.$root.settings.editMode,
         parent: this.nameOfParent,
-        routePrefix: this.$root.copy.texts[this.$root.baseView][this.findNameOfParent()],
-        copyObject:{},
+        routePrefix: this.$root.copy[this.$root.baseView][this.findNameOfParent()],
+        copyObject:{
+          copy: this.overideText,
+        },
       }
     },
 
@@ -94,9 +96,8 @@ export default {
 
     ready() {
       this.parent = this.findNameOfParent()
-      this.$watch('$root.getCopy', function(){
-        console.log(this.routePrefix)
-        console.log(this.instanceNumber)
+      this.copyObject = this.routePrefix[this.instanceNumber]
+      this.$watch('$root.copy', function(){
         this.copyObject = this.routePrefix[this.instanceNumber]
       }, { deep: true })
     },

@@ -4,7 +4,6 @@
 ></blue-hero>
 
 <div class="container">
-  <div class="row">
     <div class="features">
       <div 
         class="col-md-4 col-sm-6 wow fadeInUp" 
@@ -71,11 +70,12 @@
             </div>
           </div>
       </div><!--/.col-md-4-->
-  
-    </div>
-  </div><!--/.row--> 
-  <center><a 
-      class="mtrl-btn mtrl-raised bg-green" 
-      href="http://www.apple.com"
-  >Download Now</a></center> 
+    
+    <center>
+      <a 
+        class="mtrl-btn mtrl-raised bg-green flex-center" 
+        href="http://www.apple.com"
+      >Download Now</a>
+    </center>
+  </div>
 </div><!--/.container-->

@@ -2,25 +2,25 @@
   <div class="row flex pad-all">
     <div class="col-sm-9">
       <h1>
-          <editable-copy
-            name-of-parent="MEiApp"
-            instance-number="2"
-            use-html="true" 
-            overide-text=""
-          ></editable-copy>
-          </h1> 
+        <editable-copy
+          :name-of-parent="'MEiApp_'+id"
+          instance-number="0"
+          use-html="true" 
+          overide-text=""
+        ></editable-copy>
+      </h1> 
       <h2>
-          <editable-copy
-            name-of-parent="MEiApp"
-            instance-number="3"
-            use-html="true" 
-            overide-text=""
-          ></editable-copy>
+        <editable-copy
+          :name-of-parent="'MEiApp_'+id"
+          instance-number="1"
+          use-html="true" 
+          overide-text=""
+        ></editable-copy>
       </h2>
       <p>
         <editable-copy
-          name-of-parent="MEiApp"
-          instance-number="4"
+          :name-of-parent="'MEiApp_'+id"
+          instance-number="2"
           use-html="true" 
           overide-text=""
         ></editable-copy>
