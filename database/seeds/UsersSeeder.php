@@ -45,18 +45,18 @@ class UsersSeeder extends Seeder {
 	private function createDemos()
 	{
 		$user = User::create([
-			'name'                  => 'JJ.Schmidt',
-			'email'                     => "demo@natetheaverage.com",
-			'password'                  => bcrypt('demo'),
+			'name'                  => 'Doug.T',
+			'email'                     => "dougmt_98@yahoo.com",
+			'password'                  => bcrypt('my temporary password'),
 		]);
     $user->assignRole('admin');
 
 		$user = User::create([
-			'name'                  => 'JulieSauce',
-			'email'                     => "demo2@natetheaverage.com",
-			'password'                  => bcrypt('demo'),
+			'name'                  => 'Brian.T',
+			'email'                     => "bryanthompson@itwiseus.com",
+			'password'                  => bcrypt('a temp password'),
 		]);
-    $user->assignRole('agent');
+    $user->assignRole('admin');
 
 		$user = User::create([
 			'name'                  => 'Jett.Jones',

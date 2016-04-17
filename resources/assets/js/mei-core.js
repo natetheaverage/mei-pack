@@ -40,6 +40,9 @@ Vue.component('animatedWords', AnimatedWords)
 import IntroFlyAway from './vue/components/animate/IntroFlyAway.vue';
 Vue.component('introFlyAway', IntroFlyAway) 
 
+import MeiAdminLogin from './vue/components/auth/MeiAdminLogin.vue';
+Vue.component('meiAdminLogin', MeiAdminLogin)
+
 // import DatesBox from './vue/components/events/DatesBox.vue';
 // Vue.component('dates_box', DatesBox)
 // import EventPage from './vue/components/events/EventPage.vue';

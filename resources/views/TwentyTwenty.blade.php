@@ -43,7 +43,7 @@
 
 <div class="divider"></div>
 
-<section id="contact">
+<section id="Contact">
 	@include('front.partials.contact.contact')
 </section>
 

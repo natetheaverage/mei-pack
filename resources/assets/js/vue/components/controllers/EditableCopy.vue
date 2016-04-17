@@ -81,6 +81,13 @@ export default {
         this.$http.put('/api/copyText/'+data.id, { data },
           function (data, status, request) {
             console.log("%c saveVersion() in EditableCopy.vue",that.$root.settings.logGood);
+            // $.niftyNoty({
+            //   type: 'success',
+            //   icon : 'fa fa-check',
+            //   message : data+' <strong> Saved!</strong>. ',
+            //   container : 'page',
+            //   timer : 3000
+            // });
         }).error(function (data, status, request) {
           console.log("%c saveVersion() Err in EditableCopy",that.$root.settings.logErr);
         })

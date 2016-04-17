@@ -17,7 +17,7 @@ class CopyTextController extends Controller
      */
     public function __construct(CopyText $copyText)
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
         $this->copyText = $copyText;
     }
 
