@@ -46,7 +46,7 @@ Route::group(['prefix' => 'api'], function () {
   //Route::resource('employees', 'EmployeeController');
   //Route::resource('customers', 'CustomerController');
   Route::resource('copyText', 'CopyTextController');
-  Route::resource('feature', 'FeatureController');
+  Route::resource('feature', 'FeaturesController');
   //Route::get('tag', function(){
   //   $tags = App\Models\Tag::all();
   //   return $tags;

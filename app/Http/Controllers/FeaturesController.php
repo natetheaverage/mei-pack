@@ -6,7 +6,7 @@ use App\Models\Details\Feature;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 
-class FeatureController extends Controller
+class FeaturesController extends Controller
 {
    public $feature;
 

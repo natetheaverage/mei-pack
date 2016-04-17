@@ -8280,6 +8280,9 @@ h2 > span {
 #Contact #main-contact-form h3 {
   margin-top: 0;
 }
+#Contact .contact-form {
+  padding-top: 50px;
+}
 @-webkit-keyframes scaleIn {
   0% {
     opacity: 0;

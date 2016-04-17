@@ -67,7 +67,6 @@ elixir(function(mix) {
 
     .scripts([
         './resources/assets/vendor/waypoints.min.js',
-        './node_modules/waypoints/lib/waypoints.debug.js',
     ], './public/js/front-vendor.js')
 
 
