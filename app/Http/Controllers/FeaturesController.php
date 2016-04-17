@@ -17,7 +17,7 @@ class FeatureController extends Controller
      */
     public function __construct(Feature $feature)
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
         $this->feature = $feature;
     }
 
@@ -28,6 +28,7 @@ class FeatureController extends Controller
      */
     public function index()
     {
+
         return ['Features', $this->feature->all()];
     }
 

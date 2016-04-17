@@ -151,7 +151,7 @@ export default {
       this.toggleSetting('primaryOpen')
     },
 
-		login(e) {
+		login(e) { 
 			if(this.settings.loggedIn){
         this.toggleSetting('loggedIn') 
         this.toggleSetting('editMode') 
