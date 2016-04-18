@@ -64,7 +64,7 @@ class CommunicationsController extends Controller
 
 
         
-    }
+    
 
     /**
      * Display the specified resource.

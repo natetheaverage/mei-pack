@@ -89,7 +89,7 @@ return array(
 		//if(Auth::check()){
 			return true;
 		//}else{
-dd(\Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers::user());
+//dd(\Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers::user());
 		//}
 	},
 

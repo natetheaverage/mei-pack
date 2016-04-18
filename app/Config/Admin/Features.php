@@ -16,7 +16,7 @@ return array(
     ),
     'title',
     'content',
-    'img' => array(
+    'image' => array(
         'title' => 'Image',
         'output' => '<img src="/images/features/(:value)" height="100px"/>',
         ),
@@ -41,7 +41,7 @@ return array(
         'title' => 'Content',
         'type' => 'wysiwyg',
         ),
-    'img' => array(
+    'image' => array(
         'title' => 'Image',
         'type' => 'image',
         'location' => './images/features/',

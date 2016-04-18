@@ -68,33 +68,34 @@ return array(
 	'menu' => [
 		'User Assets' => [
 			'User',
-			'Profiles',
+			//'Profiles',
 			'Roles',
 			'Permissions',
 		],
 		'Copy & Communication' => [
 			'CopyText', 
-			'News', 
-			'Conversations', 
+			//'News', 
+			//'Conversations', 
 			'Messages', 
 		],
-		'Events'  => [
-			'Events', 
-			'Dates', 
-			'Features', 
-			'Prices', 
-			'Discounts', 
-			'Tickets'
-		],
-		'Images & Files' => [
-			'ImageGallery',  
-			'ImageFiles', 
-			'PdfFiles',
-			'Pdfs', 
-		], 
-		'Settings' => [
-			'settings.site'
-		], 
+		'Features',
+		// 'Events'  => [
+		// 	'Events', 
+		// 	'Dates', 
+		// 	'Features', 
+		// 	'Prices', 
+		// 	'Discounts', 
+		// 	'Tickets'
+		// ],
+		// 'Images & Files' => [
+		// 	'ImageGallery',  
+		// 	'ImageFiles', 
+		// 	'PdfFiles',
+		// 	'Pdfs', 
+		// ], 
+		// 'Settings' => [
+		// 	'settings.site'
+		// ], 
 
 	],
 

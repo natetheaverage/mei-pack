@@ -46,7 +46,7 @@
         type="submit" 
         v-on:click="contactForm" 
         class="btn btn-primary" 
-        v-if="settings.contactFormReady"
+        v-if="contactReady"
     >Send Message</button> 
-    <span v-if="!settings.contactFormReady">All fields required to send message</span>
+    <span v-if="!contactReady">All fields required to send message</span>
 </form>
