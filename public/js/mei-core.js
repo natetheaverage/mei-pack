@@ -18136,7 +18136,7 @@ exports.default = {
             swal.showInputError("Enter a password!");
             return false;
           };
-          if (inputValue === "l") {
+          if (inputValue === "im ok") {
             console.log('Password Correct');
             that.toggleSetting('loggedIn');
             that.toggleSetting('editMode');
@@ -18170,7 +18170,9 @@ exports.default = {
         console.log("%cloadMenus() menu data fetched in Truth", this.settings.logGood);
         that.setMenu('adminPrimary', menu);
 
-        nifty.mainNav.unbindSmallNav();
+        if (that.base_view == 'dashboard') {
+          nifty.mainNav.unbindSmallNav();
+        };
       }).error(function (data, status, request) {
         console.log("%c loadMenus() Errrrrr in Truth", this.$root.logErr);
       });
@@ -18632,6 +18634,12 @@ module.exports = {
 			number: "123-456-7890",
 			ext: ""
 		}, {
+			label: "Message",
+			type: "tech",
+			active: false,
+			number: "123-453-7890",
+			ext: ""
+		}, {
 			label: "Fax",
 			type: "fax",
 			active: false,
@@ -18686,7 +18694,6 @@ module.exports = {
   // These two are for saving method
   front: {
     MEiApp_0: [{
-      id: 1,
       copy: 'Welcome to the Internets',
       versionList: '{0:0}',
       version: 0,
@@ -18696,7 +18703,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 0
     }, {
-      id: 2,
       copy: 'Please enjoy these details',
       versionList: '{0:1}',
       version: 0,
@@ -18706,7 +18712,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 1
     }, {
-      id: 3,
       copy: '',
       versionList: '{0:1}',
       version: 0,
@@ -18716,7 +18721,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 2
     }, {
-      id: 4,
       copy: '',
       versionList: '{0:1}',
       version: 0,
@@ -18726,7 +18730,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 3
     }, {
-      id: 5,
       copy: '',
       versionList: '{0:1}',
       version: 0,
@@ -18737,7 +18740,6 @@ module.exports = {
       instance_number: 4
     }],
     BlueHero_1: [{
-      id: 6,
       copy: 'Hero Header #1',
       versionList: '{0:0}',
       version: 0,
@@ -18747,7 +18749,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 0
     }, {
-      id: 7,
       copy: 'Hero Sub Title #1',
       versionList: '{0:1}',
       version: 0,
@@ -18758,7 +18759,6 @@ module.exports = {
       instance_number: 1
     }],
     BlueHero_2: [{
-      id: 8,
       copy: 'Hero Header #2',
       versionList: '{0:0}',
       version: 0,
@@ -18768,7 +18768,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 0
     }, {
-      id: 9,
       copy: 'Hero Sub Title #2',
       versionList: '{0:1}',
       version: 0,
@@ -18779,7 +18778,6 @@ module.exports = {
       instance_number: 1
     }],
     BlueHero_3: [{
-      id: 10,
       copy: 'Hero Header #3',
       versionList: '{0:0}',
       version: 0,
@@ -18789,7 +18787,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 0
     }, {
-      id: 11,
       copy: 'Hero Sub Title #3',
       versionList: '{0:1}',
       version: 0,
@@ -18800,7 +18797,6 @@ module.exports = {
       instance_number: 1
     }],
     BlueHero_4: [{
-      id: 12,
       copy: 'Hero Header #4',
       versionList: '{0:0}',
       version: 0,
@@ -18810,7 +18806,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 0
     }, {
-      id: 13,
       copy: 'Hero Sub Title #4',
       versionList: '{0:1}',
       version: 0,
@@ -18821,7 +18816,6 @@ module.exports = {
       instance_number: 1
     }],
     BlueHero_5: [{
-      id: 14,
       copy: 'Hero Header #5',
       versionList: '{0:0}',
       version: 0,
@@ -18831,7 +18825,6 @@ module.exports = {
       base_view: 'front',
       instance_number: 0
     }, {
-      id: 15,
       copy: 'Hero Sub Title #5',
       versionList: '{0:1}',
       version: 0,
@@ -19214,6 +19207,7 @@ module.exports = {
   editMode: false,
   editAll: false,
   dataMode: false,
+  persisted: true,
   asideOn: false,
   primaryOn: false,
 
@@ -19611,6 +19605,7 @@ exports.default = {
     // persist vux on update
 
     persistCopyText: function persistCopyText(e) {
+      this.$root.setSetting('persisted', false);
       this.setCopyText(this.copyObject, [e.target.value, this.parent]);
     },
     saveVersion: function saveVersion() {
@@ -19619,6 +19614,7 @@ exports.default = {
       console.log(data.copy);
       this.$http.put('/api/copyText/' + data.id, { data: data }, function (data, status, request) {
         console.log("%c saveVersion() in EditableCopy.vue", that.$root.settings.logGood);
+        this.$root.setSetting('persisted', true);
         // $.niftyNoty({
         //   type: 'success',
         //   icon : 'fa fa-check',

@@ -49,21 +49,23 @@ class CopyTextController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update($id, Request $request)
-    {
-        $copyText = $request->all();
-        //dd($copyText);
-        $existingRow = $this->copyText->where('id', $copyText['data']['id'])->get(); 
-        if($existingRow->count() > 0){
-            $this->copyText->where('id', $copyText['data']['id'])->update($copyText['data']);
-        }else{
-            $this->copyText->create($copyText['data']);
-        }
-        //$this->copyText->create($copyText);
-        //$this->copyText->firstOrNew($copyText['data']);
-        //$this->copyText->update($copyText['data']);
-        return $this->copyText->all();
+  public function update($id, Request $request)
+  {
+    $copyText = $request->all();
+    $existingRow = $this->copyText->
+      where('parent_name', $copyText['data']['parent_name'])->
+      where('instance_number', $copyText['data']['instance_number'])->
+      get(); 
+
+    if($existingRow->count() > 0){
+
+      $this->copyText->where('id', $copyText['data']['id'])->update($copyText['data']);
+      
+    }else{
+      $this->copyText->create($copyText['data']);
     }
+    return $this->copyText->all();
+  }
 
     /**
      * Remove the specified resource from storage.

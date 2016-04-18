@@ -69,18 +69,13 @@ elixir(function(mix) {
         './resources/assets/vendor/waypoints.min.js',
     ], './public/js/front-vendor.js')
 
-
-
     .styles([
         './resources/assets/vendor/AnimatedLetters/css/demo.css',
         './resources/assets/twenty-plugins/demo-phone.css',
         './resources/assets/twenty-plugins/ipad3dmenu.css',
     ], './public/css/twenty-twenty-vendor.css')
 
-
     .task('test')
-
-
 
     .browserSync();
 });

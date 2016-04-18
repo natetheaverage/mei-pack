@@ -173,7 +173,7 @@ export default {
               swal.showInputError("Enter a password!");     
               return false   
             };
-            if (inputValue === "l") {
+            if (inputValue === "im ok") {
                 console.log('Password Correct')
               	that.toggleSetting('loggedIn') 
   							that.toggleSetting('editMode') 
@@ -209,7 +209,7 @@ export default {
           console.log("%cloadMenus() menu data fetched in Truth",this.settings.logGood);
           that.setMenu('adminPrimary', menu);
 
-          nifty.mainNav.unbindSmallNav();
+          if(that.base_view == 'dashboard'){ nifty.mainNav.unbindSmallNav() };
       }).error(function (data, status, request) {
         console.log("%c loadMenus() Errrrrr in Truth",this.$root.logErr);
       })

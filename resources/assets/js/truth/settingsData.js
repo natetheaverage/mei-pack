@@ -16,6 +16,7 @@ module.exports = {
   editMode: false,  
   editAll: false,
   dataMode: false,
+  persisted: true,
   asideOn: false,
   primaryOn: false,
 

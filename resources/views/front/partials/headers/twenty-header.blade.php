@@ -30,23 +30,34 @@
         <li class="scroll"><a href="#Pricing">Price</a></li>
         <li class="scroll"><a href="#Contact">Contact</a></li>
         @hasrole('admin')
-        <li class="scroll"><a v-on:click="login" href="#">Edit</a></li>
-        <li class="scroll"><a href="tickets">Errors</a></li>
-        <li class="scroll"><a href="modelAdmin">Admin</a></li>
+          <li class="scroll"><a v-on:click="login" href="#">Edit</a></li>
+          <li class="scroll"><a href="tickets">Errors</a></li>
+          <li class="scroll"><a href="modelAdmin">Admin</a></li>
         @else
-        <li class="scroll"><a href="auth/login">Login</a></li>
+          <li class="scroll"><a href="auth/login">Login</a></li>
         @endrole
         @hasrole('average')
-        <li class="scroll"><a href="dashboard">Admin-2</a></li>
+          <li class="scroll"><a href="dashboard">Dashboard</a></li>
         @endrole
       </ul>
     </div>
     @hasrole('admin')
-<a class="mtrl-btn mtrl-raised bg-orange"
-style="position:fixed; top:120px; left:20px; width:100px"
-v-if="settings.loggedIn"
-href=""> SAVE </a>
-@endrole
+    <div v-if="settings.loggedIn">
+      <button  
+        v-if="!settings.persisted"
+        class="mtrl-btn mtrl-raised bg-orange align-right"
+        style="position:fixed; left:inherit; right:30px; top:120px; "
+      > SAVE NOW </button>
+      <button  
+        v-if="settings.persisted"
+        class="mtrl-btn mtrl-raised bg-purple"
+        style="position:fixed; left:inherit; right:30px; top:120px; "
+      > ALL SAVED </button>
+    </div>
+
+
+
+    @endrole
 	</div><!--/.container-->
 </nav><!--/nav-->
 

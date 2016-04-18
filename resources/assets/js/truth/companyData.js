@@ -22,6 +22,12 @@ module.exports = {
 			number: "123-456-7890",
 			ext: "",
 		},{
+			label:"Message",
+			type: "tech",
+			active: false,
+			number: "123-453-7890",
+			ext: "",
+		},{
 			label:"Fax",
 			type: "fax",
 			active: false,

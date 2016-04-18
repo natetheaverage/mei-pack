@@ -3,7 +3,6 @@ module.exports = {
   front:{
     MEiApp_0:[
       {
-        id: 1,
         copy: 'Welcome to the Internets',
         versionList: '{0:0}',
         version: 0,
@@ -13,7 +12,6 @@ module.exports = {
         base_view: 'front',
         instance_number: 0,
       },{
-        id: 2,
         copy: 'Please enjoy these details',
         versionList: '{0:1}',
         version: 0,
@@ -23,8 +21,7 @@ module.exports = {
         base_view: 'front',
         instance_number: 1,
       },{
-        id: 3,
-        copy: '',
+             copy: '',
         versionList: '{0:1}',
         version: 0,
         height: 2,
@@ -33,7 +30,6 @@ module.exports = {
         base_view: 'front',
         instance_number: 2,
       },{
-        id: 4,
         copy: '',
         versionList: '{0:1}',
         version: 0,
@@ -43,7 +39,6 @@ module.exports = {
         base_view: 'front',
         instance_number: 3,
       },{
-        id: 5,
         copy: '',
         versionList: '{0:1}',
         version: 0,
@@ -56,7 +51,6 @@ module.exports = {
     ],
     BlueHero_1:[
       {
-        id: 6,
         copy: 'Hero Header #1',
         versionList: '{0:0}',
         version: 0,
@@ -66,7 +60,6 @@ module.exports = {
         base_view: 'front',
         instance_number: 0,
       },{
-        id: 7,
         copy: 'Hero Sub Title #1',
         versionList: '{0:1}',
         version: 0,
@@ -79,7 +72,6 @@ module.exports = {
     ],
     BlueHero_2:[
       {
-        id: 8,
         copy: 'Hero Header #2',
         versionList: '{0:0}',
         version: 0,
@@ -89,7 +81,6 @@ module.exports = {
         base_view: 'front',
         instance_number: 0,
       },{
-        id: 9,
         copy: 'Hero Sub Title #2',
         versionList: '{0:1}',
         version: 0,
@@ -102,7 +93,6 @@ module.exports = {
     ],
     BlueHero_3:[
       {
-        id: 10,
         copy: 'Hero Header #3',
         versionList: '{0:0}',
         version: 0,
@@ -112,7 +102,6 @@ module.exports = {
         base_view: 'front',
         instance_number: 0,
       },{
-        id: 11,
         copy: 'Hero Sub Title #3',
         versionList: '{0:1}',
         version: 0,
@@ -125,7 +114,6 @@ module.exports = {
     ],
     BlueHero_4:[
       {
-        id: 12,
         copy: 'Hero Header #4',
         versionList: '{0:0}',
         version: 0,
@@ -135,7 +123,6 @@ module.exports = {
         base_view: 'front',
         instance_number: 0,
       },{
-        id: 13,
         copy: 'Hero Sub Title #4',
         versionList: '{0:1}',
         version: 0,
@@ -148,7 +135,6 @@ module.exports = {
     ],
     BlueHero_5:[
       {
-        id: 14,
         copy: 'Hero Header #5',
         versionList: '{0:0}',
         version: 0,
@@ -158,7 +144,6 @@ module.exports = {
         base_view: 'front',
         instance_number: 0,
       },{
-        id: 15,
         copy: 'Hero Sub Title #5',
         versionList: '{0:1}',
         version: 0,

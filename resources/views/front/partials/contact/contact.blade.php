@@ -26,19 +26,19 @@
                 <span  v-text="company.contacts.emails[0].emailAddress">email 0</span>
               </a>
             </div>
-            <div v-if="company.contacts.phone[0].active" >
+            <div v-if="company.contacts.phones[0].active" >
               <br>
               <abbr title="Phone">
                 <span v-text="company.contacts.phones[0].label">phone 0 label</span>:&nbsp;
               </abbr> <span v-text="company.contacts.phones[0].number">phone 0 number</span>
             </div>
-            <div v-if="company.contacts.phone[1].active" >
+            <div v-if="company.contacts.phones[1].active" >
               <br>
               <abbr title="Phone">
                 <span v-text="company.contacts.phones[1].label">phone 1 label</span>:&nbsp;
               </abbr> <span v-text="company.contacts.phones[1].number">phone 1 number</span> 
             </div>
-            <div v-if="company.contacts.phone[2].active" >
+            <div v-if="company.contacts.phones[2].active" >
               <br>
               <abbr title="Phone">
                 <span v-text="company.contacts.phones[2].label">phone 2 label</span>:&nbsp;

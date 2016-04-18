@@ -71,6 +71,7 @@ export default {
     	// persist vux on update
 
       persistCopyText(e) {
+        this.$root.setSetting('persisted', false)
         this.setCopyText(this.copyObject, [e.target.value, this.parent])
       },
 
@@ -81,6 +82,7 @@ export default {
         this.$http.put('/api/copyText/'+data.id, { data },
           function (data, status, request) {
             console.log("%c saveVersion() in EditableCopy.vue",that.$root.settings.logGood);
+            this.$root.setSetting('persisted', true)
             // $.niftyNoty({
             //   type: 'success',
             //   icon : 'fa fa-check',
