@@ -149,7 +149,6 @@ export default {
       }).submit();
     },
 
-
     contactForm(e){
             e.preventDefault();
             var contact = {
