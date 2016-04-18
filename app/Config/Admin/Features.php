@@ -41,7 +41,7 @@ return array(
         'title' => 'Content',
         'type' => 'wysiwyg',
         ),
-    'img' => array(
+    'image' => array(
         'title' => 'Image',
         'type' => 'image',
         'location' => './images/features/',
