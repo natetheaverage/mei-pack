@@ -6,7 +6,7 @@ return array(
 
 'single' => 'Message',
 
-'model' => 'App\Models\Message',
+'model' => 'App\Models\Communications\Message',
 
 'form_width' => 1200,
 
