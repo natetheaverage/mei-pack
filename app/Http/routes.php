@@ -38,7 +38,7 @@ Route::resource('/dashboard', 'DashboardController');
 */
 Route::group(['prefix' => 'api'], function () {
   Route::resource('interfaceObjects', 'InterfaceObjectsController');
-  Route::post('mailForm', 'ComunicationsController@mailForm');
+  Route::post('mailForm', 'CommunicationsController');
   //Route::resource('conversations', 'ConversationController');
   //Route::resource('messages', 'MessageController');
   //Route::resource('projects', 'ProjectController');
