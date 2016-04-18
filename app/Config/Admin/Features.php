@@ -44,7 +44,7 @@ return array(
     'image' => array(
         'title' => 'Image',
         'type' => 'image',
-        'location' => './images/features/',
+        'location' => '/images/features/',
         ),
     'icon' => array(
         'title' => 'Icon',

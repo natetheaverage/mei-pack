@@ -40,8 +40,8 @@ export default {
       setCopy,
       setFeatures,
       setMenu,
-		},
-	},
+    },
+  },
 
   computed: {
     contactReady(){
@@ -50,14 +50,15 @@ export default {
           this.subject != '' && this.subject.length >= 10 &&
           this.message != '' && this.message.length >= 10 
         ){
+        this.setSetting('contactFormReady', true)
         return true;
       }
+      this.setSetting('contactFormReady', false)
       return false;
     }
-  },
+  }, 
 
-
-	methods:{
+  methods:{
     //objectMethods: require('./vue/control/objectMethods.js'),
     addNavButton(){
       this.navPage.menuLayout.push({
@@ -179,7 +180,6 @@ export default {
       this.$broadcast('checkButton', button)
     },
 
-    
 
 		save() {
 			// console.log('loggedIn ?');
@@ -285,6 +285,10 @@ export default {
     this.loadMenus()
     this.loadCopy()
     this.loadFeatures()
+    //this.copyObject = this.routePrefix[this.instanceNumber]
+    this.$watch('getPublicSettings', function(){
+      this.settings = this.getPublicSettings
+    }, { deep: true })
   }
 
 }
