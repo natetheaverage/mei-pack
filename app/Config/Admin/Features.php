@@ -16,7 +16,7 @@ return array(
     ),
     'title',
     'content',
-    'img' => array(
+    'image' => array(
         'title' => 'Image',
         'output' => '<img src="/images/features/(:value)" height="100px"/>',
         ),
