@@ -17986,10 +17986,18 @@ exports.default = {
       editMode: false,
       editAll: false,
       dataMode: false,
-      baseView: 'front'
+      baseView: 'front',
+      //copy: this.copy,
+
+      // mail form fields
+      contactResource: this.$resource('contact'),
+      registrationVisible: true,
+      senderName: '',
+      senderEmail: '',
+      subject: '',
+      message: ''
     };
   },
-  //copy: this.copy,
 
   store: _store2.default,
   vuex: {
@@ -18007,6 +18015,15 @@ exports.default = {
       setCopy: _actions.setCopy,
       setFeatures: _actions.setFeatures,
       setMenu: _actions.setMenu
+    }
+  },
+
+  computed: {
+    contactReady: function contactReady() {
+      if (this.senderName != '' && this.senderName.length >= 4 && this.senderEmail != '' && this.senderEmail.indexOf('@') > -0 && this.subject != '' && this.subject.length >= 10 && this.message != '' && this.message.length >= 10) {
+        return true;
+      }
+      return false;
     }
   },
 
@@ -18091,6 +18108,24 @@ exports.default = {
           console.log("Something went wrong with (mainnavbutton.js->addButton->objectArray.save) Error Stat = " + status + " here is the request = " + request);
         });
       }).submit();
+    },
+    contactForm: function contactForm(e) {
+      e.preventDefault();
+      var contact = {
+        name: this.senderName,
+        email: this.senderEmail,
+        subject: this.subject,
+        message: this.message
+      };
+
+      var form_status = $('<div class="form_status"></div>');
+      $('#main-contact-form').prepend(form_status.html('<p><i class="fa fa-spinner fa-spin"></i> Email is sending...</p>').fadeIn());
+
+      this.contactResource.save(contact, function (data) {
+        swal('Thank you!', 'We will be in touch.', 'success');
+      }).error(function (data, status, request) {
+        form_status.html('<p class="text-danger">There was a problem sending your message please try an email or call</p>').delay(3000).fadeOut();
+      });
     },
 
 
@@ -19197,6 +19232,7 @@ module.exports = {
   primaryOpen: false,
   asideOpen: false,
   animateHeader: false,
+  contactFormReady: false,
 
   appName: 'MEi',
   currentRoute: "home",

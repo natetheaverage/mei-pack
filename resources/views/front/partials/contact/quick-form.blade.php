@@ -9,39 +9,44 @@
     <div class="form-group">
         <input 
             type="text" 
-            v-model="senderName"
             name="name" 
-            class="form-control" 
             placeholder="Name" 
+            v-model="senderName"
+            class="form-control" 
             required>
     </div>
     <div class="form-group">
         <input 
             type="email" 
-            v-model="senderEmail"
             name="email" 
-            class="form-control" 
             placeholder="Email" 
+            class="form-control" 
+            v-model="senderEmail"
             required>
     </div>
     <div class="form-group">
         <input 
             type="text" 
-            v-model="subject"
             name="subject" 
+            v-model="subject"
             class="form-control" 
             placeholder="Subject" 
             required>
     </div>
     <div class="form-group">
         <textarea 
+            rows="8" 
             name="message" 
             v-model="message"
             class="form-control" 
-            rows="8" 
             placeholder="Message" 
             required></textarea>
     </div>
-    <button type="submit" v-on:click="contactForm" class="btn btn-primary" v-if="contactReady">Send Message</button> 
-    <span v-if="!contactReady">All fields required to send message</span>
+    <button 
+        type="submit" 
+        v-on:click="contactForm" 
+        class="btn btn-primary" 
+        v-if="settings.contactFormReady"
+    >Send Message</button> 
+    <span v-if="!settings.contactFormReady">All fields required to send message</span>
 </form>

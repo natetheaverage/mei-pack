@@ -17,6 +17,14 @@ export default {
       dataMode: false,
       baseView: 'front',
       //copy: this.copy,
+
+      // mail form fields
+      contactResource: this.$resource('contact'),
+      registrationVisible: true,
+      senderName: '',
+      senderEmail: '',
+      subject: '',
+      message: '',
     }
   },
 	store,
@@ -34,6 +42,20 @@ export default {
       setMenu,
 		},
 	},
+
+  computed: {
+    contactReady(){
+      if( this.senderName != '' && this.senderName.length >= 4 && 
+          this.senderEmail != '' && this.senderEmail.indexOf('@') >- 0 &&
+          this.subject != '' && this.subject.length >= 10 &&
+          this.message != '' && this.message.length >= 10 
+        ){
+        return true;
+      }
+      return false;
+    }
+  },
+
 
 	methods:{
     //objectMethods: require('./vue/control/objectMethods.js'),
@@ -124,6 +146,30 @@ export default {
           });
       }).submit();
     },
+
+
+    contactForm(e){
+            e.preventDefault();
+            var contact = {
+                name: this.senderName,
+                email: this.senderEmail,
+                subject: this.subject,
+                message: this.message,
+            }
+
+            var form_status = $('<div class="form_status"></div>');
+            $('#main-contact-form').prepend( form_status.html('<p><i class="fa fa-spinner fa-spin"></i> Email is sending...</p>').fadeIn() );
+           
+            this.contactResource.save( contact, 
+            function (data) 
+            { 
+                swal('Thank you!', 'We will be in touch.', 'success');
+            }
+            ).error(function (data, status, request) 
+            { 
+               form_status.html('<p class="text-danger">There was a problem sending your message please try an email or call</p>').delay(3000).fadeOut();
+            })  
+        },
 
     /*
     * Called from buttons dispaches 

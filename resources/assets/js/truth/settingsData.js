@@ -6,6 +6,8 @@ module.exports = {
 	primaryOpen: false,
 	asideOpen: false,
 	animateHeader: false,
+  contactFormReady: false,
+
 
   appName:'MEi',
 	currentRoute: "home",
