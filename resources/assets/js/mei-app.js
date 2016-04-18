@@ -19,7 +19,7 @@ export default {
       //copy: this.copy,
 
       // mail form fields
-      contactResource: this.$resource('contact'),
+      contactResource: this.$resource('api/mailForm'),
       registrationVisible: true,
       senderName: '',
       senderEmail: '',
@@ -45,10 +45,11 @@ export default {
 
   computed: {
     contactReady(){
-      if( this.senderName != '' && this.senderName.length >= 4 && 
-          this.senderEmail != '' && this.senderEmail.indexOf('@') >- 0 &&
-          this.subject != '' && this.subject.length >= 10 &&
-          this.message != '' && this.message.length >= 10 
+      if( this.senderName != '' &&
+          this.senderEmail != '' && 
+          this.senderEmail.indexOf('@') >- 0 &&
+          this.subject != '' &&
+          this.message != ''
         ){
         this.setSetting('contactFormReady', true)
         return true;
