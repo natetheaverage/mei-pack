@@ -1,27 +1,131 @@
-# Laravel PHP Framework
+## MEi Web Stack
 
+
+
+## We use Laravel as our PHP framework
+Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
 [![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
 [![Total Downloads](https://poser.pugx.org/laravel/framework/d/total.svg)](https://packagist.org/packages/laravel/framework)
 [![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
 [![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
 [![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, queueing, and caching.
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
+# Laravel Admin stuff
+- **FrozenNode Admin** ``http://administrator.frozennode.com/ ``
+- **TicketIT** https://github.com/thekordy/ticketit
 
-## Official Documentation
+## We use Vue.js as our front end javascript library
+**Visit:** http://Vuejs.org for official docs
 
-Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
+## We use Stylus CSS pre-proccessor 
+**Visit:** http://stylus-lang.com for official docs
 
-## Contributing
+### Other Components
+- **Spatie/laravel Components:** https://spatie.be/opensource/laravel
+	- spatie backup	https://docs.spatie.be/laravel-backup/v3/introduction
+	- spatie permissions https://github.com/spatie/laravel-permission
+- **laracast Utitlities** https://github.com/laracasts/PHP-Vars-To-Js-Transformer
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](http://laravel.com/docs/contributions).
+# Data backups
+- **iseed seed maker** https://github.com/orangehill/iseed
+- **backup-manager** https://github.com/backup-manager/laravel
 
-## Security Vulnerabilities
+# File handeling
+barryvdh snappy pdf/image creator https://github.com/barryvdh/laravel-snappy
+Intervention Image control http://image.intervention.io/
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+```php
+'providers' => [
+    '...',
+		Spatie\Geocoder\GeocoderServiceProvider::class,
+		Spatie\EloquentSortable\SortableServiceProvider::class,
+		Spatie\LaravelAnalytics\LaravelAnalyticsServiceProvider:class,
+		Spatie\Backup\BackupServiceProvider::class,
+		Spatie\Permission\PermissionServiceProvider::class,
+		Spatie\Activitylog\ActivitylogServiceProvider:class,
+		Barryvdh\Snappy\ServiceProvider::class,
+		Intervention\Image\ImageServiceProvider::class,
+		Laracasts\Utilities\JavaScript\JavaScriptServiceProvider::class,
+		BackupManager\Laravel\Laravel5ServiceProvider::class,
+		Kordy\Ticketit\TicketitServiceProvider::class
+	)
+```
 
-## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
+```php
+'aliases' => array(
+    ...
+    'Geocoder' => Spatie\Geocoder\GeocoderFacade::class,
+    'LaravelAnalytics' => Spatie\LaravelAnalytics\LaravelAnalyticsFacade::class,
+    'Activity' => Spatie\Activitylog\ActivitylogFacade::class,
+    'PDF' => Barryvdh\Snappy\Facades\SnappyPdf::class,
+		'SnappyImage' => Barryvdh\Snappy\Facades\SnappyImage::class,
+		'InterventionImage' => Intervention\Image\Facades\Image::class
+)
+```
+
+Run - vendor:publish it will do these automatic:
+```php
+	"php artisan vendor:publish --provider="Spatie\LaravelAnalytics\LaravelAnalyticsServiceProvider"
+	"php artisan vendor:publish --provider="Spatie\Backup\BackupServiceProvider"
+	"php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider" --tag="migrations"
+	"php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider" --tag="config"
+	"php artisan vendor:publish --provider="Spatie\Activitylog\ActivitylogServiceProvider" --tag="migrations"
+	"php artisan vendor:publish --provider="Intervention\Image\ImageServiceProviderLaravel5"
+	"php artisan config:publish intervention/image"
+	php artisan vendor:publish --provider="BackupManager\Laravel\Laravel5ServiceProvider"
+
+```
+
+Next, the \Spatie\Authorize\Middleware\Authorize::class-middleware must be registered in the kernel:
+```php
+//app/Http/Kernel.php
+protected $routeMiddleware = [
+  ...
+  'can' => \Spatie\Authorize\Middleware\Authorize::class,
+
+];
+```
+Naming the middleware can is just a suggestion. You can give it any name you'd like.
+
+
+```php
+/*
+ * You need to download a p12-certifciate from the Google API console
+ * Be sure to store this file in a secure location.
+ * READ CONFIG!!!
+ */
+```
+
+
+```php
+	Geocoder::getCoordinatesForQuery('Infinite Loop 1, Cupertino');
+/* 
+  This function returns an array with keys
+  "lat" =>  37.331741000000001
+  "lng" => -122.0303329
+  "accuracy" => "ROOFTOP"
+*/
+```
+
+```php
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
+
+class MyModel extends Eloquent implements Sortable
+{
+
+    use SortableTrait;
+
+    public $sortable = [
+        'order_column_name' => 'order_column',
+        'sort_when_creating' => true,
+    ];
+
+    ...
+}
+```
+
+
+
