@@ -19746,8 +19746,13 @@ var _actions = require('../../../vuex/actions.js');
 
 exports.default = {
   name: 'DashboardHome',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
   data: function data() {
-    return {};
+    return {
+      pageTitle: 'DashboardHome'
+    };
   },
 
 
