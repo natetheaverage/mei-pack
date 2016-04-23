@@ -29,9 +29,14 @@ Number.prototype.format = function(n, x, s, c) {
 };
 
 export default {
+    name: 'Numpad',
+    changeTabTitle: false,
+    logHooksToConsole: true,
+    watchMode: true,
     props:['fire'],
     data(){
         return{
+            pageTitle: 'NumPad',
             buttons:[
                 { name:1, value:1, style: ' single' },
                 { name:4, value:4, style:' single' },
@@ -93,7 +98,7 @@ export default {
         
     },
     ready(){
-        console.log('<<< numberpad.vue >>> Ready!')
+        
     }
 }
 

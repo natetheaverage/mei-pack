@@ -11,13 +11,13 @@ import Numpad from './NumPad.vue';
 import SaleReceipt from './SalesReceipt.vue';
 
 export default {
-    name: 'pos',
+    name: 'Checkout',
     changeTabTitle: true,
     logHooksToConsole: true,
     watchMode: true,
     data() {
         return {
-            pageTitle: 'pos',
+            pageTitle: 'Checkout',
             numpadEntry:'',
             fullNumber: 0,
             numbers:[],

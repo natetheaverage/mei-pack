@@ -14,12 +14,16 @@ module.exports = {
   currentView: 'home',
   currentNavigation: 'mainnav',
 
+  helpDeskVisible: true,
+
   editMode: false,  
   editAll: false,
   dataMode: false,
   persisted: true,
   asideOn: false,
   primaryOn: false,
+
+
 
   baseView: 'front',
   

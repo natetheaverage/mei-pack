@@ -22,7 +22,7 @@ trait UserDetailsAndBindings
 
     public function membershipDetails()
     {
-        return $this->hasOne('App\Membership');
+        return $this->hasOne('App\Models\Memberships\Membership');
     }
 
 

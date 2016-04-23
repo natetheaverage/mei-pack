@@ -1,56 +1,94 @@
-@extends('admin')
+@extends('layouts.auth')
+@section('title', 'Register')
+@section('content')
+<div class="cls-content">
+  <div class="cls-content-lg panel">
+      <div class="panel-heading">
+        <p class="pad-top mar-btm">So you wantRegister</p>
+      </div>
+      <div class="panel-body">
+        <form class="form-horizontal" role="form" method="POST" action="{{ url('/register') }}">
+        <div class="row">
+          <div class="col-sm-6">
+              {!! csrf_field() !!}
 
-@section('body')
-@parent
-					@if (count($errors) > 0)
-						<div class="alert alert-danger">
-							<strong>Whoops!</strong> There were some problems with your input.<br><br>
-							<ul>
-								@foreach ($errors->all() as $error)
-									<li>{{ $error }}</li>
-								@endforeach
-							</ul>
-						</div>
-					@endif
+            <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+              <div class="input-group">
+                <div class="input-group-addon"><i class="fa fa-male"></i></div>
+                <input type="text" class="form-control" name="name" value="{{ old('name') }}">
 
-					<form class="form-horizontal" role="form" method="POST" action="{!! url('/auth/register') !!}">
-						<input type="hidden" name="_token" value="{!! csrf_token() !!}">
+                @if ($errors->has('name'))
+                  <span class="help-block">
+                    <strong>{{ $errors->first('name') }}</strong>
+                  </span>
+                @endif
+              </div>
+            </div>
 
-						<div class="form-group">
-							<label class="col-md-4 control-label">Name</label>
-							<div class="col-md-6">
-								<input type="text" class="form-control" name="name" value="{!! old('name') !!}">
-							</div>
-						</div>
+            <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
+              <div class="input-group">
+                <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
+                  <input type="email" class="form-control" name="email" value="{{ old('email') }}">
 
-						<div class="form-group">
-							<label class="col-md-4 control-label">E-Mail Address</label>
-							<div class="col-md-6">
-								<input type="email" class="form-control" name="email" value="{!! old('email') !!}">
-							</div>
-						</div>
+                @if ($errors->has('email'))
+                  <span class="help-block">
+                    <strong>{{ $errors->first('email') }}</strong>
+                  </span>
+                @endif
+              </div>
+            </div>
+          </div> <!-- col-md-6 -->
+          <div class="col-sm-6">
+              <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-asterisk"></i></div>
+                  <input type="password" class="form-control" name="password">
 
-						<div class="form-group">
-							<label class="col-md-4 control-label">Password</label>
-							<div class="col-md-6">
-								<input type="password" class="form-control" name="password">
-							</div>
-						</div>
+                  @if ($errors->has('password'))
+                    <span class="help-block">
+                      <strong>{{ $errors->first('password') }}</strong>
+                    </span>
+                  @endif
+                </div>
+              </div>
 
-						<div class="form-group">
-							<label class="col-md-4 control-label">Confirm Password</label>
-							<div class="col-md-6">
-								<input type="password" class="form-control" name="password_confirmation">
-							</div>
-						</div>
+                <div class="form-group{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-asterisk"></i></div>
+                  <input type="password" class="form-control" name="password_confirmation">
 
-						<div class="form-group">
-							<div class="col-md-6 col-md-offset-4">
-								<button type="submit" class="btn btn-primary">
-									Register
-								</button>
-							</div>
-						</div>
-					</form>
-
+                  @if ($errors->has('password_confirmation'))
+                    <span class="help-block">
+                      <strong>{{ $errors->first('password_confirmation') }}</strong>
+                    </span>
+                  @endif
+                </div>
+              </div>
+            </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-8 text-left checkbox">
+                <label class="form-checkbox form-icon">
+                  <input type="checkbox"> I agree with the <a href="{{ url('/terms-and-conditions') }}" class="btn-link">Terms and Conditions</a>
+                </label>
+              </div>
+              <div class="col-xs-4">
+                <div class="form-group text-right">
+                  <button class="btn btn-success text-uppercase" type="submit">Sign Up</button>
+                </div>
+              </div>
+            </div>
+            <div class="mar-btm"><em>- or -</em></div>
+            <button class="btn btn-primary btn-lg btn-block" type="button">
+              <i class="fa fa-facebook fa-fw"></i> Sign Up with Facebook
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="pad-ver">
+        Already have an account ? <a href="{{ url('/login') }}" class="btn-link mar-rgt">Sign In</a>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection

@@ -73,11 +73,11 @@ elixir(function(mix) {
         './resources/assets/vendor/AnimatedLetters/css/demo.css',
         './resources/assets/twenty-plugins/demo-phone.css',
         './resources/assets/twenty-plugins/ipad3dmenu.css',
-    ], './public/css/twenty-twenty-vendor.css')
+    ], './public/css/twenty/vendor.css')
 
     .task('test')
 
     .browserSync();
 });
 
-    
+

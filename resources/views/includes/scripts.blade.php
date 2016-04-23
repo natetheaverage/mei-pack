@@ -1,10 +1,16 @@
-<script src="/js/jquery.js"></script>
+<!-- <script src="/js/jquery.js"></script> -->
+<script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+
+<script src="https://code.jquery.com/jquery-migrate-1.4.0.min.js" integrity="sha256-nxdiQ4FdTm28eUNNQIJz5JodTMCF5/l32g5LwfUwZUo=" crossorigin="anonymous"></script>
+
 <script src="/js/bootstrap.min.js"></script>
 <script src="/js/all-vendor.js"></script>
 <script src="/js/front-vendor.js"></script>
+
 <script src="/js/vendor/dynamics.min.js"></script>
- 
+
 <script src="/js/mei-core.js"></script>
+
 
 <!--
 <script src="js/classie.js"></script>

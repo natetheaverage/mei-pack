@@ -43,6 +43,9 @@ Vue.component('introFlyAway', IntroFlyAway)
 import MeiAdminLogin from './vue/components/auth/MeiAdminLogin.vue';
 Vue.component('meiAdminLogin', MeiAdminLogin)
 
+import TicketsIt from './vue/components/pages/TicketsIt.vue';
+Vue.component('ticketsIt', TicketsIt)
+
 // import DatesBox from './vue/components/events/DatesBox.vue';
 // Vue.component('dates_box', DatesBox)
 // import EventPage from './vue/components/events/EventPage.vue';
@@ -101,11 +104,6 @@ Vue.component('ipadMenu', iPad3DMenu)
 // import CurrencyDisplay from './vue/filters/Currency.js';
 // Vue.filter('currencyDisplay', CurrencyDisplay)
 
-// import HooksMixin from './vue/mixins/HooksMixin.js';
-// Vue.mixin(HooksMixin)
-// import SettingsWatcher from './vue/mixins/SettingsWatcher.js';
-// Vue.mixin(SettingsWatcher)
-
 
 import MainNav from './vue/components/navigation/nifty/MainNav.vue';
 Vue.component('mainnav', MainNav);
@@ -119,8 +117,8 @@ Vue.component('shortcutbuttons', ShortcutButtons )
 import MenuWidget from './vue/components/navigation/nifty/MenuWidget.vue';
 Vue.component('menuwidget', MenuWidget )
 
-// import NavPage from './vue/components/navigation/NavPage.vue'
-// Vue.component('home', NavPage );
+import NavPage from './vue/components/navigation/NavPage.vue'
+Vue.component('home', NavPage );
 
 import ObjectEditor from './vue/components/controllers/ObjectEditor.vue';
 Vue.component('objecteditor', ObjectEditor )
@@ -155,28 +153,36 @@ Vue.component('objecteditor', ObjectEditor )
 import NavPageButton from './vue/components/navigation/NavpageButton.vue';
 Vue.component('navpagebutton',  NavPageButton )
 
-
-
-
-import MEiApp from './mei-app.js'
-//import RouterMap from './truth/routeMap'
-
-
-
-
-// Instanciate Vue Router
-var MEiCore = Vue.extend(MEiApp)
-import Router from './vue-router/router' 
-import RouterMap from './vue-router/routerMap' 
-import projector from './vue/components/projector/projector.vue'
-Router.map(RouterMap)
-Router.start(MEiCore, 'body')
-Router.go({name: mei.vueRoute})
-//module.exports = Router
-
+// 
 import { sync } from 'vuex-router-sync'
 import store from './vuex/store'
-sync(store, Router)
+import { configRouter } from  './vue-router/router-config' 
+import MeiApp from './mei-app.js'
+
+// Root Componant
+var MEi = Vue.extend(MeiApp)
+
+// create router
+const router = new VueRouter({
+  hashbang: false,
+  history: true,
+  linkActiveClass: 'active-link',
+  saveScrollPosition: true
+});
+
+// configure router
+configRouter(router)
+sync(store, router)
+
+
+//Router.map(RouterMap)
+router.start(MEi, 'body')
+//router.go({ path: mei.vueRoute })
+//module.exports = Router
+
+// import { sync } from 'vuex-router-sync'
+// import store from './vuex/store'
+// sync(store, Router)
 
 //module.exports = new Vue(MeiApp).$mount('body')
 

@@ -20,6 +20,19 @@
               :button="button"
             ></mainnavbutton>
 
+            <li>
+              <a v-link="'/dashboard/help-desk'">
+                <i class="fa fa-question"></i>
+                <span class="menu-title">
+                  <strong>Help Desk</strong>
+                </span>
+                <span 
+                  class="pull-right badge badge-success"
+                  v-text="'0?'"
+                ></span>
+              </a>
+            </li>
+
             <li 
               v-if="editMode" 
               @click="addButton">
@@ -44,7 +57,7 @@
 
 <script>
 
-import { changeRoute, setMenuActive, setMenu } from '../../../../vuex/actions'
+import { changeRoute, setMenuActive, setMenu, setSetting } from '../../../../vuex/actions'
 import { getRoute } from '../../../../vuex/getters'
 
 module.exports = {
@@ -71,6 +84,7 @@ module.exports = {
       changedRoute: getRoute,
     },
     actions: {
+      setSetting,
       setMenuActive,
       changeRoute,
       setMenu
@@ -85,7 +99,7 @@ module.exports = {
 
   events:{
     menuActive(btn){
-      //this.setMenuActive(btn)
+      this.setSetting('ticketsAdmin', false)
       this.$broadcast('checkButton', btn)
       return true;
     }

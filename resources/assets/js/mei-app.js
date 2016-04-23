@@ -27,7 +27,9 @@ export default {
       message: '',
     }
   },
+
 	store,
+
 	vuex:{
 		getters:{ 
       copy: ({copyText}) => copyText.all,
@@ -138,6 +140,7 @@ export default {
           e.preventDefault(); 
           var objectData = $( this ).serializeArray();
           console.log(objectData);
+          console.log('^ is line 143 mei-app');
           objectResource.update(
             {objectType: "interfaceObjects", objectOptions: id},
             {objectData}, 
@@ -190,6 +193,16 @@ export default {
 			// this.editPage = true;
 		},
 
+    setTickets(){
+       if(this.$route.path.indexOf('help-desk') > 0){
+        //this.setTickets(true);
+        this.setSetting('helpDeskVisible', true)
+      } else {
+        //this.setTickets(false);
+        this.setSetting('helpDeskVisible', false)
+      }
+      
+    },
     toggleAside(){
       this.toggleSetting('asideOpen')
     },
@@ -251,11 +264,10 @@ export default {
       })
       this.objectResource.get(
         {objectType:"interfaceObjects", objectOptions:"navigation.adminPrimary"},
-        function (menu, status, request) {
-          console.log("%cloadMenus() menu data fetched in Truth",this.settings.logGood);
-          that.setMenu('adminPrimary', menu);
-
-          if(that.base_view == 'dashboard'){ nifty.mainNav.unbindSmallNav() };
+      function (menu, status, request) {
+        console.log("%cloadMenus() menu data fetched in Truth",this.settings.logGood);
+        that.setMenu('adminPrimary', menu);
+        if(that.base_view == 'dashboard'){ nifty.mainNav.unbindSmallNav() };
       }).error(function (data, status, request) {
         console.log("%c loadMenus() Errrrrr in Truth",this.$root.logErr);
       })
@@ -281,14 +293,26 @@ export default {
         })
     },
 	},
+  components:{
+    'tickets':{
+      name:"TicketContainer",
+      template: $('tickets-container')
+    }
+  },
   ready(){
     this.loadMenus()
     this.loadCopy()
     this.loadFeatures()
+
+    this.setTickets() 
     //this.copyObject = this.routePrefix[this.instanceNumber]
-    this.$watch('getPublicSettings', function(){
-      this.settings = this.getPublicSettings
+    this.$watch('settings', function(){
+      //this.settings
     }, { deep: true })
+    this.$watch('$route.path', function(route){ 
+      console.log('route in mei-app/ready()')
+      console.log(route)
+      this.setTickets() },{ deep: true })
   }
 
 }

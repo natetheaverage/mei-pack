@@ -118,6 +118,47 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
 
+     /**
+     * Implements model based method
+     *
+     * @param $model ('currentUser', 'objectClasses')
+     * @param $id
+     * @return Mixed Collection
+     */
+    public function collect($model, $id = null)
+    {
+        return $this->$model($id);
+    }
+
+    /**
+     * Collects Eloquent User model and its relationships in one object
+     * than saves it to a session object as user.
+     *
+     * @param $id
+     * @return $this
+     */
+    public function currentUserFull($id)
+    {
+        return $this->completeUser(\Auth::user()->id);
+    }
+
+    public function completeUser($id)
+    {
+        $userWithRelations = User::find($id)->load(
+            'profile',
+            'customerInfo',
+            'employeeInfo',
+            'membershipDetails'
+        );
+
+        return $userWithRelations;
+    }
+
+    public function currentUserBasic()
+    {
+        $userWithBasic = User::all()->load('profile');//->get('id' ,['id','first_name','last_name','profile_pic']);
+        return $userWithBasic;
+    }
 
 
 }

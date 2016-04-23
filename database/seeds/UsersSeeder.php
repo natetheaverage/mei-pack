@@ -32,6 +32,8 @@ class UsersSeeder extends Seeder {
       'email' => 'iam@natetheaverage.com',
       'password' => bcrypt('34&1/2'),
       'remember_token' => 'GO7FUCK7URSELF',
+      'ticketit_admin' => 1,
+      'ticketit_agent' => 1,
     ]);
     $user->assignRole('average');
     $user->assignRole('admin');

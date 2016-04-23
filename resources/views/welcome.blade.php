@@ -1,10 +1,7 @@
-@extends('layout')
-@section('title', 'Welcome')
+{{-- 
+front is the public facing site authentication not required 
+config('app.theme') pull theme from the env file
+home should probably be called index but i am an idiot sometimes
+--}}
 
-@section('content')
-	@parent
-
-@include('TwentyTwenty')
-
-
-@endsection
+@include('front.'.config('app.theme').'.index')

@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Users\User;
 use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
 class DashboardController extends Controller {
+
+    public $user;
 
 	/**
 	 * Create a new controller instance.
 	 *
 	 * @return void 
 	 */
-	public function __construct()
+	public function __construct(User $user)
 	{
 		$this->middleware('auth');
+        $this->user = $user;
 		//$this->middleware('repo.user');
 	}
 
@@ -30,11 +34,11 @@ class DashboardController extends Controller {
 		//dd(Session::get('currentUser'));
        \JavaScript::put([
             'editMode' => 1, 
-            'currentUser' => Session::get('currentUser'),
+            'currentUser' => \Auth::user(),//Session::get('currentUser'),
             'vueRoute' => 'dashboard'
             ]);
-        $session = Session::get('currentUser');
-        return view ('dashboard', compact('session'));
+        //$session = Session::get('currentUser');
+        return view ('layouts.dashboard', compact('session'));
 
     }
  
@@ -48,11 +52,11 @@ class DashboardController extends Controller {
     {
         \JavaScript::put([
             'editMode' => 1, 
-            'currentUser' => Session::get('currentUser'),
+            'currentUser' => $this->user->collect('currentUserFull'),//Session::get('currentUser'),
             'vueRoute' => $component
             ]);
         $session = Session::get('currentUser');
-        return view ('dashboard', compact('session'));
+        return view ('layouts.dashboard', compact('session'));
     }
 
 

@@ -640,16 +640,16 @@ h6,
 /* PAGE CONTENT */
 /*======================================*/
 #page-content {
-  padding: 5px 20px 0;
+  padding: 0px 40px 0;
 }
 @media (min-width: 768px) {
   #page-content {
-    padding: 10px 20px 0;
+    padding: 0px 40px 0;
   }
 }
 @media (min-width: 992px) {
   #page-content {
-    padding: 20px 25px 0;
+    padding: 0px 40px 0;
   }
 }
 /* SEARCHBOX */

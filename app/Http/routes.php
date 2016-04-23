@@ -10,19 +10,16 @@
 | and give it the controller to call when that URI is requested.
 |
 */
-Route::get('auth/login', 'Auth\AuthController@getLogin');
-Route::post('auth/login', 'Auth\AuthController@postLogin');
-Route::get('auth/logout', 'Auth\AuthController@logout');
 
-// Registration routes...
-Route::get('auth/register', 'Auth\AuthController@getRegister');
-Route::post('auth/register', 'Auth\AuthController@postRegister');
+Route::auth();
+
+//Route::get('/home', 'HomeController@index');
 
 Route::get('/', function () {
   \JavaScript::put([
     'editMode' => 1, 
     'currentUser' => Session::get('currentUser'),
-    'vueRoute' => 'welcome'
+    'vueRoute' => '/'
   ]);
   return view('welcome');
 });
@@ -70,3 +67,5 @@ Route::get('/copywrite', function () {
 Route::get('/privacy-policy', function () {
   // return view('legal/privacy-policy');
 });
+
+

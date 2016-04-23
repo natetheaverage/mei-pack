@@ -20,7 +20,7 @@ class DashboardMenuSeeder extends Seeder {
 			'value'              => '',                   // Value can be different for each (eg checked, string = "JoeBlow"
 			'content'            => '',                 // Body message
 			'icon'               => 'fa-barcode',                    // icon from fa-
-			'href'               => '/dashboard/inventory',          // target for links
+			'href'               => 'Inventory',          // target for links
 			'disabled'           => null,              // is this disabled?
 			'owner_id'           => 1,                 // id if this object requires an owner
 			'owner_type'         => 'Average',       //-- owner type ( this doesn't need to be a user)
@@ -38,7 +38,7 @@ class DashboardMenuSeeder extends Seeder {
 			'value'              => '',                   // Value can be different for each (eg checked, string = "JoeBlow"
 			'content'            => '',                 // Body message
 			'icon'               => 'fa-users',                    // icon from fa-
-			'href'               => '/dashboard/customer',          // target for links
+			'href'               => 'Customer',          // target for links
 			'disabled'           => null,              // is this disabled?
 			'owner_id'           => 1,                 // id if this object requires an owner
 			'owner_type'         => 'Average',       //-- owner type ( this doesn't need to be a user)
@@ -52,11 +52,11 @@ class DashboardMenuSeeder extends Seeder {
 			'family'             => 'button',                  // The family the object belongs to (box, form, button etc...
 			'type'               => 'largeButton',         // Type of object in the family
 			'class'              => 'btn btn-active-success btn-default btn-dashboard',    // Class of the object
-			'label'              => 'Dailies',           // header / Label displayed
+			'label'              => 'Reports',           // header / Label displayed
 			'value'              => '',                   // Value can be different for each (eg checked, string = "JoeBlow"
 			'content'            => '',                 // Body message
 			'icon'               => 'fa-bar-chart',                    // icon from fa-
-			'href'               => '/dashboard/daily',          // target for links
+			'href'               => 'Reports',          // target for links
 			'disabled'           => null,              // is this disabled?
 			'owner_id'           => 1,                 // id if this object requires an owner
 			'owner_type'         => 'Average',       //-- owner type ( this doesn't need to be a user)
@@ -74,7 +74,7 @@ class DashboardMenuSeeder extends Seeder {
 			'value'              => '',                   // Value can be different for each (eg checked, string = "JoeBlow"
 			'content'            => '',                 // Body message
 			'icon'               => 'fa-users',                    // icon from fa-
-			'href'               => '/employee/create',          // target for links
+			'href'               => 'EmployeeNew',          // target for links
 			'disabled'           => null,              // is this disabled?
 			'owner_id'           => 1,                 // id if this object requires an owner
 			'owner_type'         => 'Average',       //-- owner type ( this doesn't need to be a user)
@@ -92,7 +92,7 @@ class DashboardMenuSeeder extends Seeder {
 			'value'              => '',                   // Value can be different for each (eg checked, string = "JoeBlow"
 			'content'            => '',                 // Body message
 			'icon'               => 'fa-dollar',                    // icon from fa-
-			'href'               => '/dashboard/pos',          // target for links
+			'href'               => 'Pos',          // target for links
 			'disabled'           => null,              // is this disabled?
 			'owner_id'           => 1,                 // id if this object requires an owner
 			'owner_type'         => 'Average',       //-- owner type ( this doesn't need to be a user)
@@ -110,7 +110,7 @@ class DashboardMenuSeeder extends Seeder {
 			'value'              => '',                   // Value can be different for each (eg checked, string = "JoeBlow"
 			'content'            => '',                 // Body message
 			'icon'               => 'fa-building',                    // icon from fa-
-			'href'               => '/dashboard/facility',          // target for links
+			'href'               => 'Facility',          // target for links
 			'disabled'           => null,              // is this disabled?
 			'owner_id'           => 1,                 // id if this object requires an owner
 			'owner_type'         => 'Average',       //-- owner type ( this doesn't need to be a user)
@@ -128,7 +128,7 @@ class DashboardMenuSeeder extends Seeder {
 			'value'              => '',                   // Value can be different for each (eg checked, string = "JoeBlow"
 			'content'            => '',                 // Body message
 			'icon'               => 'fa-umbrella',                    // icon from fa-
-			'href'               => '/dashboard/promotion',          // target for links
+			'href'               => 'Promotion',          // target for links
 			'disabled'           => null,              // is this disabled?
 			'owner_id'           => 1,                 // id if this object requires an owner
 			'owner_type'         => 'Average',       //-- owner type ( this doesn't need to be a user)

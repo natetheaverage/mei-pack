@@ -60,7 +60,7 @@ export default {
     props:['numpadEntry'],
     data(){
         return{
-            name: 'receipt-window',
+            pageTitle: 'ReceiptWindow',
             editField: true,
             discounts:[],
         }
@@ -68,7 +68,7 @@ export default {
 
     computed:{
         items(){
-            return this.$root.inventories;
+            //return this.$root.inventories;
         }
     },
      

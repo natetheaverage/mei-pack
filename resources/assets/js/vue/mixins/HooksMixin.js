@@ -1,15 +1,12 @@
-
+import setSetting from '../../vuex/actions'
 export default {
-
+    vuex:{
+        actions:{ 
+            setSetting
+        } 
+    },
     created(){
-        var changeTabTitle = this.$options.changeTabTitle
-        if (changeTabTitle) {
-            var host = this.$root.settings.appName;
-            var title = this.pageTitle;
-            $("title").contents().last().remove();
-            $('title').append(host+" | "+title);
-            this.$root.settings.viewTitle = title;
-        }
+        
         var logHooksToConsole = this.$options.logHooksToConsole
         if (logHooksToConsole) {
             console.log("%c<< %s.vue >> Created!", this.$root.settings.logGood, this.pageTitle);
@@ -19,6 +16,13 @@ export default {
         var logHooksToConsole = this.$options.logHooksToConsole
         if (logHooksToConsole) {
             console.log("%c<< %s.vue >> Ready!", this.$root.settings.logGood, this.pageTitle);
+        }
+        var changeTabTitle = this.$options.changeTabTitle
+        if (changeTabTitle) {
+            var host = this.$root.settings.appName;
+            var title = this.pageTitle;
+            $("title").contents().last().remove();
+            $('title').append(host+" | "+title);
         }
     },
     beforeDestroy(){

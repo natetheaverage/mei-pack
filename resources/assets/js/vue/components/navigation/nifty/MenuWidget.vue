@@ -54,7 +54,7 @@ export default {
     watchMode: true,
     data() {
       return {
-
+        pageTitle: 'MainNav Widget Container '
       }
     },
 

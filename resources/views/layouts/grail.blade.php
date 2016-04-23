@@ -2,9 +2,9 @@
 @section('title') 
 	@parent @yield('page')
 @stop
+
 @section('container')
 	@parent
-  
   <div id="header">
     @include('front.'.config('app.theme').'.header'  )
   </div>

@@ -14,7 +14,7 @@
     <a 
       @click="buttonClicked(button)"
       @dblclick="changeType" 
-      v-link="{name: button.href}"
+      v-link="button.href"
     ><i :class="'fa ' +button.icon"></i>
       <span class="menu-title">
         <strong v-text="button.label"></strong>
@@ -80,7 +80,7 @@ export default {
       if(btn.value==='isThirdTier' || 
         btn.value==='isSecondTier' || 
         btn.value==='isSecondFolder' ){
-        console.log('Bang from 2nd tier')
+        //console.log('Bang from 2nd tier')
         this.$parent.active = true
         this.active = !this.active
       }

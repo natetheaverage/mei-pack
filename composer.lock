@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "8f5fc039915bc1bcd284a16640563b1d",
-    "content-hash": "292f1d584c6b719376d9b6f2854b37e8",
+    "hash": "2fc62fda68898e9afe9de099597fe504",
+    "content-hash": "4f92b351101484ec6fffd2bf35c46fe2",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.17.5",
+            "version": "3.17.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "1cef9b334729b3564c9aef15481a55561c54b53f"
+                "reference": "d5a5145263da88c9ba870b579c3d4f648b82d2a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/1cef9b334729b3564c9aef15481a55561c54b53f",
-                "reference": "1cef9b334729b3564c9aef15481a55561c54b53f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d5a5145263da88c9ba870b579c3d4f648b82d2a9",
+                "reference": "d5a5145263da88c9ba870b579c3d4f648b82d2a9",
                 "shasum": ""
             },
             "require": {
@@ -85,7 +85,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2016-04-07 22:44:13"
+            "time": "2016-04-11 17:36:01"
         },
         {
             "name": "backup-manager/backup-manager",
@@ -1288,16 +1288,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.2.3",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "2e89629ff057ebb49492ba08e6995d3a6a80021b"
+                "reference": "31382fef2889136415751badebbd1cb022a4ed72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/2e89629ff057ebb49492ba08e6995d3a6a80021b",
-                "reference": "2e89629ff057ebb49492ba08e6995d3a6a80021b",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/31382fef2889136415751badebbd1cb022a4ed72",
+                "reference": "31382fef2889136415751badebbd1cb022a4ed72",
                 "shasum": ""
             },
             "require": {
@@ -1342,7 +1342,7 @@
                 "stream",
                 "uri"
             ],
-            "time": "2016-02-18 21:54:00"
+            "time": "2016-04-13 19:56:01"
         },
         {
             "name": "h4cc/wkhtmltoimage-amd64",
@@ -1857,16 +1857,16 @@
         },
         {
             "name": "kordy/ticketit",
-            "version": "v0.2.4",
+            "version": "v0.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thekordy/ticketit.git",
-                "reference": "a1c54f174ab7d853c9bda06da35f54db53d8e2d5"
+                "reference": "e3573aec22c082860082c6faca9ad8e6287af3c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thekordy/ticketit/zipball/a1c54f174ab7d853c9bda06da35f54db53d8e2d5",
-                "reference": "a1c54f174ab7d853c9bda06da35f54db53d8e2d5",
+                "url": "https://api.github.com/repos/thekordy/ticketit/zipball/e3573aec22c082860082c6faca9ad8e6287af3c6",
+                "reference": "e3573aec22c082860082c6faca9ad8e6287af3c6",
                 "shasum": ""
             },
             "require": {
@@ -1901,7 +1901,7 @@
                 "support",
                 "ticket"
             ],
-            "time": "2016-01-30 20:45:28"
+            "time": "2016-03-15 18:21:54"
         },
         {
             "name": "laracasts/utilities",
@@ -2560,16 +2560,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "1.18.2",
+            "version": "1.19.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "064b38c16790249488e7a8b987acf1c9d7383c09"
+                "reference": "5f56ed5212dc509c8dc8caeba2715732abb32dbf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/064b38c16790249488e7a8b987acf1c9d7383c09",
-                "reference": "064b38c16790249488e7a8b987acf1c9d7383c09",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/5f56ed5212dc509c8dc8caeba2715732abb32dbf",
+                "reference": "5f56ed5212dc509c8dc8caeba2715732abb32dbf",
                 "shasum": ""
             },
             "require": {
@@ -2634,7 +2634,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2016-04-02 13:12:58"
+            "time": "2016-04-12 18:29:35"
         },
         {
             "name": "mtdowling/cron-expression",
@@ -3554,16 +3554,16 @@
         },
         {
             "name": "spatie/laravel-backup",
-            "version": "3.4.1",
+            "version": "3.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-backup.git",
-                "reference": "1793179e6a18395f62dee558c4bf99805e65c7b0"
+                "reference": "a083a0be211767c6dbae38f272b05d8ced7513d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-backup/zipball/1793179e6a18395f62dee558c4bf99805e65c7b0",
-                "reference": "1793179e6a18395f62dee558c4bf99805e65c7b0",
+                "url": "https://api.github.com/repos/spatie/laravel-backup/zipball/a083a0be211767c6dbae38f272b05d8ced7513d3",
+                "reference": "a083a0be211767c6dbae38f272b05d8ced7513d3",
                 "shasum": ""
             },
             "require": {
@@ -3612,7 +3612,7 @@
                 "laravel-backup",
                 "spatie"
             ],
-            "time": "2016-04-07 07:58:29"
+            "time": "2016-04-18 07:05:28"
         },
         {
             "name": "spatie/laravel-permission",

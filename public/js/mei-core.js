@@ -17901,6 +17901,99 @@ exports.default = {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+/*
+*  Dropzone module built to handel compliance calculator file uploads
+*  allows files to be dragged to the page for uploading than sends the
+*  processed return to an object on the page.
+*
+*   resources/assets/js/ui
+ */
+var InventoryDropzone = exports.InventoryDropzone = function () {
+
+    var newDropzoneUpload = 'waiting for file...';
+    var previewTemplate = '';
+    var inventoryDropzoneTemplate = function inventoryDropzoneTemplate() {
+        var previewNode = document.querySelector("#template");
+        previewNode.id = "";
+        previewTemplate = previewNode.parentNode.innerHTML;
+        previewNode.parentNode.removeChild(previewNode);
+    };
+
+    var myDropzone = function myDropzone() {
+        //console.log(this);
+        console.log(Vue.Calculator);
+        new Dropzone(document.body, { // Make the whole body a dropzone
+            headers: { 'X-CSRF-TOKEN': document.querySelector('#token').getAttribute('value') },
+            url: "/inventory/compliance/upload", // Set the url
+            thumbnailWidth: 80,
+            thumbnailHeight: 80,
+            parallelUploads: 20,
+            previewTemplate: previewTemplate,
+            autoQueue: true,
+            previewsContainer: "#dropzone-previews",
+            newDropzoneUpload: 'waiting for file...',
+            //clickable: ".fileinput-button" // Need to define
+            init: function init() {
+                this.on("addedfile", function (file) {
+                    $.niftyNoty({
+                        type: 'info',
+                        container: 'page'
+                    });
+                    var newDownload = $('#dropzone-previews .file-row');
+                    $('#page-alert').find('.media-body').replaceWith(newDownload);
+                });
+
+                this.on("success", function (file, response) {
+                    $("#page-alert").find(".close").trigger("click");
+                    var fileName = file.name;
+                    console.log(Vue);
+                    newDropzoneUpload = metrcCsv2Json(response, fileName);
+                });
+
+                // Update the total progress bar
+                this.on("totaluploadprogress", function (progress) {
+                    //document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+                });
+
+                this.on("sending", function (file) {
+                    // Show the total progress bar when upload starts
+                    //document.querySelector("#total-progress").style.opacity = "1";
+                    // And disable the start button
+                    //file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
+                });
+
+                // Hide the total progress bar when nothing's uploading anymore
+                this.on("queuecomplete", function (progress) {
+                    //document.querySelector("#total-progress").style.opacity = "0";
+                });
+
+                // Setup the buttons for all transfers
+                // The "add files" button doesn't need to be setup because the config
+                // `clickable` has already been specified.
+                /*document.querySelector("#actions .start").onclick = function() {
+                 this.enqueueFiles(this.getFilesWithStatus(Dropzone.ADDED));
+                 };
+                 document.querySelector("#actions .cancel").onclick = function() {
+                 this.removeAllFiles(true);
+                 };*/
+            }
+        });
+    };
+
+    return {
+        inventoryDropzoneTemplate: inventoryDropzoneTemplate,
+        previewTemplate: previewTemplate,
+        myDropzone: myDropzone,
+        newDropzoneUpload: newDropzoneUpload
+    };
+}();
+
+},{}],56:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
@@ -17910,22 +18003,18 @@ var _truth2 = _interopRequireDefault(_truth);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import Vue from 'vue'
-// import VueResource from 'vue-resource'
-// Vue.use(VueResource)
-
 var _menus = _truth2.default.menus;
 
 exports.default = {
 	getMenu: function getMenu(menuName, cb) {
-		console.log(menuName);
+		//console.log(menuName)
 		setTimeout(function () {
 			cb(_menus[menuName]);
 		}, 100);
 	}
 };
 
-},{"../../truth/truth.js":70}],56:[function(require,module,exports){
+},{"../../truth/truth.js":71}],57:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17947,13 +18036,14 @@ _vue2.default.use(_vueResource2.default);
 exports.default = new _vue2.default({
 	methods: {
 		save: function save(d) {
+			//console.log('save fired in api/vuex/pessistance.js with following data')
 			//console.log(d)
 			return true;
 		}
 	}
 });
 
-},{"vue":49,"vue-resource":40}],57:[function(require,module,exports){
+},{"vue":49,"vue-resource":40}],58:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17999,7 +18089,9 @@ exports.default = {
     };
   },
 
+
   store: _store2.default,
+
   vuex: {
     getters: {
       copy: function copy(_ref) {
@@ -18104,6 +18196,7 @@ exports.default = {
         e.preventDefault();
         var objectData = $(this).serializeArray();
         console.log(objectData);
+        console.log('^ is line 143 mei-app');
         objectResource.update({ objectType: "interfaceObjects", objectOptions: id }, { objectData: objectData }, function (data, status, request) {
           $.niftyNoty({ type: 'info', icon: 'fa fa-check', message: '<strong>Button Saved!</strong>. ', container: 'page', timer: 3000 });
         }).error(function (data, status, request) {
@@ -18145,6 +18238,15 @@ exports.default = {
       // console.log('loggedIn ?');
       // console.log(this.setSetting.loggedIn);
       // this.editPage = true;
+    },
+    setTickets: function setTickets() {
+      if (this.$route.path.indexOf('help-desk') > 0) {
+        //this.setTickets(true);
+        this.setSetting('helpDeskVisible', true);
+      } else {
+        //this.setTickets(false);
+        this.setSetting('helpDeskVisible', false);
+      }
     },
     toggleAside: function toggleAside() {
       this.toggleSetting('asideOpen');
@@ -18206,7 +18308,6 @@ exports.default = {
       this.objectResource.get({ objectType: "interfaceObjects", objectOptions: "navigation.adminPrimary" }, function (menu, status, request) {
         console.log("%cloadMenus() menu data fetched in Truth", this.settings.logGood);
         that.setMenu('adminPrimary', menu);
-
         if (that.base_view == 'dashboard') {
           nifty.mainNav.unbindSmallNav();
         };
@@ -18233,18 +18334,31 @@ exports.default = {
       });
     }
   },
+  components: {
+    'tickets': {
+      name: "TicketContainer",
+      template: $('tickets-container')
+    }
+  },
   ready: function ready() {
     this.loadMenus();
     this.loadCopy();
     this.loadFeatures();
+
+    this.setTickets();
     //this.copyObject = this.routePrefix[this.instanceNumber]
-    this.$watch('getPublicSettings', function () {
-      this.settings = this.getPublicSettings;
+    this.$watch('settings', function () {
+      //this.settings
+    }, { deep: true });
+    this.$watch('$route.path', function (route) {
+      console.log('route in mei-app/ready()');
+      console.log(route);
+      this.setTickets();
     }, { deep: true });
   }
 };
 
-},{"./vue-router/router":71,"./vuex/actions.js":100,"./vuex/getters.js":101,"./vuex/store":107}],58:[function(require,module,exports){
+},{"./vue-router/router":73,"./vuex/actions.js":119,"./vuex/getters.js":120,"./vuex/store":126}],59:[function(require,module,exports){
 'use strict';
 
 var _vueResource = require('vue-resource');
@@ -18311,6 +18425,10 @@ var _MeiAdminLogin = require('./vue/components/auth/MeiAdminLogin.vue');
 
 var _MeiAdminLogin2 = _interopRequireDefault(_MeiAdminLogin);
 
+var _TicketsIt = require('./vue/components/pages/TicketsIt.vue');
+
+var _TicketsIt2 = _interopRequireDefault(_TicketsIt);
+
 var _EditableCopy = require('./vue/components/controllers/EditableCopy.vue');
 
 var _EditableCopy2 = _interopRequireDefault(_EditableCopy);
@@ -18335,6 +18453,10 @@ var _MenuWidget = require('./vue/components/navigation/nifty/MenuWidget.vue');
 
 var _MenuWidget2 = _interopRequireDefault(_MenuWidget);
 
+var _NavPage = require('./vue/components/navigation/NavPage.vue');
+
+var _NavPage2 = _interopRequireDefault(_NavPage);
+
 var _ObjectEditor = require('./vue/components/controllers/ObjectEditor.vue');
 
 var _ObjectEditor2 = _interopRequireDefault(_ObjectEditor);
@@ -18343,27 +18465,17 @@ var _NavpageButton = require('./vue/components/navigation/NavpageButton.vue');
 
 var _NavpageButton2 = _interopRequireDefault(_NavpageButton);
 
-var _meiApp = require('./mei-app.js');
-
-var _meiApp2 = _interopRequireDefault(_meiApp);
-
-var _router = require('./vue-router/router');
-
-var _router2 = _interopRequireDefault(_router);
-
-var _routerMap = require('./vue-router/routerMap');
-
-var _routerMap2 = _interopRequireDefault(_routerMap);
-
-var _projector = require('./vue/components/projector/projector.vue');
-
-var _projector2 = _interopRequireDefault(_projector);
-
 var _vuexRouterSync = require('vuex-router-sync');
 
 var _store = require('./vuex/store');
 
 var _store2 = _interopRequireDefault(_store);
+
+var _routerConfig = require('./vue-router/router-config');
+
+var _meiApp = require('./mei-app.js');
+
+var _meiApp2 = _interopRequireDefault(_meiApp);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18397,6 +18509,8 @@ _vue2.default.component('animatedWords', _AnimatedWords2.default);
 _vue2.default.component('introFlyAway', _IntroFlyAway2.default);
 
 _vue2.default.component('meiAdminLogin', _MeiAdminLogin2.default);
+
+_vue2.default.component('ticketsIt', _TicketsIt2.default);
 
 // import DatesBox from './vue/components/events/DatesBox.vue';
 // Vue.component('dates_box', DatesBox)
@@ -18453,11 +18567,6 @@ _vue2.default.component('ipadMenu', _iPad3DMenu2.default);
 // import CurrencyDisplay from './vue/filters/Currency.js';
 // Vue.filter('currencyDisplay', CurrencyDisplay)
 
-// import HooksMixin from './vue/mixins/HooksMixin.js';
-// Vue.mixin(HooksMixin)
-// import SettingsWatcher from './vue/mixins/SettingsWatcher.js';
-// Vue.mixin(SettingsWatcher)
-
 _vue2.default.component('mainnav', _MainNav2.default);
 
 _vue2.default.component('mainnavbutton', _MainNavButton2.default);
@@ -18466,8 +18575,7 @@ _vue2.default.component('shortcutbuttons', _ShortcutButtons2.default);
 
 _vue2.default.component('menuwidget', _MenuWidget2.default);
 
-// import NavPage from './vue/components/navigation/NavPage.vue'
-// Vue.component('home', NavPage );
+_vue2.default.component('home', _NavPage2.default);
 
 _vue2.default.component('objecteditor', _ObjectEditor2.default);
 
@@ -18500,17 +18608,32 @@ _vue2.default.component('objecteditor', _ObjectEditor2.default);
 
 _vue2.default.component('navpagebutton', _NavpageButton2.default);
 
-//import RouterMap from './truth/routeMap'
+//
 
-// Instanciate Vue Router
-var MEiCore = _vue2.default.extend(_meiApp2.default);
 
-_router2.default.map(_routerMap2.default);
-_router2.default.start(MEiCore, 'body');
-_router2.default.go({ name: mei.vueRoute });
+// Root Componant
+var MEi = _vue2.default.extend(_meiApp2.default);
+
+// create router
+var router = new _vueRouter2.default({
+  hashbang: false,
+  history: true,
+  linkActiveClass: 'active-link',
+  saveScrollPosition: true
+});
+
+// configure router
+(0, _routerConfig.configRouter)(router);
+(0, _vuexRouterSync.sync)(_store2.default, router);
+
+//Router.map(RouterMap)
+router.start(MEi, 'body');
+//router.go({ path: mei.vueRoute })
 //module.exports = Router
 
-(0, _vuexRouterSync.sync)(_store2.default, _router2.default);
+// import { sync } from 'vuex-router-sync'
+// import store from './vuex/store'
+// sync(store, Router)
 
 //module.exports = new Vue(MeiApp).$mount('body')
 
@@ -18550,7 +18673,7 @@ switchElems.forEach(function (html) {
 // TODO: This needs to implement anaming system of sorts
 // switcher.onchange = function() {};
 
-},{"./mei-app.js":57,"./vue-router/router":71,"./vue-router/routerMap":72,"./vue/components/animate/AnimatedWords.vue":73,"./vue/components/animate/IntroFlyAway.vue":74,"./vue/components/animate/iPad3DMenu.vue":75,"./vue/components/auth/MeiAdminLogin.vue":76,"./vue/components/controllers/EditableCopy.vue":77,"./vue/components/controllers/ObjectEditor.vue":78,"./vue/components/navigation/NavpageButton.vue":80,"./vue/components/navigation/materialTheme/MainMenu.vue":81,"./vue/components/navigation/materialTheme/MenuButton.vue":82,"./vue/components/navigation/materialTheme/SubMenuButton.vue":83,"./vue/components/navigation/nifty/MainNav.vue":84,"./vue/components/navigation/nifty/MainNavButton.vue":85,"./vue/components/navigation/nifty/MenuWidget.vue":86,"./vue/components/navigation/nifty/ShortcutButtons.vue":87,"./vue/components/projector/projector.vue":92,"./vue/filters/Currency.js":94,"./vue/filters/VisibilityMode.js":95,"./vue/mixins/HooksMixin.js":96,"./vue/mixins/SettingsWatcher.js":97,"./vue/partials/BlueHero.vue":98,"./vue/partials/BrandBox.vue":99,"./vuex/store":107,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],59:[function(require,module,exports){
+},{"./mei-app.js":58,"./vue-router/router-config":72,"./vue/components/animate/AnimatedWords.vue":74,"./vue/components/animate/IntroFlyAway.vue":75,"./vue/components/animate/iPad3DMenu.vue":76,"./vue/components/auth/MeiAdminLogin.vue":77,"./vue/components/controllers/EditableCopy.vue":79,"./vue/components/controllers/ObjectEditor.vue":80,"./vue/components/navigation/NavPage.vue":94,"./vue/components/navigation/NavpageButton.vue":96,"./vue/components/navigation/materialTheme/MainMenu.vue":97,"./vue/components/navigation/materialTheme/MenuButton.vue":98,"./vue/components/navigation/materialTheme/SubMenuButton.vue":99,"./vue/components/navigation/nifty/MainNav.vue":100,"./vue/components/navigation/nifty/MainNavButton.vue":101,"./vue/components/navigation/nifty/MenuWidget.vue":102,"./vue/components/navigation/nifty/ShortcutButtons.vue":103,"./vue/components/pages/TicketsIt.vue":104,"./vue/filters/Currency.js":113,"./vue/filters/VisibilityMode.js":114,"./vue/mixins/HooksMixin.js":115,"./vue/mixins/SettingsWatcher.js":116,"./vue/partials/BlueHero.vue":117,"./vue/partials/BrandBox.vue":118,"./vuex/store":126,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],60:[function(require,module,exports){
 'use strict';
 
 // Setting for the main menu
@@ -18651,7 +18774,7 @@ module.exports = [{
 	}]
 }];
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 
 // Static Settings for Brand Identity
@@ -18709,7 +18832,7 @@ module.exports = {
 	}
 };
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 // Static dummy conversation data
@@ -18728,7 +18851,7 @@ module.exports = [{
 	photo: "/images/logos/logo.png"
 }];
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -18880,7 +19003,7 @@ module.exports = {
 
 };
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 module.exports = [{
@@ -18965,7 +19088,7 @@ module.exports = [{
     dates: []
 }];
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19005,7 +19128,7 @@ exports.default = {
 	}]
 };
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19048,7 +19171,7 @@ exports.default = {
 	}]
 };
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -19108,7 +19231,7 @@ module.exports = {
   }]
 };
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
 // Setting for the main menu
@@ -19209,7 +19332,7 @@ module.exports = [{
 	}]
 }];
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 "use strict";
 
 // Static dummy news data
@@ -19227,7 +19350,7 @@ module.exports = {
 	photo: "/images/logos/logo.png"
 };
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 'use strict';
 
 // Static App Setting
@@ -19244,6 +19367,8 @@ module.exports = {
   viewTitle: 'Home',
   currentView: 'home',
   currentNavigation: 'mainnav',
+
+  helpDeskVisible: true,
 
   editMode: false,
   editAll: false,
@@ -19267,7 +19392,7 @@ module.exports = {
 
 };
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19299,80 +19424,434 @@ exports.default = {
 
 };
 
-},{"./adminMenuData":59,"./companyData":60,"./conversationData":61,"./copyText":62,"./eventsData":63,"./features":64,"./imagesData":65,"./infoSectionData":66,"./mainMenuData":67,"./newsData":68,"./settingsData":69}],71:[function(require,module,exports){
+},{"./adminMenuData":60,"./companyData":61,"./conversationData":62,"./copyText":63,"./eventsData":64,"./features":65,"./imagesData":66,"./infoSectionData":67,"./mainMenuData":68,"./newsData":69,"./settingsData":70}],72:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+   value: true
 });
 
-var _vueRouter = require('vue-router');
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
-var _vueRouter2 = _interopRequireDefault(_vueRouter);
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _vue = require('vue');
+exports.configRouter = configRouter;
 
-var _vue2 = _interopRequireDefault(_vue);
+var _Inventorycalculator = require('../vue/components/inventory/Inventorycalculator.vue');
+
+var _Inventorycalculator2 = _interopRequireDefault(_Inventorycalculator);
+
+var _Profile = require('../vue/components/profile/Profile.vue');
+
+var _Profile2 = _interopRequireDefault(_Profile);
+
+var _Projector = require('../vue/components/projector/Projector.vue');
+
+var _Projector2 = _interopRequireDefault(_Projector);
+
+var _Communications = require('../vue/components/converse/Communications.vue');
+
+var _Communications2 = _interopRequireDefault(_Communications);
+
+var _SingleConversation = require('../vue/components/converse/SingleConversation.vue');
+
+var _SingleConversation2 = _interopRequireDefault(_SingleConversation);
+
+var _Navpage = require('../vue/components/navigation/Navpage.vue');
+
+var _Navpage2 = _interopRequireDefault(_Navpage);
+
+var _Checkout = require('../vue/components/pos/Checkout.vue');
+
+var _Checkout2 = _interopRequireDefault(_Checkout);
+
+var _Calendar = require('../vue/components/calendar/Calendar.vue');
+
+var _Calendar2 = _interopRequireDefault(_Calendar);
+
+var _Settings = require('../vue/components/settings/Settings.vue');
+
+var _Settings2 = _interopRequireDefault(_Settings);
+
+var _New = require('../vue/components/customer/New.vue');
+
+var _New2 = _interopRequireDefault(_New);
+
+var _Customers = require('../vue/components/customer/Customers.vue');
+
+var _Customers2 = _interopRequireDefault(_Customers);
+
+var _New3 = require('../vue/components/employee/New.vue');
+
+var _New4 = _interopRequireDefault(_New3);
+
+var _Employees = require('../vue/components/employee/Employees.vue');
+
+var _Employees2 = _interopRequireDefault(_Employees);
+
+var _Inventory = require('../vue/components/inventory/Inventory.vue');
+
+var _Inventory2 = _interopRequireDefault(_Inventory);
+
+var _UiUxPage = require('../vue/components/controllers/UiUxPage.vue');
+
+var _UiUxPage2 = _interopRequireDefault(_UiUxPage);
+
+var _UiUxButtons = require('../vue/components/controllers/UiUxButtons.vue');
+
+var _UiUxButtons2 = _interopRequireDefault(_UiUxButtons);
+
+var _UiUxCharts = require('../vue/components/controllers/UiUxCharts.vue');
+
+var _UiUxCharts2 = _interopRequireDefault(_UiUxCharts);
+
+var _TicketsIt = require('../vue/components/pages/TicketsIt.vue');
+
+var _TicketsIt2 = _interopRequireDefault(_TicketsIt);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_vue2.default.use(_vueRouter2.default);
+//import loadjs from 'partition-bundle';
 
-exports.default = new _vueRouter2.default({
-  hashbang: false,
-  history: true,
-  linkActiveClass: 'active-link'
-});
+function configRouter(router) {
+   var _router$map;
 
-},{"vue":49,"vue-router":47}],72:[function(require,module,exports){
+   // normal routes
+   router.map((_router$map = {
+
+      '/': {
+         component: _Navpage2.default,
+         name: 'Welcome'
+      }
+   }, (0, _defineProperty3.default)(_router$map, '/', {
+      component: _Navpage2.default,
+      name: 'welcome'
+   }), (0, _defineProperty3.default)(_router$map, '/dashboard', {
+      component: {
+         name: 'Dashboard',
+         template: '<div><h3>dashboard</h2><router-view></router-view></div>',
+         changeTabTitle: false,
+         logHooksToConsole: true,
+         watchMode: true,
+         data: function data() {
+            return {
+               pageTitle: 'Dashboard'
+
+            };
+         }
+      },
+      canReuse: true,
+      name: 'Dashboard',
+      subRoutes: {
+         '/': {
+            component: _Navpage2.default,
+            name: 'welcome'
+         },
+         '/home': {
+            component: _Navpage2.default,
+            name: 'Home'
+         },
+         '/pos': {
+            // component: function (resolve) {
+            //   loadjs([Pos], resolve)
+            // },
+            component: _Checkout2.default,
+            name: 'Pos'
+         },
+
+         '/customers': {
+            component: _Customers2.default,
+            name: 'Customers'
+         },
+         '/inventory/calculator': {
+            component: _Inventorycalculator2.default,
+            name: 'InventoryCalculator'
+         },
+
+         '/profile': {
+            component: _Profile2.default,
+            name: 'Profile',
+            subRoutes: {
+               '/projects': {
+                  component: _Projector2.default,
+                  name: 'Projects'
+               },
+               '/communications': {
+                  component: _Communications2.default,
+                  name: 'Communications'
+               },
+               '/singleConversation': {
+                  component: _SingleConversation2.default,
+                  name: 'SingleConversation'
+               },
+               '/calendar': {
+                  component: _Calendar2.default,
+                  name: 'Calendar'
+               },
+               '/settings': {
+                  component: _Settings2.default,
+                  name: 'Settings'
+               }
+            }
+         },
+         '/customer/new': {
+            component: _New2.default,
+            name: 'CustomerNew'
+         },
+         '/employees': {
+            component: _Employees2.default,
+            name: 'Employees'
+         },
+         '/employee/new': {
+            component: _Inventory2.default,
+            name: 'EmployeeNew'
+         },
+         '/employee': {
+            component: _Employees2.default,
+            name: 'EmployeeDirectory'
+         },
+         '/inventory': {
+            component: _Inventory2.default,
+            name: 'Inventory'
+         },
+         '/ui': {
+            component: _UiUxPage2.default,
+            name: 'UiUx'
+         },
+         '/ui/buttons': {
+            component: _UiUxButtons2.default,
+            name: 'UiUxButtons'
+         },
+         '/ui/charts': {
+            component: _UiUxCharts2.default,
+            name: 'UiUxCharts'
+         },
+
+         '/help-desk': {
+            component: _TicketsIt2.default,
+            name: 'HelpDesk'
+         }
+      } }), _router$map));
+
+   // redirect
+   // dashboard sub route close
+   //dashboard close
+
+   // '*': {
+   //     component: require('./components/not-found.vue')
+   //   },
+   router.redirect({
+      '/info': '/'
+   });
+
+   // global before
+   // 3 options:
+   // 1. return a boolean
+   // 2. return a Promise that resolves to a boolean
+   // 3. call transition.next() or transition.abort()
+   // router.beforeEach((transition) => {
+   //   //console.log('Bang from beforeEach transition')
+   //   if (transition.to.path === '/dashboard') {
+   //     router.app.authenticating = true
+   //     setTimeout(() => {
+   //       router.app.authenticating = false
+   //       alert('this route is forbidden by a global before hook')
+   //       transition.abort()
+   //     }, 3000)
+   //   } else {
+   //     transition.next()
+   //   }
+   // })
+}
+//import mainview from '../vue/mainview.js';
+
+},{"../vue/components/calendar/Calendar.vue":78,"../vue/components/controllers/UiUxButtons.vue":81,"../vue/components/controllers/UiUxCharts.vue":82,"../vue/components/controllers/UiUxPage.vue":83,"../vue/components/converse/Communications.vue":84,"../vue/components/converse/SingleConversation.vue":85,"../vue/components/customer/Customers.vue":86,"../vue/components/customer/New.vue":87,"../vue/components/employee/Employees.vue":88,"../vue/components/employee/New.vue":89,"../vue/components/inventory/Inventory.vue":90,"../vue/components/inventory/Inventorycalculator.vue":91,"../vue/components/navigation/Navpage.vue":95,"../vue/components/pages/TicketsIt.vue":104,"../vue/components/pos/Checkout.vue":105,"../vue/components/profile/Profile.vue":108,"../vue/components/projector/Projector.vue":109,"../vue/components/settings/Settings.vue":112,"babel-runtime/helpers/defineProperty":3}],73:[function(require,module,exports){
 'use strict';
 
-module.exports = {
-    '/': {
-        component: require('../vue/components/navigation/NavPage.vue'),
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+exports.configRouter = configRouter;
+
+var _Inventorycalculator = require('../vue/components/inventory/Inventorycalculator.vue');
+
+var _Inventorycalculator2 = _interopRequireDefault(_Inventorycalculator);
+
+var _Communications = require('../vue/components/converse/Communications.vue');
+
+var _Communications2 = _interopRequireDefault(_Communications);
+
+var _SingleConversation = require('../vue/components/converse/SingleConversation.vue');
+
+var _SingleConversation2 = _interopRequireDefault(_SingleConversation);
+
+var _Navpage = require('../vue/components/navigation/Navpage.vue');
+
+var _Navpage2 = _interopRequireDefault(_Navpage);
+
+var _Checkout = require('../vue/components/pos/Checkout.vue');
+
+var _Checkout2 = _interopRequireDefault(_Checkout);
+
+var _Calendar = require('../vue/components/calendar/Calendar.vue');
+
+var _Calendar2 = _interopRequireDefault(_Calendar);
+
+var _Settings = require('../vue/components/settings/Settings.vue');
+
+var _Settings2 = _interopRequireDefault(_Settings);
+
+var _New = require('../vue/components/customer/New.vue');
+
+var _New2 = _interopRequireDefault(_New);
+
+var _Customers = require('../vue/components/customer/Customers.vue');
+
+var _Customers2 = _interopRequireDefault(_Customers);
+
+var _New3 = require('../vue/components/employee/New.vue');
+
+var _New4 = _interopRequireDefault(_New3);
+
+var _Inventory = require('../vue/components/inventory/Inventory.vue');
+
+var _Inventory2 = _interopRequireDefault(_Inventory);
+
+var _UiUxPage = require('../vue/components/controllers/UiUxPage.vue');
+
+var _UiUxPage2 = _interopRequireDefault(_UiUxPage);
+
+var _UiUxButtons = require('../vue/components/controllers/UiUxButtons.vue');
+
+var _UiUxButtons2 = _interopRequireDefault(_UiUxButtons);
+
+var _UiUxCharts = require('../vue/components/controllers/UiUxCharts.vue');
+
+var _UiUxCharts2 = _interopRequireDefault(_UiUxCharts);
+
+var _TicketsIt = require('../vue/components/pages/TicketsIt.vue');
+
+var _TicketsIt2 = _interopRequireDefault(_TicketsIt);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//import mainview from '../vue/mainview.js';
+function configRouter(router) {
+    var _router$map;
+
+    alert('vue-router/router.js called??? but why and more importantly who???');
+    // normal routes
+    router.map((_router$map = {
+
+        '/': {
+            component: _Navpage2.default,
+            name: 'Welcome'
+        }
+    }, (0, _defineProperty3.default)(_router$map, '/', {
+        component: _Navpage2.default,
         name: 'welcome'
-    },
-    '/dashboard': {
-        component: require('../vue/components/navigation/NavPage.vue'),
-        name: 'dashboard'
-    },
-    '/dashboard/pos': {
-        component: require('../vue/components/pos/Checkout.vue'),
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard', {
+        component: _Navpage2.default,
+        name: 'Dashboard'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/pos', {
+        component: _Checkout2.default,
         name: 'Pos'
-    }
-};
-// '/home': {
-//     component: NavPage,
-//     name: 'home',
-//},
-// '/customers': {
-//     component: '',
-//     name: 'Customers',
-// },
-// '/employees': {
-//     component: '',
-//     name: 'Employees',
-// },
-// '/inventory/calculator': {
-//     component: '',
-//     name: 'InventoryCalculator',
-// },
-// '/projects': {
-//     component: '',
-//     name: 'Projector',
-// },
-// '/communications': {
-//     component: '',
-//     name: 'Communications',
-// },
-// '/singleConversation': {
-//     component: '',
-//     name: 'SingleConversation',
-// },
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/home', {
+        component: _Navpage2.default,
+        name: 'home'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/customers', {
+        component: _Customers2.default,
+        name: 'Customers'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/inventory/calculator', {
+        component: _Inventorycalculator2.default,
+        name: 'InventoryCalculator'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/projects', {
+        component: Projector,
+        name: 'Projects'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/communications', {
+        component: _Communications2.default,
+        name: 'Communications'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/singleConversation', {
+        component: _SingleConversation2.default,
+        name: 'SingleConversation'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/calendar', {
+        component: _Calendar2.default,
+        name: 'Calendar'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/settings', {
+        component: _Settings2.default,
+        name: 'Settings'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/customer/new', {
+        component: _New2.default,
+        name: 'CustomerNew'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/employees', {
+        component: Employees,
+        name: 'Employees'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/employee/new', {
+        component: _Inventory2.default,
+        name: 'EmployeeNew'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/employee', {
+        component: Employees,
+        name: 'EmployeeDirectory'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/inventory', {
+        component: _Inventory2.default,
+        name: 'Inventory'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/ui', {
+        component: _UiUxPage2.default,
+        name: 'UiUx'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/ui/buttons', {
+        component: _UiUxButtons2.default,
+        name: 'UiUxButtons'
+    }), (0, _defineProperty3.default)(_router$map, '/dashboard/ui/charts', {
+        component: _UiUxCharts2.default,
+        name: 'UiUxCharts'
+    }), (0, _defineProperty3.default)(_router$map, 'help-desk/active', {
+        component: _TicketsIt2.default,
+        name: 'TicketsActive'
 
-//}
+    }), (0, _defineProperty3.default)(_router$map, 'help-desk/admin', {
+        component: _TicketsIt2.default,
+        name: 'TicketsAdmin'
+    }), (0, _defineProperty3.default)(_router$map, 'help-desk', {
+        component: _TicketsIt2.default,
+        name: 'TicketsAdmin'
+    }), _router$map));
 
-},{"../vue/components/navigation/NavPage.vue":79,"../vue/components/pos/Checkout.vue":88}],73:[function(require,module,exports){
+    // redirect
+
+
+    // '*': {
+    //     component: require('./components/not-found.vue')
+    //   },
+    router.redirect({
+        '/info': '/'
+    });
+
+    // global before
+    // 3 options:
+    // 1. return a boolean
+    // 2. return a Promise that resolves to a boolean
+    // 3. call transition.next() or transition.abort()
+    //'/hello/:userId': '/user/:userId'
+    router.beforeEach(function (transition) {
+        if (transition.to.path === '/forbidden') {
+            router.app.authenticating = true;
+            setTimeout(function () {
+                router.app.authenticating = false;
+                alert('this route is forbidden by a global before hook');
+                transition.abort();
+            }, 3000);
+        } else {
+            transition.next();
+        }
+    });
+}
+
+},{"../vue/components/calendar/Calendar.vue":78,"../vue/components/controllers/UiUxButtons.vue":81,"../vue/components/controllers/UiUxCharts.vue":82,"../vue/components/controllers/UiUxPage.vue":83,"../vue/components/converse/Communications.vue":84,"../vue/components/converse/SingleConversation.vue":85,"../vue/components/customer/Customers.vue":86,"../vue/components/customer/New.vue":87,"../vue/components/employee/New.vue":89,"../vue/components/inventory/Inventory.vue":90,"../vue/components/inventory/Inventorycalculator.vue":91,"../vue/components/navigation/Navpage.vue":95,"../vue/components/pages/TicketsIt.vue":104,"../vue/components/pos/Checkout.vue":105,"../vue/components/settings/Settings.vue":112,"babel-runtime/helpers/defineProperty":3}],74:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19434,7 +19913,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],74:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],75:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".fly-away-image {\n  -webkit-transition: 1s ease-out;\n  transition: 1s ease-out;\n  height: 100px;\n}\n.fly-away-image > img {\n  -webkit-transition: 1s ease-out;\n  transition: 1s ease-out;\n  max-height: 100px;\n  width: 100%;\n  right: 0;\n}\n.fly-away-image .fly-away {\n  top: -600px;\n}\n.intro-fly-away .section-title {\n  font-size: 80px;\n  font-weight: 900px;\n  color: #fff;\n}\n@media (min-width: 300px) {\n  .hero {\n    padding: 30px 0;\n  }\n  .fly-away-image {\n    height: 120px;\n  }\n  .fly-away-image > img {\n    max-height: 120px;\n  }\n  .fly-away {\n    top: -300px;\n  }\n}\n@media (min-width: 568px) {\n  .hero {\n    padding: 100px 0;\n  }\n  .fly-away-image {\n    background-image: -webkit-linear-gradient(90deg, #2c8cb3 0%, #2caab3 100%);\n    height: 250px;\n  }\n  .fly-away-image > img {\n    margin: 0 auto;\n    max-height: 250px;\n  }\n}\n@media (min-width: 850px) {\n  .fly-away-image {\n    background-image: -webkit-linear-gradient(90deg, #2c8cb3 0%, #2caab3 100%);\n    height: 325px;\n  }\n  .fly-away-image > img {\n    max-height: 350px;\n  }\n}\n@media (min-width: 1400px) {\n  .fly-away-image {\n    height: 450px;\n    width: 100%;\n  }\n  .fly-away-image > img {\n    max-width: 1400px;\n    max-height: 450px;\n  }\n  .fly-away {\n    top: -600px;\n  }\n}\n")
 'use strict';
 
@@ -19493,7 +19972,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":100,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],75:[function(require,module,exports){
+},{"../../../vuex/actions.js":119,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],76:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".media {\n  position: absolute;\n}\n@media (min-width: 500px) {\n  .media {\n    position: inherit;\n    padding-top: 100px;\n  }\n}\n")
 'use strict';
 
@@ -19555,7 +20034,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],76:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],77:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".login-overlay {\n  width: 100%;\n  height: 100%;\n  position: fixed;\n  top: 0;\n  right: 0;\n  z-index: 999999;\n  background-color: rgba(103,58,183,0.5);\n}\n.login-modal {\n  padding: 15px;\n  position: fixed;\n  top: 0;\n  right: 0;\n  z-index: 9999999;\n}\n@media (min-width: 568px) {\n  .login-modal {\n    padding: 15px;\n    position: fixed;\n    top: 120px;\n    right: 25%;\n    left: 25%;\n    max-height: 580px;\n    max-width: 490px;\n  }\n}\n")
 'use strict';
 
@@ -19604,7 +20083,43 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],77:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],78:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'calendar',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'name'
+
+    };
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"calendar\">\n  comming soon\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/calendar/Calendar.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],79:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19696,7 +20211,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions":100,"vue":49,"vue-hot-reload-api":38}],78:[function(require,module,exports){
+},{"../../../vuex/actions":119,"vue":49,"vue-hot-reload-api":38}],80:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -19734,7 +20249,817 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../api/data/iconListForSelectBox":54,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],79:[function(require,module,exports){
+},{"../../../api/data/iconListForSelectBox":54,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],81:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'UiUx-page',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'UiUx-page'
+
+    };
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"UiUx-page\">\n  Commin Soon\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/controllers/UiUxButtons.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],82:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'UiUx-page',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'UiUx-page'
+
+    };
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"UiUx-page\">\n  Commin Soon\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/controllers/UiUxCharts.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],83:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'UiUx-page',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'UiUx-page'
+
+    };
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"UiUx-page\">\n  Commin Soon\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/controllers/UiUxPage.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],84:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".checkout {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n}\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    name: 'communications',
+    changeTabTitle: true,
+    logHooksToConsole: true,
+    watchMode: true,
+    data: function data() {
+        return {
+            pageTitle: 'Conversations'
+        };
+    }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"panel panel-default panel-left\">\n    <div class=\"discussions\">\n        <div id=\"demo-email-list\" class=\"panel-body\">\n            <div class=\"row\">\n                <div class=\"col-sm-7\">\n\n                    <!-- Mail toolbar -->\n                    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->\n\n                    <!--Split button dropdowns-->\n                    <div class=\"btn-group\">\n                        <div id=\"demo-checked-all-mail\" class=\"btn btn-default\">\n                            <label class=\"form-checkbox form-normal form-primary\">\n                                <input class=\"form-input\" type=\"checkbox\" name=\"mail-list\">\n                            </label>\n                        </div>\n                        <button data-toggle=\"dropdown\" class=\"btn btn-default dropdown-toggle dropdown-toggle-icon\"><i class=\"dropdown-caret fa fa-caret-down\"></i></button>\n                        <ul class=\"dropdown-menu\">\n                            <li><a href=\"javascript:void(0)\" id=\"demo-select-all-list\">All</a></li>\n                            <li><a href=\"javascript:void(0)\" id=\"demo-select-none-list\">None</a></li>\n                            <li><a href=\"javascript:void(0)\" id=\"demo-select-toggle-list\">Toggle</a></li>\n                            <li class=\"divider\"></li>\n                            <li><a href=\"javascript:void(0)\" id=\"demo-select-read-list\">Read</a></li>\n                            <li><a href=\"javascript:void(0)\" id=\"demo-select-unread-list\">Unread</a></li>\n                            <li><a href=\"javascript:void(0)\" id=\"demo-select-starred-list\">Starred</a></li>\n                        </ul>\n                    </div>\n\n                    <!--Refresh button-->\n                    <button id=\"demo-mail-ref-btn\" data-toggle=\"panel-overlay\" data-target=\"#demo-email-list\" class=\"btn btn-default\" type=\"button\">\n                        <i class=\"fa fa-refresh\"></i>\n                    </button>\n\n                    <!--Dropdown button (More Action)-->\n                    <div class=\"btn-group\">\n                        <button data-toggle=\"dropdown\" class=\"btn btn-default dropdown-toggle\" type=\"button\">\n                            More <i class=\"dropdown-caret fa fa-caret-down\"></i>\n                        </button>\n                        <ul class=\"dropdown-menu\">\n                            <li><a href=\"#\">Mark as read</a></li>\n                            <li><a href=\"#\">Mark as unread</a></li>\n                            <li class=\"divider\"></li>\n                            <li><a href=\"#\">Star</a></li>\n                            <li><a href=\"#\">Clear Star</a></li>\n                        </ul>\n                    </div>\n                </div>\n                <hr class=\"hr-sm visible-xs\">\n                <div class=\"col-sm-5 clearfix\">\n                    <div class=\"pull-right\">\n\n                        <!--Pager buttons-->\n                        <span class=\"text-muted\">\n                            <strong>1-50</strong>\n                            of\n                            <strong>160</strong>\n                        </span>\n                        <div class=\"btn-group btn-group\">\n                            <button class=\"btn btn-default\" type=\"button\">\n                                <span class=\"fa fa-chevron-left\"></span>\n                            </button>\n                            <button class=\"btn btn-default\" type=\"button\">\n                                <span class=\"fa fa-chevron-right\"></span>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <hr class=\"hr-sm\">\n\n            <!--Mail list group-->\n            <ul id=\"demo-mail-list\" class=\"mail-list\">\n\n                <!--Mail list item-->\n                <li class=\"mail-list-unread mail-attach\">\n                    <!-- <conversation></conversation> -->\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-list-unread mail-attach\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Michael Robert</a></div>\n                    <div class=\"mail-time\">05:55 PM</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\">\n                        <a v-link=\"{ path: '/dashboard/singleConversation' }\">This is an example if there is a really really long text. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </a>\n                    </div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-starred\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Shopping Mall</a></div>\n                    <div class=\"mail-time\">10:45 AM</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\">\n                        <a href=\"mailbox-message.html\">Tracking Your Order - Shoes Store Online</a>\n                    </div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-list-unread mail-starred mail-attach\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Dropbox</a></div>\n                    <div class=\"mail-time\">07:18 AM</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\">\n                        <a href=\"mailbox-message.html\">Reset your account password</a>\n                    </div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-list-unread\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Server Host</a></div>\n                    <div class=\"mail-time\">01:51 PM</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\">\n                        <a href=\"mailbox-message.html\">\n                            <span class=\"label label-danger\">\n                            Bussines\n                            </span>\n                            Regarding to your website issues.\n                        </a>\n                    </div>\n                </li>\n\n                <!--Mail list item-->\n                <li>\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Lisa D. Smith</a></div>\n                    <div class=\"mail-time\">Yesterday</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\">\n                        <a href=\"mailbox-message.html\">Hi John! How are you?</a>\n                    </div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-starred\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Johny Juan</a></div>\n                    <div class=\"mail-time\">Yesterday</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\">\n                        <a href=\"mailbox-message.html\">\n                            <span class=\"label label-info\">\n                            Partner\n                            </span>\n                            Repair Status Unregistered User\n                        </a>\n                    </div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-attach\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Bobby Marz</a></div>\n                    <div class=\"mail-time\">Oct 10</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\"><a href=\"mailbox-message.html\">Bugs in your system.</a></div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-list-unread mail-starred\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Lucy Moon</a></div>\n                    <div class=\"mail-time\">Oct 10</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\"><a href=\"mailbox-message.html\">We need to meet up soon</a></div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-list-unread\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Michael Robert</a></div>\n                    <div class=\"mail-time\">Oct 10</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\"><a href=\"mailbox-message.html\">This is an example if there is a really really long text. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </a></div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-starred mail-attach\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Shopping Mall</a></div>\n                    <div class=\"mail-time\">Oct 9</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\"><a href=\"mailbox-message.html\">Tracking Your Order - Shoes Store Online</a></div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-list-unread mail-starred\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Dropbox</a></div>\n                    <div class=\"mail-time\">Oct 8</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\"><a href=\"mailbox-message.html\">Reset your account password</a></div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-list-unread\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Server Host</a></div>\n                    <div class=\"mail-time\">Oct 7</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\">\n                        <a href=\"mailbox-message.html\">\n                            <span class=\"label label-danger\">\n                                Bussines\n                            </span>\n                            Regarding to your website issues.\n                        </a>\n                    </div>\n                </li>\n\n                <!--Mail list item-->\n                <li class=\"mail-starred\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Lisa D. Smith</a></div>\n                    <div class=\"mail-time\">Oct 5</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\"><a href=\"mailbox-message.html\">Hi John! How are you?</a></div>\n                </li>\n\n\n                <!--Mail list item-->\n                <li class=\"mail-starred\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Johny Juan</a></div>\n                    <div class=\"mail-time\">Oct 5</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\">\n                        <a href=\"mailbox-message.html\">\n                            <span class=\"label label-info\">\n                                Partner\n                            </span>\n                            Repair Status Unregistered User\n                        </a>\n                    </div>\n                </li>\n\n\n                <!--Mail list item-->\n                <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->\n                <li class=\"mail-attach\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Bobby Marz</a></div>\n                    <div class=\"mail-time\">Oct 3</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\"><a href=\"mailbox-message.html\">Bugs in your system.</a></div>\n                </li>\n\n\n                <!--Mail list item-->\n                <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->\n                <li class=\"mail-list-unread mail-starred\">\n                    <div class=\"mail-control\">\n                        <label class=\"demo-cb-mail form-checkbox form-normal form-primary\">\n                            <input type=\"checkbox\">\n                        </label>\n                    </div>\n                    <div class=\"mail-star\"><a href=\"#\"></a></div>\n                    <div class=\"mail-from\"><a href=\"#\">Lucy Moon</a></div>\n                    <div class=\"mail-time\">Oct 1</div>\n                    <div class=\"mail-attach-icon\"></div>\n                    <div class=\"mail-subject\"><a href=\"mailbox-message.html\">We need to meet up soon</a></div>\n                </li>\n            </ul>\n        </div>\n\n\n        <!--Mail footer-->\n        <div class=\"panel-footer clearfix\">\n            <div class=\"pull-right\">\n                <span class=\"text-muted\"><strong>1-50</strong> of <strong>160</strong></span>\n                <div class=\"btn-group btn-group\">\n                    <button type=\"button\" class=\"btn btn-dark\">\n                        <span class=\"fa fa-chevron-left\"></span>\n                    </button>\n                    <button type=\"button\" class=\"btn btn-dark\">\n                        <span class=\"fa fa-chevron-right\"></span>\n                    </button>\n                </div>\n            </div>\n        </div>\n    </div>\n    <!--===================================================-->\n    <!-- END OF MAIL INBOX -->\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/converse/Communications.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".checkout {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],85:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    name: 'singleConversation',
+    changeTabTitle: true,
+    logHooksToConsole: true,
+    watchMode: true,
+    data: function data() {
+        return {
+            pageTitle: 'The Title'
+        };
+    }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- VIEW MESSAGE -->\n<!--===================================================-->\n<div class=\"panel panel-default panel-left\">\n    <div class=\"panel-body\">\n        <div class=\"row\">\n            <div class=\"col-sm-7\">\n\n                <!--Sender Information-->\n                <div class=\"media\">\n                    <span class=\"media-left\">\n                        <img src=\"/img/av4.png\" class=\"img-circle img-sm\" alt=\"Profile Picture\">\n                    </span>\n                    <div class=\"media-body\">\n                        <div class=\"text-bold\">Lisa D. Smith</div>\n                        <small class=\"text-muted\">lisa.aqua@boss-pos.com</small>\n                    </div>\n                </div>\n            </div>\n            <hr class=\"hr-sm visible-xs\">\n            <div class=\"col-sm-5 clearfix\">\n\n                <!--Details Information-->\n                <div class=\"pull-right text-right\">\n                    <p class=\"mar-no\"><small class=\"text-muted\">Monday 23, Jan 2014</small></p>\n                    <a href=\"#\">\n                        <strong>Holiday.zip</strong>\n                        <i class=\"fa fa-paperclip fa-lg fa-fw\"></i>\n                    </a>\n                </div>\n            </div>\n        </div>\n        <div class=\"row pad-ver\">\n            <div class=\"col-xs-7\">\n\n                <!--Mail toolbar-->\n                <button class=\"btn btn-default\"><i class=\"fa fa-print\"></i></button>\n                <div class=\"btn-group btn-group\">\n                    <button class=\"btn btn-default\"><i class=\"fa fa-exclamation-circle\"></i></button>\n                    <button class=\"btn btn-default\"><i class=\"fa fa-trash\"></i></button>\n                </div>\n            </div>\n            <div class=\"col-xs-5 clearfix\">\n                <div class=\"pull-right\">\n\n                    <!--Reply & forward buttons-->\n                    <div class=\"btn-group btn-group\">\n                        <a class=\"btn btn-default\" href=\"#\">\n                        <i class=\"fa fa-reply\"></i>\n                        </a>\n                        <a class=\"btn btn-default\" href=\"#\">\n                        <i class=\"fa fa-share\"></i>\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <!--Message-->\n        <!--===================================================-->\n        <div class=\"pad-all bord-all bg-gray-light\">\n            Hey John,\n            <br><br>\n            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br><br>\n            <blockquote class=\"text-muted\">\n                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n            </blockquote>\n            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?\n            <br><br>\n            Regards,\n            <br><br>\n            <strong>Lisa D. Smith</strong><br>\n            2834 Street Name<br>\n            San Francisco, CA<br>\n        </div>\n        <!--===================================================-->\n        <!--End Message-->\n\n        <!-- Attach Files-->\n        <!--===================================================-->\n        <div class=\"pad-ver\">\n            <h4><i class=\"fa fa-paperclip fa-fw\"></i> Attachments <span>(2)</span></h4>\n\n            <ul class=\"mail-attach-list list-ov\">\n                <li class=\" clearfix\">\n\n                    <!--Download button-->\n                    <div class=\"mail-attach-btn\"><a href=\"#\" class=\"btn btn-purple btn-sm\">Download</a></div>\n\n                    <!--File information-->\n                    <div class=\"mail-attach-file\">\n                        <span class=\"mail-attach-label\">\n                            <span class=\"label label-info text-uppercase\">Images</span>\n                        </span>\n                        <div class=\"media-body\">\n                            <div class=\"text-bold\"><a href=\"#\">IMG_007.jpg</a></div>\n                            <small class=\"text-muted\">(15 KB)</small>\n                        </div>\n                    </div>\n                </li>\n                <li class=\"clearfix\">\n\n                    <!--Download button-->\n                    <div class=\"mail-attach-btn\"><a href=\"#\" class=\"btn btn-purple btn-sm\">Download</a></div>\n\n                    <!--File information-->\n                    <div class=\"mail-attach-file\">\n                        <span class=\"mail-attach-label\">\n                            <span class=\"label label-warning  text-uppercase\">Video</span>\n                        </span>\n                        <div class=\"media-body\">\n                            <div class=\"text-bold\"><a href=\"#\">VID_007.mp4</a></div>\n                            <small class=\"text-muted\">(178 MB)</small>\n                        </div>\n                    </div>\n                </li>\n            </ul>\n        </div>\n        <!--===================================================-->\n        <!-- End Attach Files-->\n\n\n        <!--Quick reply : Summernote Placeholder -->\n        <div id=\"demo-mail-textarea\" class=\"mail-message-reply bg-gray-light\">\n            <strong>Reply</strong> or <strong>Forward</strong> this message...\n        </div>\n\n        <!--Send button-->\n        <div class=\"pad-ver\">\n            <button id=\"demo-mail-send-btn\" type=\"button\" class=\"btn btn-primary hide\">\n                <span class=\"fa fa-paper-plane\"></span>\n                Send Message\n            </button>\n        </div>\n    </div>\n</div>\n<!--===================================================-->\n<!-- END VIEW MESSAGE -->\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/converse/SingleConversation.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],86:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n")
+'use strict';
+
+module.exports = {
+
+  //template: '#customers-page-template',
+
+  //inherit: true,
+
+  data: function data() {
+    return {
+      customerResource: this.$resource('api/customer/:options'),
+      customers: {}
+    };
+  },
+  methods: {},
+  components: {
+    //'navpagebutton': require('./navpagebutton.js')
+  },
+  created: function created() {
+    console.log('<< customers.js >> Component Created');
+  },
+  ready: function ready() {
+    console.log('<< customers.js >> Component Ready');
+    this.customerResource.get( //{options: ""},
+    function (customerData, status, request) {
+      this.$set('customers', customerData);
+    }).error(function (customerData, status, request) {
+      console.log("<< customers.js >> Errrr@ready->this.eployee.get()");
+    });
+  }
+
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"col-lg-12\">\n        <!--Primary Panel-->\n        <!--===================================================-->\n        <div class=\"panel panel-bordered panel-dark\">\n            <div class=\"panel-heading\">\n                <div class=\"panel-control\">\n                    <span class=\"label label-danger\">?#? Customers</span>\n                    <button class=\"btn btn-default\" data-target=\"#demo-panel-collapse\" data-toggle=\"collapse\" aria-expanded=\"true\"><i class=\"fa fa-chevron-down\"></i></button>\n                    <button class=\"btn btn-default\" data-dismiss=\"panel\"><i class=\"fa fa-times\"></i></button>\n                </div>\n                <h3 class=\"panel-title\">Customers</h3>\n            </div>\n            <div id=\"demo-panel-collapse\" class=\"collapse in panel-body\" aria-expanded=\"true\">\n\n                \n                    <div class=\"col-md-4 col-lg-4\">\n\n                    <!--Profile Widget-->\n                    <!--===================================================-->\n                    <div class=\"panel widget\">\n                        <div class=\"widget-header bg-mint\"></div>\n                        <div class=\"widget-body text-center\">\n                           {{--  @include('partials.user.avatar')  --}}\n                                <a class=\"users-list-name\" href=\"/employee/{{-- $user->id --}}\"><h4 class=\"mar-no\">{{-- $user-&gt;username --}}</h4></a>\n                            <p class=\"text-muted mar-btm\">{{-- $user-&gt;employeeInfo-&gt;title --}}</p>\n                            <span class=\"users-list-date\">{{-- $user-&gt;date_joined --}}</span>\n                            <div class=\"pad-ver\">\n                                <button class=\"btn btn-primary\">Edit</button>\n                                {!! Form::open(['method' =&gt; 'DELETE', 'url' =&gt; 'employee/ ' ]) !!}\n                                {!! Form::submit('Delete', ['class' =&gt; 'btn btn-warning btn-active-error']) !!}\n                                {!! Form::close() !!}\n                                <button class=\"btn btn-success\">Message</button>\n                            </div>\n                        </div>\n                    </div>\n                    <!--===================================================-->\n\n                </div>\n\n                \n\n            </div>\n        </div>\n        <!--===================================================-->\n        <!--End Primary Panel-->\n    </div>\n    \n\n<pre v-show=\"dataMode\">@{{ $data | json }}</pre>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/customer/Customers.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],87:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'new-customer',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'new customer'
+
+    };
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"new-customer\">\n  comming\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/customer/New.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],88:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+
+  data: function data() {
+    return {
+      employeeResource: this.$resource('api/employee/:options'),
+      employees: {}
+    };
+  },
+  methods: {},
+  components: {
+    //'navpagebutton': require('./navpagebutton.js')
+  },
+  created: function created() {
+    console.log('<< employees.js >> Component Created');
+  },
+  ready: function ready() {
+    console.log('<< employees.js >> Component Ready');
+    this.employeeResource.get( //{options: ""},
+    function (employeeData, status, request) {
+      this.$set('employees', employeeData);
+    }).error(function (data, status, request) {
+      console.log("<< employees.js >> Errrr@ready->this.eployee.get()");
+    });
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<pre>@{{ $data | json }}</pre>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/employee/Employees.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],89:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'employee-new',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'name'
+
+    };
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"employee-new\">\n  Comming soon\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/employee/New.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],90:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    data: function data() {
+        return {};
+    },
+
+    methods: {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<p>hello inventory</p>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/inventory/Inventory.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],91:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _inventory = require('./inventory.vue');
+
+var _inventory2 = _interopRequireDefault(_inventory);
+
+var _workbook = require('./workbook.vue');
+
+var _workbook2 = _interopRequireDefault(_workbook);
+
+var _inventoryDropzone = require('../../../api/inventoryDropzone.js');
+
+var _inventoryDropzone2 = _interopRequireDefault(_inventoryDropzone);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//////////////////////////////////////////////////////////////
+// VUE Project system [ START ]
+exports.default = {
+    template: '#metrc-calculator-template',
+    data: function data() {
+        return {
+            //users: $(bosspos.usersBasic),
+            currentUser: false,
+            components: ['projects', 'tasks', 'conversations', 'comments'], // 'workbook', 'inventory', 'sheets',
+            workbooks: [],
+            sheets: {},
+            inventories: { a: 1, b: 2, c: 3, d: 4 },
+            projects: {},
+            tasks: {},
+            conversations: {},
+            comments: {},
+            projectVisibility: 'active'
+        };
+    },
+
+    methods: {
+        /*
+         * New Objects
+         * each calls save method to persist
+         */
+        createNewInventory: function createNewInventory(user_id) {
+            var newInventory = {
+                'product_id': this.id,
+                'name': 'pot',
+                'rfid': '',
+                'class': 'info',
+                'unit_count': '',
+                'user_id': this.currentUser,
+                'facility_id': '',
+                'conversation_id': '',
+                'project_id': '',
+                'history': '',
+                'deleted': false
+            };
+            this.save(newProject, 'projects', 'new');
+        },
+
+        /*
+         * Persistence Success methods
+         * each handles its actions success
+         */
+        newPersisted: function newPersisted(objectList, newObject) {
+            //console.log('saved', newObject[newObject.length - 1].id,'pushing to',objectList);
+            this[objectList].push(newObject[newObject.length - 1]);
+        },
+        updatePersisted: function updatePersisted(type, returned, obj) {
+            //console.log('saved',type, obj.id); //
+        },
+        deletePersisted: function deletePersisted(objectType, deletedObject, obj) {
+            var list = this[objectType];
+            for (var i in this[objectType]) {
+                if (list[i].id == obj.id) {
+                    list.splice(i, 1);
+                }
+            } // Find deleted object and remove it from list
+        },
+        /*
+         * Component called  methods
+         * each handles its components requested action
+         */
+        softDelete: function softDelete(objectID, action) {
+            var model = this.pullApartObjectID(objectID);
+            console.log(objectID, model);
+            for (var i in model.obj) {
+                if (model.obj[i].id == model.id) {
+                    //console.log(model.obj[i].deleted)
+                    model.obj[i].deleted = !model.obj[i].deleted; //Toggle deleted Var
+                    //console.log(model.obj[i].deleted)
+                    this.save(model.obj[i], model.type, action); // Persist
+                }
+            }
+        },
+        permanentTrash: function permanentTrash(objectID) {
+            var model = this.pullApartObjectID(objectID);
+            for (var i in model.obj) {
+                if (model.obj[i].id == model.id) {
+                    this.save(model.obj[i], model.type, 'delete');
+                }
+            }
+        },
+        /*
+         * Vue Object persistence
+         * obj = component/object to persist
+         * objType = name of object
+         * action = will accept (update, new, delete)
+         */
+        save: function save(obj, objType, action) {
+            this.$http.post('/api/' + action + '/' + objType, obj, function (model, status, request) {}).success(function (model) {
+                this.$set(objType, model);
+                //this[action+'Persisted'](objType, model, obj)
+            });
+        },
+        /*
+         * fetch component objects
+         */
+        fetch: function fetch(component) {
+            this.$http.get('/api/' + [component], function (project) {
+                this.$set(component, project);
+            });
+        },
+
+        /*
+         * Helper Methods
+         */
+        pullApartObjectID: function pullApartObjectID(objectID) {
+            var modelId = objectID.id.substr(objectID.id.indexOf('_') + 1, objectID.id.length);
+            var modelType = objectID.id.substr(0, objectID.id.indexOf('_'));
+            var that = this[modelType];
+            return { obj: that, id: modelId, type: modelType };
+        }
+    },
+
+    ready: function ready() {
+        for (var i in this.components) {
+            this.fetch(this.components[i]);
+        }
+        _inventoryDropzone2.default.inventoryDropzoneTemplate();
+        _inventoryDropzone2.default.myDropzone();
+
+        console.log(_inventoryDropzone2.default);
+        console.log(this);
+    }
+};
+
+// VUE system [ END ]
+//////////////////////////////////////////////////////////////
+
+//var InventoryDropzone = require('../ui/inventoryDropzone.js');
+
+function CSVToArray(strData, strDelimiter) {
+    // Check to see if the delimiter is defined. If not,
+    // then default to comma.
+    strDelimiter = strDelimiter || ",";
+    // Create a regular expression to parse the CSV values.
+    var objPattern = new RegExp(
+    // Delimiters.
+    "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+    // Quoted fields.
+    "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+    // Standard fields.
+    "([^\"\\" + strDelimiter + "\\r\\n]*))", "gi");
+    // Create an array to hold our data. Give the array
+    // a default empty first row.
+    var arrData = [[]];
+    // Create an array to hold our individual pattern
+    // matching groups.
+    var arrMatches = null;
+    // Keep looping over the regular expression matches
+    // until we can no longer find a match.
+    while (arrMatches = objPattern.exec(strData)) {
+        // Get the delimiter that was found.
+        var strMatchedDelimiter = arrMatches[1];
+
+        //console.log(arrMatches);
+
+        // Check to see if the given delimiter has a length
+        // (is not the start of string) and if it matches
+        // field delimiter. If id does not, then we know
+        // that this delimiter is a row delimiter.
+        if (strMatchedDelimiter.length && strMatchedDelimiter != strDelimiter) {
+            // Since we have reached a new row of data,
+            // add an empty row to our data array.
+            arrData.push([]);
+        }
+        // Now that we have our delimiter out of the way,
+        // let's check to see which kind of value we
+        // captured (quoted or unquoted).
+
+        if (arrMatches[2]) {
+            // We found a quoted value. When we capture
+            // this value, unescape any double quotes.
+            var strMatchedValue = arrMatches[2].replace(new RegExp("\"\"", "g"), "\"");
+        } else {
+            // We found a non-quoted value.
+            var strMatchedValue = arrMatches[3];
+        }
+        // Now that we have our value string, let's add
+        // it to the data array.
+        arrData[arrData.length - 1].push(strMatchedValue);
+    }
+    // Return the parsed data.
+    return arrData;
+}
+
+function metrcCsv2Json(csv, fileName) {
+    var array = CSVToArray(csv);
+    var obj = {};
+    var g = fileName.slice(0, 17);
+    if (g = "PackagesInventory") {
+        obj = metricCVS(array);
+    }
+    console.log('finished ' + obj);
+    return obj;
+}
+
+function metricCVS(array) {
+    var h = array[11][2];
+    var recordCount = Number(h.replace(/^\D+/g, ''));
+    obj = { title: array[1][4] };
+    obj = { dates: array[2][4] };
+    obj = { name: array[8][3] };
+    obj = { license: array[9][3] };
+    obj = { type: array[10][3] };
+    obj = { records: recordCount };
+    //array[0].splice(0, 167);
+    var colCount = array[0].length;
+    var keysArray = [];
+    for (var k = 0; k < colCount; k++) {
+        var key = array[12][k];
+        if (key !== undefined) {
+            keysArray.push(array[12][k]);
+        } else {
+            keysArray.push("-");
+        }
+    }
+    var obj = { i: {} };
+    for (var i = 13; i < recordCount + 13; i++) {
+        var key = 0;
+        obj[i] = {};
+        for (var k = 0; k < colCount - 1; k++) {
+            var value = array[i][k];
+            if (value != '-' && keysArray[key] !== 'Harvest') {
+                obj[i][keysArray[key]] = value;
+                key++;
+            } else {
+                if (keysArray[key] == 'Harvest') {
+                    key++;
+                    k + 3;
+                    //array[0].shift();
+                    //array[0].shift();
+                }
+            }
+        }
+    }
+    return obj;
+}
+
+/*
+var csv = '' +
+    '"","","","","","","","","","","","","","","" ' +
+    '"","","","","Packages Inventory","","","","","","","","","","" ' +
+    '"","","","","From 10/1/2014 to 10/31/2014","","","","","","","","","","" ' +
+    '"","","","","","","","","","","","","","","" ' +
+    '"","","","","","","","","","","","","","","" ' +
+    '"","","","","","","","","","","","","","","" ' +
+    '"","","","","","","","","","","","","","","" ' +
+    '"","","","","","","","","","","","","","","" ' +
+    '"","","Name","SOULSHINE MEDICAL CONSULTING LLC","","","","","","","","","","","" ' +
+    '"","","License","402-00332","","","","","","","","","","","" ' +
+    '"","","Type","MMC Type 1","","","","","","","","","","","" ' +
+    '"","","Total Records: 11","","","","","","","","","","","","" ' +
+    '"","","Tag","","","Harvest","Item","","Item Category","Quantity","Lab Testing","Date","","","" ' +
+    '"","","1A4000500266EFD100000116","","","10/10","DURBAN POISON","","Buds","33.07 g","NotSubmitted","10/10/2014","","","" ' +
+    '"","","1A4000500266EFD100000117","","","10/10","nycd","","Buds","59.25 g","NotSubmitted","10/10/2014","","","" ' +
+    '"","","1A4000100265688C0000004A","","","","chocolope","","Buds","208.41 g","NotSubmitted","10/21/2014","","","" ' +
+    '"","","1A4000100265688C0000004D","","","","lemon diesel","","Buds","289.69 g","NotSubmitted","10/23/2014","","","" ' +
+    '"","","1A4000100265688C0000004E","","","","sour diesel","","Buds","108.23 g","NotSubmitted","10/21/2014","","","" ' +
+    '"","","1A4000100265688C0000004F","","","","texas hash","","Buds","311.95 g","NotSubmitted","10/21/2014","","","" ' +
+    '"","","1A4000100265688C00000050","","","","Concentrates","","Concentrate","156 g","NotSubmitted","10/21/2014","","","" ' +
+    '"","","1A4000100265688C0000004B","","","","critical mass","","Buds","253.03 g","NotSubmitted","10/21/2014","","","" ' +
+    '"","","1A4000100265688C0000004C","","","","jah kush","","Buds","55.78 g","NotSubmitted","10/23/2014","","","" ' +
+    '"","","1A4000100265688C00000051","","","","Edibles","","Infused (edible)","311 ea","TestPassed","10/21/2014","","","" ' +
+    '"","","1A4000100265688C00000052","","","","Non-Edibles (Topicals)","","Infused (non-edible)","95 ea","NotSubmitted","10/21/2014","","",""';
+*/
+//console.log(metrcCsv2Json(csv));
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div id=\"ComplianceCalculator\">\n                    <div class=\"table table-striped\" id=\"dropzone-previews\">\n                <div id=\"template\" class=\"file-row\">\n                    <!-- This is used as the file preview template -->\n                    <div>\n\n                        <strong class=\"error text-danger\" data-dz-errormessage=\"\"></strong>\n\n                        <span class=\"name\" data-dz-name=\"\"></span>\n                        <span class=\"size\" data-dz-size=\"\"></span>\n                        <div class=\"progress progress-striped progress-sm active\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\">\n                            <div class=\"progress-bar progress-sm progress-bar-success\" style=\"width:0%;\" data-dz-uploadprogress=\"\"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <div v-repeat=\" workbook in workbooks \">\n                <div class=\"col-md-6 pull-left\">\n                    <workbook>\n                        <div v-repeat=\"inventory in inventories\">\n                            <inventory>\n                            </inventory>\n                        </div>\n                    </workbook>\n                </div>\n            </div>\n\n        </div><!-- End ComplianceCalculator -->\n\n    <div>\n\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/inventory/Inventorycalculator.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../../api/inventoryDropzone.js":55,"./inventory.vue":92,"./workbook.vue":93,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],92:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    data: function data() {
+        return {};
+    },
+
+    methods: {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<p>hello inventory</p>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/inventory/inventory.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],93:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n")
+'use strict';
+
+module.exports = {
+
+    // Template script is imported via partials blade template
+    //template: document.querySelector('#WorkbookTemplate'),
+
+    // Inherit the data from the parent class
+    //inherit: true,
+
+    props: {
+        onDelete: {},
+        onRestore: {},
+        onTrash: {},
+        onChange: {},
+        currentUser: {
+            type: Number
+        }
+    },
+
+    data: function data() {
+        return {
+            //completed: this.project.deleted,
+            taskVisibility: 'active',
+            conversationVisibility: 'active',
+            typingTimer: {}
+        };
+    },
+    methods: {
+
+        /*
+        * Report a change in the project
+        * Handles textField height : e = event
+        * Calls onChange if the timer is allowed to count down
+        * Requests parent to persist item
+        */
+        projectChanged: function projectChanged(e) {
+            if (e.target.type == 'textarea') {
+                autosize(e.target);
+                var targetID = '#' + e.target.id;
+                this.project.description_height = $(targetID).height();
+            }
+            clearTimeout(this.typingTimer);
+            this.typingTimer = setTimeout(function () {
+                e.targetVM.onChange(e.targetVM.project, 'projects', 'update');
+            }, 2500);
+        },
+        toggleSoftDelete: function toggleSoftDelete(e) {
+            this.onDelete(e.path[3], 'update');
+        },
+        trashThis: function trashThis(e) {
+            this.onTrash(e.path[3], 'delete');
+        },
+        createNewTask: function createNewTask() {
+            var newTask = {
+                "title": "Task Title",
+                "description": "New Task Details",
+                "description_height": 100,
+                "class": "info",
+                "due_time": "12:00:00",
+                "due_date": "2017-01-20",
+                "owner_id": 0,
+                "project_id": this.project.id,
+                "delegated_id": 0,
+                "facility_id": 1,
+                "creator_id": this.currentUser,
+                "deleted_at": null
+            };
+            this.onChange(newTask, 'tasks', 'new');
+        },
+        createNewConversation: function createNewConversation() {
+            var newConversation = {
+                "title": "Note Title",
+                "description": "A new note",
+                "description_height": 100,
+                "class": "info",
+                "owner_id": this.project.id,
+                "owner_type": 'project',
+                "facility_id": 1,
+                "user_id": this.currentUser
+            };
+            this.onChange(newConversation, 'conversations', 'new');
+        }
+    }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<table class=\"table table-striped table-bordered dataTable no-footer dtr-inline\">\n            <tbody><tr v-repeat=\"item in workbook\">\n                <td v-repeat=\"detail in item\">\n                    <span>@{{ detail }}</span>\n                </td>\n            </tr>\n        </tbody></table>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/inventory/workbook.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],94:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -19789,7 +21114,57 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":100,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],80:[function(require,module,exports){
+},{"../../../vuex/actions.js":119,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],95:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _actions = require('../../../vuex/actions.js');
+
+exports.default = {
+  name: 'DashboardHome',
+  data: function data() {
+    return {};
+  },
+
+
+  vuex: {
+    getters: {
+      menuData: function menuData(_ref) {
+        var menus = _ref.menus;
+        return menus.DashboardMenu;
+      }
+    },
+    actions: {
+      setMenuActive: _actions.setMenuActive,
+      setMenu: _actions.setMenu
+    }
+  },
+  ready: function ready() {
+    this.setMenu('DashboardMenu');
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div id=\"main-nav-menu\">\n    <div class=\"inline-block pad-all\" v-for=\"button in menuData\">\n      <navpagebutton :button=\"button\" :edit-mode=\"editMode\"></navpagebutton>\n    </div>\n    \n    <button class=\"btn btn-default\" @click=\"$root.addNavButton()\"><i class=\"fa fa-4x fa-plus\"></i></button>\n   <!-- <pre v-if=\"dataMode\">{{ $data | json }}</pre> -->\n</div>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/navigation/Navpage.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../../vuex/actions.js":119,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],96:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".edit-btn {\n  position: absolute;\n}\n")
 'use strict';
 
@@ -19816,7 +21191,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],81:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],97:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19867,7 +21242,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../../vuex/actions.js":100,"vue":49,"vue-hot-reload-api":38}],82:[function(require,module,exports){
+},{"../../../../vuex/actions.js":119,"vue":49,"vue-hot-reload-api":38}],98:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -19973,7 +21348,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],83:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],99:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -20012,7 +21387,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],84:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],100:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n/*.v-link-active \n  color: purple\n  padding-left: 20px\n  font-weight: bold\n  box-shadow:inset 2px 2px 2px  4px #999*/\n")
 'use strict';
 
@@ -20048,6 +21423,7 @@ module.exports = {
       changedRoute: _getters.getRoute
     },
     actions: {
+      setSetting: _actions.setSetting,
       setMenuActive: _actions.setMenuActive,
       changeRoute: _actions.changeRoute,
       setMenu: _actions.setMenu
@@ -20062,7 +21438,7 @@ module.exports = {
 
   events: {
     menuActive: function menuActive(btn) {
-      //this.setMenuActive(btn)
+      this.setSetting('ticketsAdmin', false);
       this.$broadcast('checkButton', btn);
       return true;
     }
@@ -20107,7 +21483,7 @@ module.exports = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <!-- MAIN NAVIGATION -->\n  <!--===================================================-->\n<div id=\"mainnav-container\">\n  <div id=\"mainnav\">\n  <shortcutbuttons></shortcutbuttons>\n    <!--Menu--> \n    <!--================================-->\n    <div id=\"mainnav-menu-wrap\">\n      <div class=\"nano\">\n        <div class=\"nano-content\">\n          <ul id=\"mainnav-menu\" class=\"list-group\">\n\n            <!--Category name-->\n            <li class=\"list-header\">Navigation </li>\n\n            <!--Menu list item-->\n            <mainnavbutton v-for=\"button in menuData\" :button=\"button\"></mainnavbutton>\n\n            <li v-if=\"editMode\" @click=\"addButton\">\n            <a> + Create New Button</a></li>\n          </ul>\n\n          <li class=\"list-divider\"></li>\n\n          <menuwidget></menuwidget>\n \n        </div>\n      </div>\n    </div>\n    <!--================================-->\n    <!--End menu-->\n\n  </div>\n</div>\n<!--===================================================-->\n<!--END MAIN NAVIGATION-->\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <!-- MAIN NAVIGATION -->\n  <!--===================================================-->\n<div id=\"mainnav-container\">\n  <div id=\"mainnav\">\n  <shortcutbuttons></shortcutbuttons>\n    <!--Menu--> \n    <!--================================-->\n    <div id=\"mainnav-menu-wrap\">\n      <div class=\"nano\">\n        <div class=\"nano-content\">\n          <ul id=\"mainnav-menu\" class=\"list-group\">\n\n            <!--Category name-->\n            <li class=\"list-header\">Navigation </li>\n\n            <!--Menu list item-->\n            <mainnavbutton v-for=\"button in menuData\" :button=\"button\"></mainnavbutton>\n\n            <li>\n              <a v-link=\"'/dashboard/help-desk'\">\n                <i class=\"fa fa-question\"></i>\n                <span class=\"menu-title\">\n                  <strong>Help Desk</strong>\n                </span>\n                <span class=\"pull-right badge badge-success\" v-text=\"'0?'\"></span>\n              </a>\n            </li>\n\n            <li v-if=\"editMode\" @click=\"addButton\">\n            <a> + Create New Button</a></li>\n          </ul>\n\n          <li class=\"list-divider\"></li>\n\n          <menuwidget></menuwidget>\n \n        </div>\n      </div>\n    </div>\n    <!--================================-->\n    <!--End menu-->\n\n  </div>\n</div>\n<!--===================================================-->\n<!--END MAIN NAVIGATION-->\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -20123,7 +21499,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../../vuex/actions":100,"../../../../vuex/getters":101,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],85:[function(require,module,exports){
+},{"../../../../vuex/actions":119,"../../../../vuex/getters":120,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],101:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20165,7 +21541,7 @@ exports.default = {
         this.active = !this.active;
       }
       if (btn.value === 'isThirdTier' || btn.value === 'isSecondTier' || btn.value === 'isSecondFolder') {
-        console.log('Bang from 2nd tier');
+        //console.log('Bang from 2nd tier')
         this.$parent.active = true;
         this.active = !this.active;
       }
@@ -20228,7 +21604,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<li :class=\"active ? 'active' : ''\">\n  <div class=\"col-xs-2 pad-no\" v-if=\"editMode\"> \n    <a style=\"padding:10px 10px\" @click=\"$root.editButton(button)\" class=\"pad-no text-bold text-bright\"><i class=\"fa fa-edit\"></i></a>\n  </div>\n  <objecteditor :object=\"button\"></objecteditor>\n    <a @click=\"buttonClicked(button)\" @dblclick=\"changeType\" v-link=\"{name: button.href}\"><i :class=\"'fa ' +button.icon\"></i>\n      <span class=\"menu-title\">\n        <strong v-text=\"button.label\"></strong>\n      </span>\n          <i :class=\"{'arrow': isFolder}\"></i>\n        <span v-if=\"hasBadge\" class=\"pull-right badge badge-success\"></span>\n    </a>\n    <ul class=\"collapse\" :class=\"{'in': active}\">\n      <mainnavbutton v-for=\"button in button.submenu\" :button=\"button\"></mainnavbutton>\n        <li v-if=\"editMode\" @click=\"addButton\">\n      <a> + Create New Button</a></li>\n    </ul>\n</li>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<li :class=\"active ? 'active' : ''\">\n  <div class=\"col-xs-2 pad-no\" v-if=\"editMode\"> \n    <a style=\"padding:10px 10px\" @click=\"$root.editButton(button)\" class=\"pad-no text-bold text-bright\"><i class=\"fa fa-edit\"></i></a>\n  </div>\n  <objecteditor :object=\"button\"></objecteditor>\n    <a @click=\"buttonClicked(button)\" @dblclick=\"changeType\" v-link=\"button.href\"><i :class=\"'fa ' +button.icon\"></i>\n      <span class=\"menu-title\">\n        <strong v-text=\"button.label\"></strong>\n      </span>\n          <i :class=\"{'arrow': isFolder}\"></i>\n        <span v-if=\"hasBadge\" class=\"pull-right badge badge-success\"></span>\n    </a>\n    <ul class=\"collapse\" :class=\"{'in': active}\">\n      <mainnavbutton v-for=\"button in button.submenu\" :button=\"button\"></mainnavbutton>\n        <li v-if=\"editMode\" @click=\"addButton\">\n      <a> + Create New Button</a></li>\n    </ul>\n</li>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -20240,7 +21616,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],86:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],102:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20252,7 +21628,9 @@ exports.default = {
   logHooksToConsole: true,
   watchMode: true,
   data: function data() {
-    return {};
+    return {
+      pageTitle: 'MainNav Widget Container '
+    };
   },
 
 
@@ -20273,7 +21651,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],87:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],103:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20285,7 +21663,9 @@ exports.default = {
   logHooksToConsole: true,
   watchMode: true,
   data: function data() {
-    return {};
+    return {
+      pageTitle: 'MainNav Shortcut Buttons'
+    };
   },
 
 
@@ -20294,7 +21674,7 @@ exports.default = {
   ready: function ready() {}
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!--Shortcut buttons--> \n<!--================================-->\n<div id=\"mainnav-shortcut\">\n  <ul class=\"list-unstyled\">\n    <li class=\"col-xs-4\" data-content=\"Sidebar Menu\">\n      <a id=\"demo-toggle-aside\" class=\"shortcut-grid\" href=\"#\">\n        <i class=\"fa fa-magic\"></i>\n      </a>\n    </li>\n    <li class=\"col-xs-4\" data-content=\"A Demo Notification\">\n      <a id=\"demo-alert\" class=\"shortcut-grid\" href=\"#\">\n        <i class=\"fa fa-bullhorn\"></i>\n      </a>\n    </li>\n    <li class=\"col-xs-4 pad-top\" data-content=\"Go Home\">\n      <a id=\"dash-to-home\" class=\"shortcut-grid\" v-link=\"{name: 'welcome'}\"><i class=\"fa fa-home\"></i>\n      </a>\n    </li>\n  </ul>\n</div>\n<!--================================-->\n<!--End shortcut buttons-->\t\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!--Shortcut buttons--> \n<!--================================-->\n<div id=\"mainnav-shortcut\">\n  <ul class=\"list-unstyled\">\n    <li class=\"col-xs-3\" data-content=\"Sidebar Menu\">\n      <a id=\"demo-toggle-aside\" class=\"shortcut-grid\" href=\"#\">\n        <i class=\"fa fa-magic\"></i>\n      </a>\n    </li>\n    <li class=\"col-xs-3\" data-content=\"A Demo Notification\">\n      <a id=\"demo-alert\" class=\"shortcut-grid\" href=\"#\">\n        <i class=\"fa fa-bullhorn\"></i>\n      </a>\n    </li>\n    <li class=\"col-xs-3\" data-content=\"Help Desk\">\n      <a id=\"Help-Desk\" class=\"shortcut-grid\" v-link=\"help-desk\">\n        <i class=\"fa fa-exclamation\"></i>\n      </a>\n    </li>\n    <li class=\"col-xs-3 pad-top\" data-content=\"Go Home\">\n      <a id=\"dash-to-home\" class=\"shortcut-grid\" v-link=\"dashboard\"><i class=\"fa fa-home\"></i>\n      </a>\n    </li>\n  </ul>\n</div>\n<!--================================-->\n<!--End shortcut buttons-->\t\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -20306,7 +21686,67 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],88:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],104:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".hack-frame {\n  padding: 0;\n  width: 100%;\n  height: 1000px;\n  margin: 0;\n  border: 0;\n}\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _actions = require('../../../vuex/actions');
+
+exports.default = {
+  name: 'help-desk',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'Help Desk'
+    };
+  },
+  //isOn: false,
+
+  vuex: {
+    actions: {
+      setSetting: _actions.setSetting
+    }
+  },
+  methods: {
+    // turnOn(bool){
+    //   this.setSetting('helpDeskVisible', bool)
+    // }
+  },
+
+  ready: function ready() {
+    //this.turnOn(this.isOn)
+    // console.log(this.$route.path)
+    // this.$watch('$route.path', function(cb){
+    //   //this.turnOn(!this.isOn)
+    //   console.log('cb')
+    //   console.log(cb)
+    // })
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"tickets\">\n    <!--Page content-->\n    <!--===================================================-->\n    <!--VUE ROUTER checks for nested componants -->\n    \n  <iframe class=\"hack-frame\" src=\"http://localhost:3000/tickets\"></iframe>\n\t\t<!--===================================================-->\n\t\t<!--End page content-->\n  </div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/pages/TicketsIt.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".hack-frame {\n  padding: 0;\n  width: 100%;\n  height: 1000px;\n  margin: 0;\n  border: 0;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../../vuex/actions":119,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],105:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".checkout {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n}\n")
 'use strict';
 
@@ -20325,13 +21765,13 @@ var _SalesReceipt2 = _interopRequireDefault(_SalesReceipt);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-    name: 'pos',
+    name: 'Checkout',
     changeTabTitle: true,
     logHooksToConsole: true,
     watchMode: true,
     data: function data() {
         return {
-            pageTitle: 'pos',
+            pageTitle: 'Checkout',
             numpadEntry: '',
             fullNumber: 0,
             numbers: []
@@ -20366,7 +21806,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./NumPad.vue":89,"./SalesReceipt.vue":90,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],89:[function(require,module,exports){
+},{"./NumPad.vue":106,"./SalesReceipt.vue":107,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],106:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".numbers {\n  width: 370px;\n  border: 1px #000 solid;\n  background: #999;\n}\n.numbers .numbers-pad {\n  width: 100%;\n  height: 340px;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  border: 1px #33abb7 solid;\n}\n.numbers .numbers-pad > button {\n  margin: 2.2% 2.8% 2.8% 2.2%;\n  width: 15%;\n  height: 19%;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: center;\n  -webkit-justify-content: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  background: -webkit-linear-gradient(top, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  background: linear-gradient(to bottom, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  box-shadow: 2px 2px 6px #000;\n  border-radius: 5px;\n}\n.numbers .numbers-pad > button:active {\n  color: #33abb7;\n  margin: 2.5% 2.5% 2.5% 2.5%;\n  box-shadow: 0px 0px 3px #000;\n}\n.numbers .numbers-pad > button > span {\n  font-size: 2em;\n  line-height: 1em;\n}\n.numbers .numbers-pad .tall {\n  height: 30%;\n}\n.numbers .numbers-entry-field {\n  width: 100%;\n  font-size: 3em;\n  font-weight: bold;\n  text-align: right;\n  padding: 4px;\n}\n")
 'use strict';
 
@@ -20390,9 +21830,14 @@ Number.prototype.format = function (n, x, s, c) {
 };
 
 exports.default = {
+    name: 'Numpad',
+    changeTabTitle: false,
+    logHooksToConsole: true,
+    watchMode: true,
     props: ['fire'],
     data: function data() {
         return {
+            pageTitle: 'NumPad',
             buttons: [{ name: 1, value: 1, style: ' single' }, { name: 4, value: 4, style: ' single' }, { name: 7, value: 7, style: ' single' }, { name: '.', value: '.', style: ' single' }, { name: 2, value: 2, style: ' single' }, { name: 5, value: 5, style: ' single' }, { name: 8, value: 8, style: ' single' }, { name: 0, value: 0, style: ' single' }, { name: 3, value: 3, style: ' single' }, { name: 6, value: 6, style: ' single' }, { name: 9, value: 9, style: ' single' }, { name: '00', value: '00', style: ' single' }, { name: '/', value: '/', style: ' single' }, { name: 'X', value: '*', style: ' single' }, { name: '-', value: '-', style: ' single' }, { name: '+', value: '+', style: ' single' }, { name: '', icon: 'money', value: 'fire', style: ' tall' }, { name: '', icon: 'trash', value: 'kill', style: ' tall' }],
             workingNumber: '',
             savedNumbers: []
@@ -20433,9 +21878,7 @@ exports.default = {
             this.numpadEntry = '';
         }
     },
-    ready: function ready() {
-        console.log('<<< numberpad.vue >>> Ready!');
-    }
+    ready: function ready() {}
 };
 if (module.exports.__esModule) module.exports = module.exports.default
 ;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"numbers\">\n    <input class=\"numbers-entry-field\" v-model=\"displayNumber\">\n    <div class=\"numbers-pad\">\n        <button v-for=\"btn in buttons\" :class=\"btn.style\" class=\"\" @click=\"btnHandeler(btn.value)\" @tap=\"btnHandeler(btn.value)\"><span><i class=\"fa fa-{{btn.icon}}\"></i>{{ btn.name }}</span></button>\n        \n    </div>\n</div>\n"
@@ -20454,7 +21897,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],90:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],107:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".receipt-window {\n  width: 370px;\n  height: 400px;\n/* TODO Attach nano scroller to this */\n  overflow: auto;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  border: 1px #000 solid;\n  background: #eee;\n}\n.receipt-window .receipt-item {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  padding: 5px;\n}\n.receipt-window .receipt-item .item-controls {\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details {\n  font-size: 1.5em;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  width: 85%;\n}\n.receipt-window .receipt-item .item-details > input {\n  width: 100%;\n  border: none;\n  background-color: none;\n}\n.receipt-window .receipt-item .item-details .item-id {\n  width: 10%;\n}\n.receipt-window .receipt-item .item-details .item-name {\n  width: 50%;\n}\n.receipt-window .receipt-item .item-details .item-price {\n  text-align: right;\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details .item-sku {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-rfid {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-field-sm {\n  width: 20%;\n}\n")
 'use strict';
 
@@ -20467,7 +21910,7 @@ exports.default = {
     props: ['numpadEntry'],
     data: function data() {
         return {
-            name: 'receipt-window',
+            pageTitle: 'ReceiptWindow',
             editField: true,
             discounts: []
         };
@@ -20476,7 +21919,7 @@ exports.default = {
 
     computed: {
         items: function items() {
-            return this.$root.inventories;
+            //return this.$root.inventories;
         }
     }
 
@@ -20498,101 +21941,43 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],91:[function(require,module,exports){
-var __vueify_style__ = require("vueify-insert-css").insert(".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n")
-"use strict";
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],108:[function(require,module,exports){
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 exports.default = {
-    props: {
-        visibleScope: 'active',
-        softDelete: {},
-        currentUserId: { type: Number },
-        conversations: {},
-        project: {},
-        tasks: {}
-    },
+  name: 'Profile',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'Profile'
 
-    data: function data() {
-        return {
-            completed: this.project.deleted,
-            typingTimer: {}
-        };
-    },
+    };
+  },
 
 
-    computed: {
-        autoHeightFix: function autoHeightFix() {
-            return "'height:" + (this.project.description_height + 4) + "px; margin:5px 0;'";
-            /* 
-            *  Adding the 4px here is a little necessary tweak 
-            *  otherwise the field will resize itself 
-            *  improperly when saved.
-            */
-        }
-    },
+  methods: {},
 
-    methods: {
-        /*
-        * Report a change in the project
-        * Handles textField height : e = event
-        * Calls onChange if the timer is allowed to count down
-        * Requests parent to persist item
-        */
-        projectChanged: function projectChanged(e) {
-            if (e.target.type == 'textarea') {
-                autosize(e.target);
-                var targetID = '#' + e.target.id;
-                this.project.description_height = $(targetID).height();
-            }
-            clearTimeout(this.typingTimer);
-            this.typingTimer = setTimeout(function () {
-                e.targetVM.onChange(e.targetVM.project, 'projects', 'update');
-            }, 2500);
-        },
-        toggleSoftDelete: function toggleSoftDelete(e) {
-            this.onDelete(e.path[3], 'update');
-        },
-        trashThis: function trashThis(e) {
-            this.onTrash(e.path[3], 'delete');
-        },
-
-        createNewConversation: function createNewConversation() {
-            var newConversation = {
-                "title": "Note Title",
-                "description": "A new note",
-                "description_height": 100,
-                "class": "info",
-                "owner_id": this.project.id,
-                "owner_type": 'project',
-                "facility_id": 1,
-                "user_id": this.currentUser
-            };
-            this.onChange(newConversation, 'conversations', 'new');
-        }
-    },
-    ready: function ready() {}
+  ready: function ready() {}
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"panel panel-bordered panel-{{ project.class }}\">\n    <div class=\"panel-heading\" style=\"display: flex; width: 100%;\">\n        <h4 class=\"panel-title\" style=\"width: 100%;\">\n            <a data-parent=\"#accordion\" data-toggle=\"collapse\" href=\"#project{{ project.id }}\" class=\"collapsed\" aria-expanded=\"false\">\n                <input class=\"form-textarea project-message-body project-title\" @keyup=\"projectChanged\" v-model=\"project.title\">\n            </a>\n        </h4>\n        <button class=\"btn btn-danger pull-right\" @click=\"toggleSoftDelete\" v-show=\"!completed\">\n            <i class=\"fa fa-close\"></i> Delete\n        </button>\n        <button class=\"btn btn-success mar-rgt\" @click=\"toggleSoftDelete\" v-show=\"completed\">\n            <span class=\"fa fa-check\"></span> &nbsp; Restore</button>\n\n        <button class=\"btn btn-danger\" @click=\"trashThis\" v-show=\"completed\">\n            <span class=\"fa fa-trash\"></span> &nbsp; Trash</button>\n    </div>\n    <!--Accordion content collapsible container-->\n    <div class=\"panel-collapse collapse\" id=\"project{{ project.id }}\" aria-expanded=\"false\" style=\"height: 0px;\">\n        <div class=\"bg-dark\">\n            <div class=\"tab-base accordion-tab-base tab-stacked-left bg-trans\">\n                <!--Project Navigation Tabs-->\n                <ul class=\"nav nav-tabs\">\n                    <li class=\"active\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-details\" aria-expanded=\"true\">Details</a>\n                    </li>\n                    <li class=\"\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-tasks\" aria-expanded=\"false\">Tasks</a>\n                    </li>\n                    <li class=\"\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-conversations\" aria-expanded=\"false\">Notes</a>\n                    </li>\n                </ul>\n                <!--Tab Content-->\n                <div class=\"tab-content bg-gray-dark\">\n                    <!-- Details -->\n                    <div id=\"project{{ project.id }}-details\" class=\"tab-pane fade active in\">\n                        <textarea id=\"project{{project.id}}_description\" class=\"col-sm-12 list-group-item-text form-textarea project-message-body\" :style=\"autoHeightFix\" v-model=\"project.description\" @keyup=\"projectChanged\"></textarea>\n                        <input class=\"form-textarea project-message-body\" @keyup=\"projectChanged\" v-model=\"project.updated_at\" :disabled=\"true\">\n                    </div>\n                    <!-- Details -->\n\n                    <!-- Tasks -->\n                    <tasks :current-user-id=\"currentUserId\" :project-id=\"project.id\" :conversation-id=\"project.conversation_id\" :tasks=\"tasks\"></tasks>\n                    <!-- Tasks end -->\n\n                    <!-- conversation start -->\n                    <conversations :conversations=\"conversations\" :current-user-id=\"currentUserId\" :project-id=\"project.id\"></conversations>\n                    <!-- conversation end -->\n\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"Profile\">\n  \n  <router-view></router-view>\n</div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/projector/project.vue"
-  module.hot.dispose(function () {
-    require("vueify-insert-css").cache[".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n"] = false
-    document.head.removeChild(__vueify_style__)
-  })
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/profile/Profile.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],92:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],109:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n\n")
 'use strict';
 
@@ -20736,7 +22121,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/projector/projector.vue"
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/projector/Projector.vue"
   module.hot.dispose(function () {
     require("vueify-insert-css").cache["\n\n"] = false
     document.head.removeChild(__vueify_style__)
@@ -20747,7 +22132,101 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./project.vue":91,"./task.vue":93,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],93:[function(require,module,exports){
+},{"./project.vue":110,"./task.vue":111,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],110:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n")
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    props: {
+        visibleScope: 'active',
+        softDelete: {},
+        currentUserId: { type: Number },
+        conversations: {},
+        project: {},
+        tasks: {}
+    },
+
+    data: function data() {
+        return {
+            completed: this.project.deleted,
+            typingTimer: {}
+        };
+    },
+
+
+    computed: {
+        autoHeightFix: function autoHeightFix() {
+            return "'height:" + (this.project.description_height + 4) + "px; margin:5px 0;'";
+            /* 
+            *  Adding the 4px here is a little necessary tweak 
+            *  otherwise the field will resize itself 
+            *  improperly when saved.
+            */
+        }
+    },
+
+    methods: {
+        /*
+        * Report a change in the project
+        * Handles textField height : e = event
+        * Calls onChange if the timer is allowed to count down
+        * Requests parent to persist item
+        */
+        projectChanged: function projectChanged(e) {
+            if (e.target.type == 'textarea') {
+                autosize(e.target);
+                var targetID = '#' + e.target.id;
+                this.project.description_height = $(targetID).height();
+            }
+            clearTimeout(this.typingTimer);
+            this.typingTimer = setTimeout(function () {
+                e.targetVM.onChange(e.targetVM.project, 'projects', 'update');
+            }, 2500);
+        },
+        toggleSoftDelete: function toggleSoftDelete(e) {
+            this.onDelete(e.path[3], 'update');
+        },
+        trashThis: function trashThis(e) {
+            this.onTrash(e.path[3], 'delete');
+        },
+
+        createNewConversation: function createNewConversation() {
+            var newConversation = {
+                "title": "Note Title",
+                "description": "A new note",
+                "description_height": 100,
+                "class": "info",
+                "owner_id": this.project.id,
+                "owner_type": 'project',
+                "facility_id": 1,
+                "user_id": this.currentUser
+            };
+            this.onChange(newConversation, 'conversations', 'new');
+        }
+    },
+    ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"panel panel-bordered panel-{{ project.class }}\">\n    <div class=\"panel-heading\" style=\"display: flex; width: 100%;\">\n        <h4 class=\"panel-title\" style=\"width: 100%;\">\n            <a data-parent=\"#accordion\" data-toggle=\"collapse\" href=\"#project{{ project.id }}\" class=\"collapsed\" aria-expanded=\"false\">\n                <input class=\"form-textarea project-message-body project-title\" @keyup=\"projectChanged\" v-model=\"project.title\">\n            </a>\n        </h4>\n        <button class=\"btn btn-danger pull-right\" @click=\"toggleSoftDelete\" v-show=\"!completed\">\n            <i class=\"fa fa-close\"></i> Delete\n        </button>\n        <button class=\"btn btn-success mar-rgt\" @click=\"toggleSoftDelete\" v-show=\"completed\">\n            <span class=\"fa fa-check\"></span> &nbsp; Restore</button>\n\n        <button class=\"btn btn-danger\" @click=\"trashThis\" v-show=\"completed\">\n            <span class=\"fa fa-trash\"></span> &nbsp; Trash</button>\n    </div>\n    <!--Accordion content collapsible container-->\n    <div class=\"panel-collapse collapse\" id=\"project{{ project.id }}\" aria-expanded=\"false\" style=\"height: 0px;\">\n        <div class=\"bg-dark\">\n            <div class=\"tab-base accordion-tab-base tab-stacked-left bg-trans\">\n                <!--Project Navigation Tabs-->\n                <ul class=\"nav nav-tabs\">\n                    <li class=\"active\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-details\" aria-expanded=\"true\">Details</a>\n                    </li>\n                    <li class=\"\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-tasks\" aria-expanded=\"false\">Tasks</a>\n                    </li>\n                    <li class=\"\">\n                        <a data-toggle=\"tab\" href=\"#project{{ project.id }}-conversations\" aria-expanded=\"false\">Notes</a>\n                    </li>\n                </ul>\n                <!--Tab Content-->\n                <div class=\"tab-content bg-gray-dark\">\n                    <!-- Details -->\n                    <div id=\"project{{ project.id }}-details\" class=\"tab-pane fade active in\">\n                        <textarea id=\"project{{project.id}}_description\" class=\"col-sm-12 list-group-item-text form-textarea project-message-body\" :style=\"autoHeightFix\" v-model=\"project.description\" @keyup=\"projectChanged\"></textarea>\n                        <input class=\"form-textarea project-message-body\" @keyup=\"projectChanged\" v-model=\"project.updated_at\" :disabled=\"true\">\n                    </div>\n                    <!-- Details -->\n\n                    <!-- Tasks -->\n                    <tasks :current-user-id=\"currentUserId\" :project-id=\"project.id\" :conversation-id=\"project.conversation_id\" :tasks=\"tasks\"></tasks>\n                    <!-- Tasks end -->\n\n                    <!-- conversation start -->\n                    <conversations :conversations=\"conversations\" :current-user-id=\"currentUserId\" :project-id=\"project.id\"></conversations>\n                    <!-- conversation end -->\n\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/projector/project.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],111:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -20802,7 +22281,43 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],94:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],112:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'general-settings',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'settings'
+
+    };
+  },
+
+
+  methods: {},
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"general-settings\">\n  comming\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/settings/Settings.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38}],113:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20819,7 +22334,7 @@ module.exports = {
   }
 };
 
-},{}],95:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20847,22 +22362,27 @@ module.exports = {
     }
 };
 
-},{}],96:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _actions = require("../../vuex/actions");
+
+var _actions2 = _interopRequireDefault(_actions);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 exports.default = {
-    created: function created() {
-        var changeTabTitle = this.$options.changeTabTitle;
-        if (changeTabTitle) {
-            var host = this.$root.settings.appName;
-            var title = this.pageTitle;
-            $("title").contents().last().remove();
-            $('title').append(host + " | " + title);
-            this.$root.settings.viewTitle = title;
+    vuex: {
+        actions: {
+            setSetting: _actions2.default
         }
+    },
+    created: function created() {
+
         var logHooksToConsole = this.$options.logHooksToConsole;
         if (logHooksToConsole) {
             console.log("%c<< %s.vue >> Created!", this.$root.settings.logGood, this.pageTitle);
@@ -20873,6 +22393,13 @@ exports.default = {
         if (logHooksToConsole) {
             console.log("%c<< %s.vue >> Ready!", this.$root.settings.logGood, this.pageTitle);
         }
+        var changeTabTitle = this.$options.changeTabTitle;
+        if (changeTabTitle) {
+            var host = this.$root.settings.appName;
+            var title = this.pageTitle;
+            $("title").contents().last().remove();
+            $('title').append(host + " | " + title);
+        }
     },
     beforeDestroy: function beforeDestroy() {
         var logHooksToConsole = this.$options.logHooksToConsole;
@@ -20882,7 +22409,7 @@ exports.default = {
     }
 };
 
-},{}],97:[function(require,module,exports){
+},{"../../vuex/actions":119}],116:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -20902,7 +22429,7 @@ module.exports = {
     }
 };
 
-},{}],98:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20931,7 +22458,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],99:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],118:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".brand-box {\n  position: relative;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  margin: auto 2px auto 2px;\n  -webkit-box-flex: 1;\n  -webkit-flex: 1;\n      -ms-flex: 1;\n          flex: 1;\n}\n.brand-logo {\n  max-height: 50px;\n  min-height: 40px;\n  padding: 0 5px 5px 5px;\n}\n.brand-text-box {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  line-height: 20px;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n}\n.brand-title {\n  font-size: 18px;\n  margin: 5px 0 0 0;\n  font-weight: 600;\n}\n.brand-sub-title {\n  font-size: 14px;\n  margin: 5px 0 0 0;\n  font-weight: 400;\n}\n")
 'use strict';
 
@@ -20982,7 +22509,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../vuex/actions.js":100,"../../vuex/getters.js":101,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],100:[function(require,module,exports){
+},{"../../vuex/actions.js":119,"../../vuex/getters.js":120,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],119:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21098,7 +22625,7 @@ var setPage = exports.setPage = function setPage(_ref11) {
   dispatch(types.SET_PAGE, state);
 };
 
-},{"../api/vuex/menus.js":55,"./mutation-types":106,"babel-runtime/helpers/typeof":4}],101:[function(require,module,exports){
+},{"../api/vuex/menus.js":56,"./mutation-types":125,"babel-runtime/helpers/typeof":4}],120:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21151,7 +22678,7 @@ function getHomePage(state) {
   return state.pages.home;
 }
 
-},{}],102:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21200,7 +22727,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":70,"../mutation-types":106,"babel-runtime/helpers/defineProperty":3}],103:[function(require,module,exports){
+},{"../../truth/truth.js":71,"../mutation-types":125,"babel-runtime/helpers/defineProperty":3}],122:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21233,7 +22760,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":70,"../mutation-types":106,"babel-runtime/helpers/defineProperty":3}],104:[function(require,module,exports){
+},{"../../truth/truth.js":71,"../mutation-types":125,"babel-runtime/helpers/defineProperty":3}],123:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21297,7 +22824,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../api/vuex/menus.js":55,"../../truth/truth.js":70,"../mutation-types":106,"babel-runtime/helpers/defineProperty":3}],105:[function(require,module,exports){
+},{"../../api/vuex/menus.js":56,"../../truth/truth.js":71,"../mutation-types":125,"babel-runtime/helpers/defineProperty":3}],124:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21336,7 +22863,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":70,"../mutation-types":106,"babel-runtime/helpers/defineProperty":3}],106:[function(require,module,exports){
+},{"../../truth/truth.js":71,"../mutation-types":125,"babel-runtime/helpers/defineProperty":3}],125:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21360,7 +22887,7 @@ var SET_COPY = exports.SET_COPY = 'SET_COPY';
 
 var SET_FEATURES = exports.SET_FEATURES = 'SET_FEATURES';
 
-},{}],107:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21484,6 +23011,6 @@ exports.default = new _vuex2.default.Store({
   mutations: mutations
 });
 
-},{"../api/vuex/persistance.js":56,"../truth/truth.js":70,"./modules/copyText.js":102,"./modules/features.js":103,"./modules/menus.js":104,"./modules/settings.js":105,"vue":49,"vuex":52,"vuex/logger":53}]},{},[58]);
+},{"../api/vuex/persistance.js":57,"../truth/truth.js":71,"./modules/copyText.js":121,"./modules/features.js":122,"./modules/menus.js":123,"./modules/settings.js":124,"vue":49,"vuex":52,"vuex/logger":53}]},{},[59]);
 
 //# sourceMappingURL=mei-core.js.map

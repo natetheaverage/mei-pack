@@ -24,8 +24,13 @@ import { changeRoute, setMenuActive, setMenu } from '../../../vuex/actions.js'
 
 export default {
   name: 'DashboardHome', 
+    changeTabTitle: true,
+    logHooksToConsole: true,
+    watchMode: true,
   data(){
-    return{}
+    return{
+      pageTitle: 'DashboardHome'
+    }
   },
 
   vuex:{ 

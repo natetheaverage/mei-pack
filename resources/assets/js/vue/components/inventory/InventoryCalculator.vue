@@ -40,7 +40,7 @@
 import inventory from './inventory.vue';
 import workbook  from './workbook.vue';
 //var InventoryDropzone = require('../ui/inventoryDropzone.js');
-import InventoryDropzone from "../../../ui/inventoryDropzone.js";
+import InventoryDropzone from "../../../api/inventoryDropzone.js";
 
 
 //////////////////////////////////////////////////////////////
