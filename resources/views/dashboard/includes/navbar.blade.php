@@ -515,66 +515,8 @@
 			</ul>
 
 			<ul class="nav navbar-top-links pull-right">
-             
-				<!--Language selector-->
-				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-				<li v-if="showLanguageSelector" class="dropdown">
-					<a id="demo-lang-switch" class="lang-selector dropdown-toggle" href="#" data-toggle="dropdown">
-								<span class="lang-selected">
-									<img class="lang-flag" src="{!! asset('img/flags/united-kingdom.png') !!}" alt="English">
-									<span class="lang-id">EN</span>
-									<span class="lang-name">English</span>
-								</span>
-					</a>
-
-					<!--Language selector menu-->
-					<ul class="head-list dropdown-menu with-arrow">
-						<li>
-							<!--English-->
-							<a href="#" class="active">
-								<img class="lang-flag" src="{!! asset('img/flags/united-kingdom.png') !!}" alt="English">
-								<span class="lang-id">EN</span>
-								<span class="lang-name">English</span>
-							</a>
-						</li>
-						<li>
-							<!--France-->
-							<a href="#">
-								<img class="lang-flag" src="{!! asset('img/flags/france.png') !!}" alt="France">
-								<span class="lang-id">FR</span>
-								<span class="lang-name">Fran&ccedil;ais</span>
-							</a>
-						</li>
-						<li>
-							<!--Germany-->
-							<a href="#">
-								<img class="lang-flag" src="{!! asset('img/flags/germany.png') !!}" alt="Germany">
-								<span class="lang-id">DE</span>
-								<span class="lang-name">Deutsch</span>
-							</a>
-						</li>
-						<li>
-							<!--Italy-->
-							<a href="#">
-								<img class="lang-flag" src="{!! asset('img/flags/italy.png') !!}" alt="Italy">
-								<span class="lang-id">IT</span>
-								<span class="lang-name">Italiano</span>
-							</a>
-						</li>
-						<li>
-							<!--Spain-->
-							<a href="#">
-								<img class="lang-flag" src="{!! asset('img/flags/spain.png') !!}" alt="Spain">
-								<span class="lang-id">ES</span>
-								<span class="lang-name">Espa&ntilde;ol</span>
-							</a>
-						</li>
-					</ul>
-				</li>
-				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-				<!--End language selector-->
-                
-
+				
+				@include('dashboard.includes.languageSelector')
 				<!--User dropdown-->
 				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 				<li id="dropdown-user" class="dropdown">
@@ -582,13 +524,17 @@
 								<span class="pull-right">
 									{{-- @if($currentUser->profile->profile_picture != null) 
 										<img alt="Profile Picture" class="img-circle img-user media-object" --}}
-                                        {{-- src="{!! $currentUser->profile->profile_picture !!}"> --}}
+                  {{-- src="{!! $currentUser->profile->profile_picture !!}"> --}}
 
-                                        {{-- src="{!! asset('img/users/'.studly_case($currentUser->profile->last_name[0]).'/'.studly_case($currentUser->profile->last_name).studly_case($currentUser->profile->first_name).'/'.$currentUser->profile->
+                  {{-- src="{!! asset('img/users/'.studly_case($currentUser->profile->last_name[0]).'/'.studly_case($currentUser->profile->last_name).studly_case($currentUser->profile->first_name).'/'.$currentUser->profile->
 										<img alt="Profile Picture" class="img-circle img-user media-object" src="{!! asset('img/av'.rand(1,6).'.png') !!}">--}}
-									<img alt="Profile Picture" class="img-circle img-user media-object" src="{!! asset('img/av6.png') !!}" />
+									<img 
+										alt="Profile Picture" 
+										class="img-circle img-user media-object" 
+										:src="profile.profile_picture" 
+									/>
 								</span>
-						<div class="username hidden-xs"> Username </div>
+						<div class="username hidden-xs" v-text="user.name"></div>
 					</a>
 
 
@@ -608,37 +554,37 @@
 						<!-- User dropdown menu -->
 						<ul class="head-list">
 							<li>
-								<a href="#">
+								<a v-link="'/dashboard/profile'">
 									<i class="fa fa-user fa-fw fa-lg"></i> Profile
 								</a>
 							</li>
 							<li>
-								<a href="#">
+								<a v-link="'/dashboard/profile/communications'">
 									<span class="badge badge-danger pull-right">9</span>
 									<i class="fa fa-envelope fa-fw fa-lg"></i> Messages
 								</a>
 							</li>
 							<li>
-								<a href="#">
+								<a v-link="'/dashboard/settings'">
 									<span class="label label-success pull-right">New</span>
 									<i class="fa fa-gear fa-fw fa-lg"></i> Settings
 								</a>
 							</li>
 							<li>
-								<a href="#">
+								<a v-link="'/dashboard/help-desk'">
 									<i class="fa fa-question-circle fa-fw fa-lg"></i> Help
 								</a>
 							</li>
 							<li>
-								<a href="#">
-									<i class="fa fa-lock fa-fw fa-lg"></i> Lock screen
+								<a v-link="'/dashboard/projects'">
+									<i class="fa fa-lock fa-fw fa-lg"></i> Project Manager
 								</a>
 							</li>
 						</ul>
 
 						<!-- Dropdown footer -->
 						<div class="pad-all text-right">
-							<a href="/auth/logout" class="btn btn-primary">
+							<a href="/logout" class="btn btn-primary">
 								<i class="fa fa-sign-out fa-fw"></i> Logout
 							</a>
 						</div>

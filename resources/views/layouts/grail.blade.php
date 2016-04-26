@@ -20,6 +20,14 @@
     @include('front.'.config('app.theme').'.aside'  )
   </div>
   @include('front.'.config('app.theme').'.footer')
-  
+@endsection
 
-@stop
+@section('footer')
+  @parent
+
+  <script src="/js/front-vendor.js"></script>
+
+@endsection
+
+  
+  

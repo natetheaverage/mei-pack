@@ -1,18 +1,24 @@
 <template>
-    <!--Searchbox-->
-	  <div class="searchbox" :class="{'in' : openSearch}">
-	    <div class="input-group custom-search-form">
-	      <input 
-	      	type="text" 
-	      	class="form-control bg-dark-gray" 
-	      	placeholder="Search.."
-	      	@keyup.enter="searchFor"
-	      >
-	      <span class="input-group-btn  bg-dark-gray">
-	        <button class="text-muted" type="button"><i class="fa fa-2x fa-search "></i></button>
-	      </span>
-	    </div>
-	  </div>
+	<button 
+		class="open-search" 
+		type="button"
+	><i class="fa fa-2x fa-search"></i>
+	</button>
+  <!--Searchbox-->
+  <div class="searchbox" :class="{'in' : openSearch}">
+    <div class="input-group custom-search-form">
+      <input 
+      	id="search-field"
+      	type="text" 
+      	class="form-control bg-dark-gray" 
+      	placeholder="Search.."
+      	@keyup.enter="searchFor"
+      >
+      <span class="input-group-btn  bg-dark-gray">
+        <button class="text-muted" type="button"><i class="fa fa-2x fa-search "></i></button>
+      </span>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -39,6 +45,7 @@ export default {
     	},
 
     	searchFor(){
+    		$('#search-field').blur()
     		this.openSearch = false
     	}
     },
@@ -50,23 +57,27 @@ export default {
 </script>
 
 <style lang="stylus">
+.open-search
+	position absolute
+	
 .searchbox
-	top -50px
+	top -35px
 	right 0
-	padding 0 25%
-	min-width 100%
-	position fixed
+	padding 0 0 5px 25%
+	min-width 100vw
+	position relative
 	margin-right 0px
-	transition padding .3s ease, top .3s ease
+	transition .3s ease
+	>.input-group >input
+		font-size 14px
+		font-weight 100
+		transition .3s ease
+		&:focus
+			border none
 	&.in
 		top 0px
 		padding-top 50px
-	>.input-group
-		>input
+		>.input-group >input
 			font-size 42px
-			font-weight 100
-			&:focus
-				border none
-		
 
 </style>

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\ObjectBuilder;
 use App\Http\Controllers\Controller;
 use App\Models\InterfaceObjects\InterfaceObject;
+use Spatie\Permission\Models\Role;
 
 
 class InterfaceObjectsController extends Controller
@@ -93,12 +94,12 @@ class InterfaceObjectsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(\Gate::allows('edit-bosspos')){
-            $object                 = InterfaceObject::find($id);
+        $user = \Auth::user();
+        if($user->hasRole('admin')){
+            $object = InterfaceObject::find($id);
             $array = $request->all();
-            foreach($array['buttonData'] as $requestData){
-                //$name = $value->name;
-                $object->$requestData['name']         = $requestData['value']; 
+            foreach($array['objectData'] as $requestData){
+                $object[$requestData['name']] = $requestData['value']; 
             }
             // $object->href           = $button['href'];
             // $object                 = $request->all();

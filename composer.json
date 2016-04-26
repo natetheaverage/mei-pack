@@ -29,7 +29,8 @@
         "orangehill/iseed": "dev-master",
         "predis/predis": "~1.1@dev",
         "iron-io/iron_mq": "~2.0",
-        "kordy/ticketit": "0.*"
+        "kordy/ticketit": "0.*",
+        "pda/pheanstalk": "~3.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

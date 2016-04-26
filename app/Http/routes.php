@@ -10,6 +10,16 @@
 | and give it the controller to call when that URI is requested.
 |
 */
+// Route::get('/redis', function(){
+//   $data=[
+//     'event' => 'thisHappened',
+//     'data' => [
+//       'userName' => 'Nathan',
+//       'message' => 'this be nuts'
+//     ]
+//   ];
+//   Redis::publish('message-channel', json_encode($data));
+// });
 
 Route::auth();
 

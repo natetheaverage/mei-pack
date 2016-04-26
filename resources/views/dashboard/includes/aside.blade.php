@@ -9,18 +9,18 @@
 				<!--================================-->
 				<ul class="nav nav-tabs nav-justified">
 					<li class="active">
-						<a href="#demo-asd-tab-1" data-toggle="tab">
+						<a href="#asd-tab-1" data-toggle="tab">
 							<i class="fa fa-comments"></i>
 							<span class="badge badge-purple">7</span>
 						</a>
 					</li>
 					<li>
-						<a href="#demo-asd-tab-2" data-toggle="tab">
+						<a href="#asd-tab-2" data-toggle="tab">
 							<i class="fa fa-info-circle"></i>
 						</a>
 					</li>
 					<li>
-						<a href="#demo-asd-tab-3" data-toggle="tab">
+						<a href="#asd-tab-3" data-toggle="tab">
 							<i class="fa fa-wrench"></i>
 						</a>
 					</li>
@@ -36,113 +36,8 @@
 
 					<!--First tab (Contact list)-->
 					<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-					<div class="tab-pane fade in active" id="demo-asd-tab-1">
-						<h4 class="pad-hor text-thin">
-							<span class="pull-right badge badge-warning">3</span> Family
-						</h4>
-
-						<!--Family-->
-						<div class="list-group bg-trans">
-							<a href="#" class="list-group-item">
-								<div class="media-left">
-									<img class="img-circle img-xs" src="{!! asset('img/av2.png') !!}" alt="Profile Picture">
-								</div>
-								<div class="media-body">
-									<div class="text-lg">Stephen Tran</div>
-									<span class="text-muted">Availabe</span>
-								</div>
-							</a>
-							<a href="#" class="list-group-item">
-								<div class="media-left">
-									<img class="img-circle img-xs" src="{!! asset('img/av4.png') !!}" alt="Profile Picture">
-								</div>
-								<div class="media-body">
-									<div class="text-lg">Brittany Meyer</div>
-									<span class="text-muted">I think so</span>
-								</div>
-							</a>
-							<a href="#" class="list-group-item">
-								<div class="media-left">
-									<img class="img-circle img-xs" src="{!! asset('img/av3.png') !!}" alt="Profile Picture">
-								</div>
-								<div class="media-body">
-									<div class="text-lg">Donald Brown</div>
-									<span class="text-muted">Lorem ipsum dolor sit amet.</span>
-								</div>
-							</a>
-						</div>
-
-
-						<hr>
-						<h4 class="pad-hor text-thin">
-							<span class="pull-right badge badge-info">4</span> Friends
-						</h4>
-
-						<!--Friends-->
-						<div class="list-group bg-trans">
-							<a href="#" class="list-group-item">
-								<div class="media-left">
-									<img class="img-circle img-xs" src="{!! asset('img/av5.png') !!}" alt="Profile Picture">
-								</div>
-								<div class="media-body">
-									<div class="text-lg">Betty Murphy</div>
-									<span class="text-muted">Bye</span>
-								</div>
-							</a>
-							<a href="#" class="list-group-item">
-								<div class="media-left">
-									<img class="img-circle img-xs" src="{!! asset('img/av6.png') !!}" alt="Profile Picture">
-								</div>
-								<div class="media-body">
-									<div class="text-lg">Olivia Spencer</div>
-									<span class="text-muted">Thank you!</span>
-								</div>
-							</a>
-							<a href="#" class="list-group-item">
-								<div class="media-left">
-									<img class="img-circle img-xs" src="{!! asset('img/av4.png') !!}" alt="Profile Picture">
-								</div>
-								<div class="media-body">
-									<div class="text-lg">Sarah Ruiz</div>
-									<span class="text-muted">2 hours ago</span>
-								</div>
-							</a>
-							<a href="#" class="list-group-item">
-								<div class="media-left">
-									<img class="img-circle img-xs" src="{!! asset('img/av3.png') !!}" alt="Profile Picture">
-								</div>
-								<div class="media-body">
-									<div class="text-lg">Paul Aguilar</div>
-									<span class="text-muted">2 hours ago</span>
-								</div>
-							</a>
-						</div>
-
-
-						<hr>
-						<h4 class="pad-hor text-thin">
-							<span class="pull-right badge badge-success">Offline</span> Works
-						</h4>
-
-						<!--Works-->
-						<div class="list-group bg-trans">
-							<a href="#" class="list-group-item">
-								<span class="badge badge-purple badge-icon badge-fw pull-left"></span> Joey K. Greyson
-							</a>
-							<a href="#" class="list-group-item">
-								<span class="badge badge-info badge-icon badge-fw pull-left"></span> Andrea Branden
-							</a>
-							<a href="#" class="list-group-item">
-								<span class="badge badge-pink badge-icon badge-fw pull-left"></span> Lucy Moon
-							</a>
-							<a href="#" class="list-group-item">
-								<span class="badge badge-success badge-icon badge-fw pull-left"></span> Johny Juan
-							</a>
-							<a href="#" class="list-group-item">
-								<span class="badge badge-danger badge-icon badge-fw pull-left"></span> Susan Sun
-							</a>
-						</div>
-
+					<div class="tab-pane fade in active" id="asd-tab-1">
+						<contact-list></contact-list>
 					</div>
 					<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 					<!--End first tab (Contact list)-->
@@ -150,9 +45,22 @@
 
 					<!--Second tab (Custom layout)-->
 					<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-					<div class="tab-pane fade" id="demo-asd-tab-2">
+					<div id="asd-tab-2" class="tab-pane fade">
+						@roles('Average')
+						<small>Probably dont touch this if you happen to be able to see it. (or it doesnt work?!?)</small>
+						<a 
+							class="mtrl-btn mtrl-raised bg-purple"
+							v-text="'Create DB:Seeds'"
+						></a>
+						<br />
+						<br />
+						<a 
+							class="mtrl-btn mtrl-raised bg-purple"
+							v-text="'Seed Database'"
+						></a>
+						@roles
 						<!-- <div id="TaskSystem" class="bg-dark"></div> -->
-						will replace TaskSystem div
+						
 					</div>
 					<!--End second tab (Custom layout)-->
 					<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -160,108 +68,8 @@
 
 					<!--Third tab (Settings)-->
 					<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-					<div class="tab-pane fade" id="demo-asd-tab-3">
-						<ul class="list-group bg-trans">
-							<li class="list-header">
-								<h4 class="text-thin">Account Settings</h4>
-							</li>
-							
-							<!--Edit Toggle Button-->
-			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-			                @role('average')
-			                <li class="list-group-item">
-			                	<div class="pull-right">
-			                    	<input 
-			                    		type="checkbox" 
-			                    		class="switchery bp-edit-toggle" 
-			                    		v-model="editMode" 
-			                    	/>
-			                    </div>
-								<p>Edit All</p>
-								<small class="text-muted">Right now edit mode is @{{ editMode ? "on" : "off" }}.</small>
-			                </li>
-			                @endrole
-			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-			                <!--End Edit toggle button-->
-			                <!--Data Output Toggle Button-->
-			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-			                @role('edit-layout')
-			                <li class="list-group-item">
-			                	<div class="pull-right">
-			                    	<input 
-			                    		type="checkbox" 
-			                    		class="switchery bp-data-toggle" 
-			                    		v-model="dataMode" 
-			                    	/>
-			                    </div>
-								<p>Data Output</p>
-								<small class="text-muted">Right now data view is @{{ dataMode ? "on" : "off" }}.</small>
-			                </li>
-			                @endrole
-			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-			                <!--End Edit toggle button-->
-
-							<li class="list-group-item">
-								<div class="pull-right">
-									<input class="demo-switch" type="checkbox" checked>
-								</div>
-								<p>Show offline contact</p>
-								<small class="text-muted">Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</small>
-							</li>
-							<li class="list-group-item">
-								<div class="pull-right">
-									<input class="demo-switch" type="checkbox">
-								</div>
-								<p>Invisible mode </p>
-								<small class="text-muted">Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</small>
-							</li>
-						</ul>
-
-
-						<hr>
-
-						<ul class="list-group bg-trans">
-							<li class="list-header"><h4 class="text-thin">Public Settings</h4></li>
-							<li class="list-group-item">
-								<div class="pull-right">
-									<input class="demo-switch" type="checkbox" checked>
-								</div>
-								Online status
-							</li>
-							<li class="list-group-item">
-								<div class="pull-right">
-									<input class="demo-switch" type="checkbox" checked>
-								</div>
-								Show offline contact
-							</li>
-							<li class="list-group-item">
-								<div class="pull-right">
-									<input class="demo-switch" type="checkbox">
-								</div>
-								Show my device icon
-							</li>
-						</ul>
-
-
-
-						<hr>
-
-						<h4 class="pad-hor text-thin">Task Progress</h4>
-						<div class="pad-all">
-							<p>Upgrade Progress</p>
-							<div class="progress progress-sm">
-								<div class="progress-bar progress-bar-success" style="width: 15%;"><span class="sr-only">15%</span></div>
-							</div>
-							<small class="text-muted">15% Completed</small>
-						</div>
-						<div class="pad-hor">
-							<p>Database</p>
-							<div class="progress progress-sm">
-								<div class="progress-bar progress-bar-danger" style="width: 75%;"><span class="sr-only">75%</span></div>
-							</div>
-							<small class="text-muted">17/23 Database</small>
-						</div>
-
+					<div class="tab-pane fade" id="asd-tab-3">
+						<aside-settings></aside-settings>
 					</div>
 					<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 					<!--Third tab (Settings)-->

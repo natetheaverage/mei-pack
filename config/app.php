@@ -185,6 +185,7 @@ return [
         BackupManager\Laravel\Laravel5ServiceProvider::class,
         Kordy\Ticketit\TicketitServiceProvider::class,
         Laravel\Cashier\CashierServiceProvider::class,
+        Orangehill\Iseed\IseedServiceProvider::class,
 
     ],
 

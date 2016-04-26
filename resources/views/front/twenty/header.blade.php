@@ -31,16 +31,19 @@
         <li class="scroll"><a href="#Contact">Contact</a></li>
         @hasrole('admin')
           <li class="scroll"><a v-on:click="login" href="#">Edit</a></li>
-          <li class="scroll"><a href="help-desk">Errors</a></li>
-          <li class="scroll"><a href="modelAdmin">Admin</a></li>
+          <li class="scroll"><a href="/dashboard/help-desk">Help</a></li>
         @else
-          <li class="scroll"><a href="auth/login">Login</a></li>
+          <li class="scroll"><a href="/login">Login</a></li>
         @endrole
         @hasrole('average')
-          <li class="scroll"><a href="dashboard">Dashboard</a></li>
+          <li class="scroll"><a href="/dashboard">Dashboard</a></li>
         @endrole
       </ul>
     </div>
+
+    {{--}}
+    A button to save while live edit mode is on the page
+    {{--}}
     @hasrole('admin')
     <div v-if="settings.loggedIn">
       <button  
@@ -54,8 +57,6 @@
         style="position:fixed; left:inherit; right:30px; top:120px; "
       > ALL SAVED </button>
     </div>
-
-
 
     @endrole
 	</div><!--/.container-->

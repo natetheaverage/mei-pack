@@ -40,11 +40,11 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'employee_id',
         'customer_id',
         'stripe_id',
-				'card_brand',
-				'card_last_four',
-				'trial_ends_at',
-				'ticketit_admin',
-				'ticketit_agent',
+    	'card_brand',
+    	'card_last_four',
+    	'trial_ends_at',
+    	'ticketit_admin',
+    	'ticketit_agent',
 	];
 
 	/**
@@ -137,7 +137,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @param $id
      * @return $this
      */
-    public function currentUserFull($id)
+    public function currentUserFull()
     {
         return $this->completeUser(\Auth::user()->id);
     }

@@ -125,8 +125,10 @@ export default {
   },
 
   created(){
+    this.editMode = this.$root.editMode
     this.$watch("$root.editMode", 
       function(response){this.editMode = response;});
+    this.dataMode = this.$root.dataMode
     this.$watch("$root.dataMode", 
       function(response){this.dataMode = response;});
 

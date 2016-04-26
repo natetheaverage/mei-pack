@@ -29,14 +29,12 @@ class DashboardController extends Controller {
      */
     public function index()
     {
-		//$savedClasses = InterfaceObject::find(3)->objectClasses;
         //flash()->error('This is a message!', 'hey!!', 'floating')->timer(5000);
-		//dd(Session::get('currentUser'));
-
-       \JavaScript::put([
-            'currentUser' => \Auth::user(),
+        \JavaScript::put([
+            // 'currentUser' => $this->user->completeUser(\Auth::user()->id),
+            'currentUser' => $this->user->collect('currentUserFull'),
             'vueRoute' => 'dashboard'
-            ]);
+        ]);
         return view ('layouts.dashboard');
 
     }

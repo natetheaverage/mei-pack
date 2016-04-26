@@ -124,11 +124,17 @@ Vue.component('shortcutbuttons', ShortcutButtons )
 import MenuWidget from './vue/components/navigation/nifty/MenuWidget.vue';
 Vue.component('menuwidget', MenuWidget )
 
-import NavPage from './vue/components/navigation/NavPage.vue'
-Vue.component('home', NavPage );
+// import NavPage from './vue/components/navigation/NavPage.vue'
+// Vue.component('home', NavPage );
 
 import ObjectEditor from './vue/components/controllers/ObjectEditor.vue';
 Vue.component('objecteditor', ObjectEditor )
+
+import ContactList from './vue/components/converse/ContactList.vue';
+Vue.component('ContactList', ContactList )
+
+import AsideSettings from './vue/components/settings/AsideSettings.vue';
+Vue.component('AsideSettings', AsideSettings )
 
 // import Project from './vue/components/projector/Project.vue'
 // Vue.component('project', Project )
@@ -167,7 +173,7 @@ import { configRouter } from  './vue-router/router-config'
 import MeiApp from './mei-app.js'
 
 // Root Componant
-var MEi = Vue.extend(MeiApp)
+const MEi = Vue.extend(MeiApp)
 
 // create router
 const router = new VueRouter({
@@ -181,18 +187,7 @@ const router = new VueRouter({
 configRouter(router)
 sync(store, router)
 
-
-//Router.map(RouterMap)
 router.start(MEi, 'body')
-//router.go({ path: mei.vueRoute })
-//module.exports = Router
-
-// import { sync } from 'vuex-router-sync'
-// import store from './vuex/store'
-// sync(store, Router)
-
-//module.exports = new Vue(MeiApp).$mount('body')
-
 
 // TODO FIND A BETTER HOME FOR THIS
 var $head = $( '#ha-header' );

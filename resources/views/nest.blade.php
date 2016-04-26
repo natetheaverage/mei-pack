@@ -8,7 +8,9 @@
     </div>
   @include('includes.scripts')
 	@include( 'front.'.config('app.theme').'.includes.footScripts' )
+
 	@yield('footer')
   @include('includes.php-to-js')
+  @include('front.'.config('app.theme').'.footer')
   </body>
 </html>

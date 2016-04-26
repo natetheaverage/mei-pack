@@ -1,12 +1,15 @@
 <template>
-<div id="{{ object.id }}-form-holder" style="display:none"> 
+<div 
+  id="{{ object.id }}-form-holder" 
+  style="display:none"
+> 
   <form 
     id="object-{{ object.id }}-editing-form" 
-    action="/interfaceObject/{{object.id}}" 
-    method="POST"
   >
-    <!-- // <input type="hidden" name="_method" value="PUT"> -->
-    <!-- // <input type="hidden" name="_token" value="{{ csrf_token() }}"> -->
+    <!-- method="POST" -->
+    <!-- action="/api/interfaceObject/{{object.id}}"  -->
+    <!-- <input type="hidden" name="_method" value="PUT"> -->
+    <!-- <input type="hidden" name="_token" value="{{ csrf_token() }}"> -->
     <input type="hidden" id="id" name="id" value="{{ object.id }}">
     <div class="row">
       <div class="col-sm-12">
@@ -165,7 +168,15 @@ export default {
         this.setObject(this.object, field, value)
       },
       saveObject(){
-
+        var that =this
+        this.$root.objectResource.update(
+          {objectType:"interfaceObjects", objectOptions: this.object},
+          function (menu, status, request) {
+            console.log("%csaveObject() menu data persisted in ObjEditor",this.settings.logGood);
+            //that.setMenu('DashboardMenu', menu);
+        }).error(function (data, status, request) {
+          console.log("%c csaveObject() Errrrrr in ObjEditor",this.$root.logErr);
+        })
       },
       
     },

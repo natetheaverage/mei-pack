@@ -12,51 +12,78 @@ class FeaturesTableSeeder extends Seeder
      */
     public function run()
     {
+        
 
         \DB::table('features')->delete();
         
         \DB::table('features')->insert(array (
-            0=>
+            0 => 
             array (
+                'id' => 36,
+                'order_column' => 0,
                 'title' => 'Welcome',
-                'image' => 'ipad-screen-twenty.png',
-                'link' => '#',
-                'icon' => 'link',
                 'content' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-            ),
-            1=>
-            array (
-                'title' => "Company's",
                 'image' => 'ipad-screen-twenty.png',
                 'link' => '#',
                 'icon' => 'link',
-                'content' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'      
+                'parent' => '',
+                'created_at' => NULL,
+                'updated_at' => NULL,
             ),
-            2=>
-                array (
+            1 => 
+            array (
+                'id' => 37,
+                'order_column' => 0,
+                'title' => 'Company\'s',
+                'content' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+                'image' => 'ipad-screen-twenty.png',
+                'link' => '#',
+                'icon' => 'link',
+                'parent' => '',
+                'created_at' => NULL,
+                'updated_at' => NULL,
+            ),
+            2 => 
+            array (
+                'id' => 38,
+                'order_column' => 0,
                 'title' => 'Ailments',
+                'content' => ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
                 'image' => 'ipad-screen-twenty.png',
                 'link' => '#',
                 'icon' => 'link',
-                'content' => ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'     
+                'parent' => '',
+                'created_at' => NULL,
+                'updated_at' => NULL,
             ),
-            3=>
+            3 => 
             array (
+                'id' => 39,
+                'order_column' => 0,
                 'title' => 'Company content',
+                'content' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
                 'image' => 'ipad-screen-twenty.png',
                 'link' => '#',
                 'icon' => 'link',
-                'content' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'      
+                'parent' => '',
+                'created_at' => NULL,
+                'updated_at' => NULL,
             ),
-            4=>
+            4 => 
             array (
+                'id' => 40,
+                'order_column' => 0,
                 'title' => 'Company Details 2',
+                'content' => ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
                 'image' => 'ipad-screen-twenty.png',
                 'link' => '#',
                 'icon' => 'link',
-                'content' => ' Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'     
-            )
-        )
-    );
+                'parent' => '',
+                'created_at' => NULL,
+                'updated_at' => NULL,
+            ),
+        ));
+        
+        
     }
 }

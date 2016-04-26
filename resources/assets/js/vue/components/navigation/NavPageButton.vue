@@ -1,7 +1,7 @@
 <template>
   <div 
     class="pad-no edit-btn" 
-    v-if="$root.editMode"
+    v-if="$root.editMode" 
   >
     <a 
       style="padding:10px 5px" 

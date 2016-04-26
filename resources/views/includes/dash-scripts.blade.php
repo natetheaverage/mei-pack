@@ -3,8 +3,17 @@
 
 <!--jQuery [ REQUIRED ]-->
 <!-- <script src="/js/jquery-2.1.1.min.js"></script> -->
-<script src="{!! asset('/js/jquery.js') !!}"></script>
+<!-- <script src="{!! asset('/js/jquery.js') !!}"></script> -->
 
+
+
+!-- <script src="/js/jquery.js"></script> -->
+<script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+
+<script src="https://code.jquery.com/jquery-migrate-1.4.0.min.js" integrity="sha256-nxdiQ4FdTm28eUNNQIJz5JodTMCF5/l32g5LwfUwZUo=" crossorigin="anonymous"></script>
+
+<!--Socket.io  [ Broadcasting server ] -->
+<script src="http://192.168.10.10:3000/socket.io/socket.io.js"></script>
 
 <!--BootstrapJS [ RECOMMENDED ]-->
 <script src="{!! asset('/js/bootstrap.min.js') !!}"></script>

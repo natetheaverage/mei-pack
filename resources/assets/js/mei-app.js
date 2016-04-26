@@ -3,6 +3,8 @@ import { setSetting, toggleSetting, setMenu, setCopy, setFeatures } from './vuex
 import store from './vuex/store'
 import router from './vue-router/router' 
 
+//var socket = io();
+
 export default {
 	name: 'MEiApp',
   watchMode: true,
@@ -12,7 +14,7 @@ export default {
       id: 0,
       objectResource: this.$resource('/api/:objectType/:objectOptions'),
       apiResource: this.$resource('/api/:model/:id'),
-      editMode: true,
+      editMode: false,
       editAll: false,
       dataMode: false,
       baseView: 'front',
@@ -26,6 +28,14 @@ export default {
       senderEmail: '',
       subject: '',
       message: '',
+
+      // CurrentUser
+      user: {
+        username: 'Bangie-Boom-Boom'
+      },
+      profile: {},
+      customer_info: {},
+      employee_info: {},
     }
   },
 
@@ -59,6 +69,15 @@ export default {
       }
       this.setSetting('contactFormReady', false)
       return false;
+    },
+
+    userFields(){
+      this.user = (window).mei.currentUser
+      //console.log(this.user)
+      this.profile = this.user.profile
+      this.customer_info = this.user.customer_info
+      this.employee_info = this.user.employee_info
+
     }
   }, 
 
@@ -116,7 +135,7 @@ export default {
       var currentIcon = obj.icon;
       $('#chosen-fa-icon-'+obj.id).addClass(currentIcon);
       $('#selectpicker-'+obj.id).on('change', function(evt, params) {
-        console.log(currentIcon, " - ", params.selected);
+        //console.log(currentIcon, " - ", params.selected);
         $('#chosen-fa-icon-'+obj.id).removeClass(currentIcon);
         $('#chosen-fa-icon-'+obj.id).addClass(params.selected);
         currentIcon = params.selected;
@@ -140,13 +159,11 @@ export default {
         function(e) {
           e.preventDefault(); 
           var objectData = $( this ).serializeArray();
-          console.log(objectData);
-          console.log('^ is line 143 mei-app');
           objectResource.update(
             {objectType: "interfaceObjects", objectOptions: id},
             {objectData}, 
             function (data, status, request) {
-              $.niftyNoty({type: 'info',icon : 'fa fa-check',message : '<strong>Button Saved!</strong>. ',container : 'page',timer : 3000});
+              $.niftyNoty({type: 'info',icon : 'fa fa-check',message : '<strong>Button Saved!</strong>.'+data,container : 'page',timer : 3000});
             }).error(function (data, status, request) {
               console.log("Something went wrong with (mainnavbutton.js->addButton->objectArray.save) Error Stat = "+status+" here is the request = "+request)
           });
@@ -305,15 +322,34 @@ export default {
     this.loadCopy()
     this.loadFeatures()
 
+  var socket = io.connect('http://192.168.10.10:3000');
+  
+  socket.on('newMessage', function(){
+    //socket.emit('bang', this.user)
+  })
+  .on('message-channel:thisHappened', function(message){
+    console.log(message)
+    socket.emit('bang', this.user)
+  }.bind(this))
+  // .on('bang', function(message){
+  //   console.log(message)
+  // })
+
     this.setTickets() 
     //this.copyObject = this.routePrefix[this.instanceNumber]
-    this.$watch('settings', function(){
-      //this.settings
-    }, { deep: true })
+    this.$watch('settings', function(){},{deep:true})
+    
     this.$watch('$route.path', function(route){ 
       // console.log('route in mei-app/ready()')
       // console.log(route)
       this.setTickets() },{ deep: true })
+
+
+    // socket.on('message-channel:thisHappened', function(message){
+    //   console.log(message)
+    // }.bind(this))
+
+
   }
 
 }
