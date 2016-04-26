@@ -22,16 +22,16 @@ class MipsTableSeeder extends Seeder
                 'id' => 1,
                 'facility_id' => 3,
                 'deleted_at' => NULL,
-                'created_at' => '2016-04-25 06:18:58',
-                'updated_at' => '2016-04-25 06:18:58',
+                'created_at' => '2016-04-17 19:32:42',
+                'updated_at' => '2016-04-17 19:32:42',
             ),
             1 => 
             array (
                 'id' => 2,
                 'facility_id' => 4,
                 'deleted_at' => NULL,
-                'created_at' => '2016-04-25 06:18:58',
-                'updated_at' => '2016-04-25 06:18:58',
+                'created_at' => '2016-04-17 19:32:42',
+                'updated_at' => '2016-04-17 19:32:42',
             ),
         ));
         
