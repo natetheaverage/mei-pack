@@ -1,20 +1,22 @@
 <template>
   <div id="main-nav-menu">
-      <div 
-        class="inline-block pad-all" 
-        v-for="button in menuData" 
-      >
-        <navpagebutton 
-          :button="button" 
-          :edit-mode="editMode"
-        ></navpagebutton>
-      </div>
-      
+    <div 
+      class="inline-block pad-all" 
+      v-for="button in menuData" 
+    >
+      <nav-page-button 
+        :button="button" 
+        :edit-mode="editMode"
+      ></nav-page-button>
+    </div>
+    <div class="inline-block pad-all">
       <button 
-        class="btn btn-default"
+        v-if="$root.editMode"
+        class="mtrl-btn mtrl-raised mtrl-btn-dashboard bg-off-white"
         @click="$root.addNavButton()"
       ><i class="fa fa-4x fa-plus"></i></button>
-     <!-- <pre v-if="dataMode">{{ $data | json }}</pre> -->
+    </div>
+   <pre v-if="dataMode">{{ $data | json }}</pre>
   </div>
 
 </template>
@@ -43,7 +45,7 @@ export default {
     },
   },
   ready(){
-    this.setMenu('DashboardMenu')
+    //this.setMenu('DashboardMenu')
   },
 
 }

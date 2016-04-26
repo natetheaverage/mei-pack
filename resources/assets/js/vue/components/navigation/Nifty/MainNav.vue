@@ -1,7 +1,7 @@
 <template>
   <!-- MAIN NAVIGATION -->
   <!--===================================================-->
-<div id="mainnav-container">
+<nav id="mainnav-container">
   <div id="mainnav">
   <shortcutButtons></shortcutButtons>
     <!--Menu--> 
@@ -15,10 +15,10 @@
             <li class="list-header">Navigation </li>
 
             <!--Menu list item-->
-            <mainnavbutton 
+            <main-nav-button 
               v-for="button in menuData" 
               :button="button"
-            ></mainnavbutton>
+            ></main-nav-button>
 
             <li>
               <a v-link="'/dashboard/help-desk'">
@@ -33,13 +33,26 @@
               </a>
             </li>
 
+            <li>
+              <a v-link="'/dashboard/super-admin'">
+                <i class="fa fa-question"></i>
+                <span class="menu-title">
+                  <strong>Super Admin</strong>
+                </span>
+                <span 
+                  class="pull-right badge badge-success"
+                  v-text="'0'"
+                ></span>
+              </a>
+            </li>
+
+            <li class="list-divider"></li>
+
             <li 
               v-if="editMode" 
               @click="addButton">
             <a> + Create New Button</a></li>
           </ul>
-
-          <li class="list-divider"></li>
 
           <menuwidget></menuwidget>
  
@@ -50,7 +63,7 @@
     <!--End menu-->
 
   </div>
-</div>
+</nav>
 <!--===================================================-->
 <!--END MAIN NAVIGATION-->
 </template>

@@ -32,13 +32,12 @@ class DashboardController extends Controller {
 		//$savedClasses = InterfaceObject::find(3)->objectClasses;
         //flash()->error('This is a message!', 'hey!!', 'floating')->timer(5000);
 		//dd(Session::get('currentUser'));
+
        \JavaScript::put([
-            'editMode' => 1, 
-            'currentUser' => \Auth::user(),//Session::get('currentUser'),
+            'currentUser' => \Auth::user(),
             'vueRoute' => 'dashboard'
             ]);
-        //$session = Session::get('currentUser');
-        return view ('layouts.dashboard', compact('session'));
+        return view ('layouts.dashboard');
 
     }
  
@@ -51,12 +50,10 @@ class DashboardController extends Controller {
     public function show($component)
     {
         \JavaScript::put([
-            'editMode' => 1, 
-            'currentUser' => $this->user->collect('currentUserFull'),//Session::get('currentUser'),
+            'currentUser' => $this->user->collect('currentUserFull'),
             'vueRoute' => $component
-            ]);
-        $session = Session::get('currentUser');
-        return view ('layouts.dashboard', compact('session'));
+        ]);
+        return view ('layouts.dashboard');
     }
 
 

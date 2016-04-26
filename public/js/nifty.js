@@ -10,21 +10,23 @@
 
 /* REQUIRED PLUGINS
 /* ========================================================================
-/*! nanoScrollerJS - v0.8.4 - (c) 2014 James Florentino; Licensed MIT */
-!function(a,b,c){"use strict";var d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H;z={paneClass:"nano-pane",sliderClass:"nano-slider",contentClass:"nano-content",iOSNativeScrolling:!1,preventPageScrolling:!1,disableResize:!1,alwaysVisible:!1,flashDelay:1500,sliderMinHeight:20,sliderMaxHeight:null,documentContext:null,windowContext:null},u="scrollbar",t="scroll",l="mousedown",m="mouseenter",n="mousemove",p="mousewheel",o="mouseup",s="resize",h="drag",i="enter",w="up",r="panedown",f="DOMMouseScroll",g="down",x="wheel",j="keydown",k="keyup",v="touchmove",d="Microsoft Internet Explorer"===b.navigator.appName&&/msie 7./i.test(b.navigator.appVersion)&&b.ActiveXObject,e=null,D=b.requestAnimationFrame,y=b.cancelAnimationFrame,F=c.createElement("div").style,H=function(){var a,b,c,d,e,f;for(d=["t","webkitT","MozT","msT","OT"],a=e=0,f=d.length;f>e;a=++e)if(c=d[a],b=d[a]+"ransform",b in F)return d[a].substr(0,d[a].length-1);return!1}(),G=function(a){return H===!1?!1:""===H?a:H+a.charAt(0).toUpperCase()+a.substr(1)},E=G("transform"),B=E!==!1,A=function(){var a,b,d;return a=c.createElement("div"),b=a.style,b.position="absolute",b.width="100px",b.height="100px",b.overflow=t,b.top="-9999px",c.body.appendChild(a),d=a.offsetWidth-a.clientWidth,c.body.removeChild(a),d},C=function(){var a,c,d;return c=b.navigator.userAgent,(a=/(?=.+Mac OS X)(?=.+Firefox)/.test(c))?(d=/Firefox\/\d{2}\./.exec(c),d&&(d=d[0].replace(/\D+/g,"")),a&&+d>23):!1},q=function(){function j(d,f){this.el=d,this.options=f,e||(e=A()),this.$el=a(this.el),this.doc=a(this.options.documentContext||c),this.win=a(this.options.windowContext||b),this.body=this.doc.find("body"),this.$content=this.$el.children("."+f.contentClass),this.$content.attr("tabindex",this.options.tabIndex||0),this.content=this.$content[0],this.previousPosition=0,this.options.iOSNativeScrolling&&null!=this.el.style.WebkitOverflowScrolling?this.nativeScrolling():this.generate(),this.createEvents(),this.addEvents(),this.reset()}return j.prototype.preventScrolling=function(a,b){if(this.isActive)if(a.type===f)(b===g&&a.originalEvent.detail>0||b===w&&a.originalEvent.detail<0)&&a.preventDefault();else if(a.type===p){if(!a.originalEvent||!a.originalEvent.wheelDelta)return;(b===g&&a.originalEvent.wheelDelta<0||b===w&&a.originalEvent.wheelDelta>0)&&a.preventDefault()}},j.prototype.nativeScrolling=function(){this.$content.css({WebkitOverflowScrolling:"touch"}),this.iOSNativeScrolling=!0,this.isActive=!0},j.prototype.updateScrollValues=function(){var a,b;a=this.content,this.maxScrollTop=a.scrollHeight-a.clientHeight,this.prevScrollTop=this.contentScrollTop||0,this.contentScrollTop=a.scrollTop,b=this.contentScrollTop>this.previousPosition?"down":this.contentScrollTop<this.previousPosition?"up":"same",this.previousPosition=this.contentScrollTop,"same"!==b&&this.$el.trigger("update",{position:this.contentScrollTop,maximum:this.maxScrollTop,direction:b}),this.iOSNativeScrolling||(this.maxSliderTop=this.paneHeight-this.sliderHeight,this.sliderTop=0===this.maxScrollTop?0:this.contentScrollTop*this.maxSliderTop/this.maxScrollTop)},j.prototype.setOnScrollStyles=function(){var a;B?(a={},a[E]="translate(0, "+this.sliderTop+"px)"):a={top:this.sliderTop},D?(y&&this.scrollRAF&&y(this.scrollRAF),this.scrollRAF=D(function(b){return function(){return b.scrollRAF=null,b.slider.css(a)}}(this))):this.slider.css(a)},j.prototype.createEvents=function(){this.events={down:function(a){return function(b){return a.isBeingDragged=!0,a.offsetY=b.pageY-a.slider.offset().top,a.slider.is(b.target)||(a.offsetY=0),a.pane.addClass("active"),a.doc.bind(n,a.events[h]).bind(o,a.events[w]),a.body.bind(m,a.events[i]),!1}}(this),drag:function(a){return function(b){return a.sliderY=b.pageY-a.$el.offset().top-a.paneTop-(a.offsetY||.5*a.sliderHeight),a.scroll(),a.contentScrollTop>=a.maxScrollTop&&a.prevScrollTop!==a.maxScrollTop?a.$el.trigger("scrollend"):0===a.contentScrollTop&&0!==a.prevScrollTop&&a.$el.trigger("scrolltop"),!1}}(this),up:function(a){return function(){return a.isBeingDragged=!1,a.pane.removeClass("active"),a.doc.unbind(n,a.events[h]).unbind(o,a.events[w]),a.body.unbind(m,a.events[i]),!1}}(this),resize:function(a){return function(){a.reset()}}(this),panedown:function(a){return function(b){return a.sliderY=(b.offsetY||b.originalEvent.layerY)-.5*a.sliderHeight,a.scroll(),a.events.down(b),!1}}(this),scroll:function(a){return function(b){a.updateScrollValues(),a.isBeingDragged||(a.iOSNativeScrolling||(a.sliderY=a.sliderTop,a.setOnScrollStyles()),null!=b&&(a.contentScrollTop>=a.maxScrollTop?(a.options.preventPageScrolling&&a.preventScrolling(b,g),a.prevScrollTop!==a.maxScrollTop&&a.$el.trigger("scrollend")):0===a.contentScrollTop&&(a.options.preventPageScrolling&&a.preventScrolling(b,w),0!==a.prevScrollTop&&a.$el.trigger("scrolltop"))))}}(this),wheel:function(a){return function(b){var c;if(null!=b)return c=b.delta||b.wheelDelta||b.originalEvent&&b.originalEvent.wheelDelta||-b.detail||b.originalEvent&&-b.originalEvent.detail,c&&(a.sliderY+=-c/3),a.scroll(),!1}}(this),enter:function(a){return function(b){var c;if(a.isBeingDragged)return 1!==(b.buttons||b.which)?(c=a.events)[w].apply(c,arguments):void 0}}(this)}},j.prototype.addEvents=function(){var a;this.removeEvents(),a=this.events,this.options.disableResize||this.win.bind(s,a[s]),this.iOSNativeScrolling||(this.slider.bind(l,a[g]),this.pane.bind(l,a[r]).bind(""+p+" "+f,a[x])),this.$content.bind(""+t+" "+p+" "+f+" "+v,a[t])},j.prototype.removeEvents=function(){var a;a=this.events,this.win.unbind(s,a[s]),this.iOSNativeScrolling||(this.slider.unbind(),this.pane.unbind()),this.$content.unbind(""+t+" "+p+" "+f+" "+v,a[t])},j.prototype.generate=function(){var a,c,d,f,g,h,i;return f=this.options,h=f.paneClass,i=f.sliderClass,a=f.contentClass,(g=this.$el.children("."+h)).length||g.children("."+i).length||this.$el.append('<div class="'+h+'"><div class="'+i+'" /></div>'),this.pane=this.$el.children("."+h),this.slider=this.pane.find("."+i),0===e&&C()?(d=b.getComputedStyle(this.content,null).getPropertyValue("padding-right").replace(/[^0-9.]+/g,""),c={right:-14,paddingRight:+d+14}):e&&(c={right:-e},this.$el.addClass("has-scrollbar")),null!=c&&this.$content.css(c),this},j.prototype.restore=function(){this.stopped=!1,this.iOSNativeScrolling||this.pane.show(),this.addEvents()},j.prototype.reset=function(){var a,b,c,f,g,h,i,j,k,l,m,n;return this.iOSNativeScrolling?void(this.contentHeight=this.content.scrollHeight):(this.$el.find("."+this.options.paneClass).length||this.generate().stop(),this.stopped&&this.restore(),a=this.content,f=a.style,g=f.overflowY,d&&this.$content.css({height:this.$content.height()}),b=a.scrollHeight+e,l=parseInt(this.$el.css("max-height"),10),l>0&&(this.$el.height(""),this.$el.height(a.scrollHeight>l?l:a.scrollHeight)),i=this.pane.outerHeight(!1),k=parseInt(this.pane.css("top"),10),h=parseInt(this.pane.css("bottom"),10),j=i+k+h,n=Math.round(j/b*j),n<this.options.sliderMinHeight?n=this.options.sliderMinHeight:null!=this.options.sliderMaxHeight&&n>this.options.sliderMaxHeight&&(n=this.options.sliderMaxHeight),g===t&&f.overflowX!==t&&(n+=e),this.maxSliderTop=j-n,this.contentHeight=b,this.paneHeight=i,this.paneOuterHeight=j,this.sliderHeight=n,this.paneTop=k,this.slider.height(n),this.events.scroll(),this.pane.show(),this.isActive=!0,a.scrollHeight===a.clientHeight||this.pane.outerHeight(!0)>=a.scrollHeight&&g!==t?(this.pane.hide(),this.isActive=!1):this.el.clientHeight===a.scrollHeight&&g===t?this.slider.hide():this.slider.show(),this.pane.css({opacity:this.options.alwaysVisible?1:"",visibility:this.options.alwaysVisible?"visible":""}),c=this.$content.css("position"),("static"===c||"relative"===c)&&(m=parseInt(this.$content.css("right"),10),m&&this.$content.css({right:"",marginRight:m})),this)},j.prototype.scroll=function(){return this.isActive?(this.sliderY=Math.max(0,this.sliderY),this.sliderY=Math.min(this.maxSliderTop,this.sliderY),this.$content.scrollTop(this.maxScrollTop*this.sliderY/this.maxSliderTop),this.iOSNativeScrolling||(this.updateScrollValues(),this.setOnScrollStyles()),this):void 0},j.prototype.scrollBottom=function(a){return this.isActive?(this.$content.scrollTop(this.contentHeight-this.$content.height()-a).trigger(p),this.stop().restore(),this):void 0},j.prototype.scrollTop=function(a){return this.isActive?(this.$content.scrollTop(+a).trigger(p),this.stop().restore(),this):void 0},j.prototype.scrollTo=function(a){return this.isActive?(this.scrollTop(this.$el.find(a).get(0).offsetTop),this):void 0},j.prototype.stop=function(){return y&&this.scrollRAF&&(y(this.scrollRAF),this.scrollRAF=null),this.stopped=!0,this.removeEvents(),this.iOSNativeScrolling||this.pane.hide(),this},j.prototype.destroy=function(){return this.stopped||this.stop(),!this.iOSNativeScrolling&&this.pane.length&&this.pane.remove(),d&&this.$content.height(""),this.$content.removeAttr("tabindex"),this.$el.hasClass("has-scrollbar")&&(this.$el.removeClass("has-scrollbar"),this.$content.css({right:""})),this},j.prototype.flash=function(){return!this.iOSNativeScrolling&&this.isActive?(this.reset(),this.pane.addClass("flashed"),setTimeout(function(a){return function(){a.pane.removeClass("flashed")}}(this),this.options.flashDelay),this):void 0},j}(),a.fn.nanoScroller=function(b){return this.each(function(){var c,d;if((d=this.nanoscroller)||(c=a.extend({},z,b),this.nanoscroller=d=new q(this,c)),b&&"object"==typeof b){if(a.extend(d.options,b),null!=b.scrollBottom)return d.scrollBottom(b.scrollBottom);if(null!=b.scrollTop)return d.scrollTop(b.scrollTop);if(b.scrollTo)return d.scrollTo(b.scrollTo);if("bottom"===b.scroll)return d.scrollBottom(0);if("top"===b.scroll)return d.scrollTop(0);if(b.scroll&&b.scroll instanceof a)return d.scrollTo(b.scroll);if(b.stop)return d.stop();if(b.destroy)return d.destroy();if(b.flash)return d.flash()}return d.reset()})},a.fn.nanoScroller.Constructor=q}(jQuery,window,document);
+/*! nanoScrollerJS - v0.8.7 - (c) 2015 James Florentino; Licensed MIT */
+
+!function(a){return"function"==typeof define&&define.amd?define(["jquery"],function(b){return a(b,window,document)}):"object"==typeof exports?module.exports=a(require("jquery"),window,document):a(jQuery,window,document)}(function(a,b,c){"use strict";var d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H;z={paneClass:"nano-pane",sliderClass:"nano-slider",contentClass:"nano-content",iOSNativeScrolling:!1,preventPageScrolling:!1,disableResize:!1,alwaysVisible:!1,flashDelay:1500,sliderMinHeight:20,sliderMaxHeight:null,documentContext:null,windowContext:null},u="scrollbar",t="scroll",l="mousedown",m="mouseenter",n="mousemove",p="mousewheel",o="mouseup",s="resize",h="drag",i="enter",w="up",r="panedown",f="DOMMouseScroll",g="down",x="wheel",j="keydown",k="keyup",v="touchmove",d="Microsoft Internet Explorer"===b.navigator.appName&&/msie 7./i.test(b.navigator.appVersion)&&b.ActiveXObject,e=null,D=b.requestAnimationFrame,y=b.cancelAnimationFrame,F=c.createElement("div").style,H=function(){var a,b,c,d,e,f;for(d=["t","webkitT","MozT","msT","OT"],a=e=0,f=d.length;f>e;a=++e)if(c=d[a],b=d[a]+"ransform",b in F)return d[a].substr(0,d[a].length-1);return!1}(),G=function(a){return H===!1?!1:""===H?a:H+a.charAt(0).toUpperCase()+a.substr(1)},E=G("transform"),B=E!==!1,A=function(){var a,b,d;return a=c.createElement("div"),b=a.style,b.position="absolute",b.width="100px",b.height="100px",b.overflow=t,b.top="-9999px",c.body.appendChild(a),d=a.offsetWidth-a.clientWidth,c.body.removeChild(a),d},C=function(){var a,c,d;return c=b.navigator.userAgent,(a=/(?=.+Mac OS X)(?=.+Firefox)/.test(c))?(d=/Firefox\/\d{2}\./.exec(c),d&&(d=d[0].replace(/\D+/g,"")),a&&+d>23):!1},q=function(){function j(d,f){this.el=d,this.options=f,e||(e=A()),this.$el=a(this.el),this.doc=a(this.options.documentContext||c),this.win=a(this.options.windowContext||b),this.body=this.doc.find("body"),this.$content=this.$el.children("."+this.options.contentClass),this.$content.attr("tabindex",this.options.tabIndex||0),this.content=this.$content[0],this.previousPosition=0,this.options.iOSNativeScrolling&&null!=this.el.style.WebkitOverflowScrolling?this.nativeScrolling():this.generate(),this.createEvents(),this.addEvents(),this.reset()}return j.prototype.preventScrolling=function(a,b){if(this.isActive)if(a.type===f)(b===g&&a.originalEvent.detail>0||b===w&&a.originalEvent.detail<0)&&a.preventDefault();else if(a.type===p){if(!a.originalEvent||!a.originalEvent.wheelDelta)return;(b===g&&a.originalEvent.wheelDelta<0||b===w&&a.originalEvent.wheelDelta>0)&&a.preventDefault()}},j.prototype.nativeScrolling=function(){this.$content.css({WebkitOverflowScrolling:"touch"}),this.iOSNativeScrolling=!0,this.isActive=!0},j.prototype.updateScrollValues=function(){var a,b;a=this.content,this.maxScrollTop=a.scrollHeight-a.clientHeight,this.prevScrollTop=this.contentScrollTop||0,this.contentScrollTop=a.scrollTop,b=this.contentScrollTop>this.previousPosition?"down":this.contentScrollTop<this.previousPosition?"up":"same",this.previousPosition=this.contentScrollTop,"same"!==b&&this.$el.trigger("update",{position:this.contentScrollTop,maximum:this.maxScrollTop,direction:b}),this.iOSNativeScrolling||(this.maxSliderTop=this.paneHeight-this.sliderHeight,this.sliderTop=0===this.maxScrollTop?0:this.contentScrollTop*this.maxSliderTop/this.maxScrollTop)},j.prototype.setOnScrollStyles=function(){var a;B?(a={},a[E]="translate(0, "+this.sliderTop+"px)"):a={top:this.sliderTop},D?(y&&this.scrollRAF&&y(this.scrollRAF),this.scrollRAF=D(function(b){return function(){return b.scrollRAF=null,b.slider.css(a)}}(this))):this.slider.css(a)},j.prototype.createEvents=function(){this.events={down:function(a){return function(b){return a.isBeingDragged=!0,a.offsetY=b.pageY-a.slider.offset().top,a.slider.is(b.target)||(a.offsetY=0),a.pane.addClass("active"),a.doc.bind(n,a.events[h]).bind(o,a.events[w]),a.body.bind(m,a.events[i]),!1}}(this),drag:function(a){return function(b){return a.sliderY=b.pageY-a.$el.offset().top-a.paneTop-(a.offsetY||.5*a.sliderHeight),a.scroll(),a.contentScrollTop>=a.maxScrollTop&&a.prevScrollTop!==a.maxScrollTop?a.$el.trigger("scrollend"):0===a.contentScrollTop&&0!==a.prevScrollTop&&a.$el.trigger("scrolltop"),!1}}(this),up:function(a){return function(b){return a.isBeingDragged=!1,a.pane.removeClass("active"),a.doc.unbind(n,a.events[h]).unbind(o,a.events[w]),a.body.unbind(m,a.events[i]),!1}}(this),resize:function(a){return function(b){a.reset()}}(this),panedown:function(a){return function(b){return a.sliderY=(b.offsetY||b.originalEvent.layerY)-.5*a.sliderHeight,a.scroll(),a.events.down(b),!1}}(this),scroll:function(a){return function(b){a.updateScrollValues(),a.isBeingDragged||(a.iOSNativeScrolling||(a.sliderY=a.sliderTop,a.setOnScrollStyles()),null!=b&&(a.contentScrollTop>=a.maxScrollTop?(a.options.preventPageScrolling&&a.preventScrolling(b,g),a.prevScrollTop!==a.maxScrollTop&&a.$el.trigger("scrollend")):0===a.contentScrollTop&&(a.options.preventPageScrolling&&a.preventScrolling(b,w),0!==a.prevScrollTop&&a.$el.trigger("scrolltop"))))}}(this),wheel:function(a){return function(b){var c;if(null!=b)return c=b.delta||b.wheelDelta||b.originalEvent&&b.originalEvent.wheelDelta||-b.detail||b.originalEvent&&-b.originalEvent.detail,c&&(a.sliderY+=-c/3),a.scroll(),!1}}(this),enter:function(a){return function(b){var c;if(a.isBeingDragged)return 1!==(b.buttons||b.which)?(c=a.events)[w].apply(c,arguments):void 0}}(this)}},j.prototype.addEvents=function(){var a;this.removeEvents(),a=this.events,this.options.disableResize||this.win.bind(s,a[s]),this.iOSNativeScrolling||(this.slider.bind(l,a[g]),this.pane.bind(l,a[r]).bind(""+p+" "+f,a[x])),this.$content.bind(""+t+" "+p+" "+f+" "+v,a[t])},j.prototype.removeEvents=function(){var a;a=this.events,this.win.unbind(s,a[s]),this.iOSNativeScrolling||(this.slider.unbind(),this.pane.unbind()),this.$content.unbind(""+t+" "+p+" "+f+" "+v,a[t])},j.prototype.generate=function(){var a,c,d,f,g,h,i;return f=this.options,h=f.paneClass,i=f.sliderClass,a=f.contentClass,(g=this.$el.children("."+h)).length||g.children("."+i).length||this.$el.append('<div class="'+h+'"><div class="'+i+'" /></div>'),this.pane=this.$el.children("."+h),this.slider=this.pane.find("."+i),0===e&&C()?(d=b.getComputedStyle(this.content,null).getPropertyValue("padding-right").replace(/[^0-9.]+/g,""),c={right:-14,paddingRight:+d+14}):e&&(c={right:-e},this.$el.addClass("has-scrollbar")),null!=c&&this.$content.css(c),this},j.prototype.restore=function(){this.stopped=!1,this.iOSNativeScrolling||this.pane.show(),this.addEvents()},j.prototype.reset=function(){var a,b,c,f,g,h,i,j,k,l,m,n;return this.iOSNativeScrolling?void(this.contentHeight=this.content.scrollHeight):(this.$el.find("."+this.options.paneClass).length||this.generate().stop(),this.stopped&&this.restore(),a=this.content,f=a.style,g=f.overflowY,d&&this.$content.css({height:this.$content.height()}),b=a.scrollHeight+e,l=parseInt(this.$el.css("max-height"),10),l>0&&(this.$el.height(""),this.$el.height(a.scrollHeight>l?l:a.scrollHeight)),i=this.pane.outerHeight(!1),k=parseInt(this.pane.css("top"),10),h=parseInt(this.pane.css("bottom"),10),j=i+k+h,n=Math.round(j/b*i),n<this.options.sliderMinHeight?n=this.options.sliderMinHeight:null!=this.options.sliderMaxHeight&&n>this.options.sliderMaxHeight&&(n=this.options.sliderMaxHeight),g===t&&f.overflowX!==t&&(n+=e),this.maxSliderTop=j-n,this.contentHeight=b,this.paneHeight=i,this.paneOuterHeight=j,this.sliderHeight=n,this.paneTop=k,this.slider.height(n),this.events.scroll(),this.pane.show(),this.isActive=!0,a.scrollHeight===a.clientHeight||this.pane.outerHeight(!0)>=a.scrollHeight&&g!==t?(this.pane.hide(),this.isActive=!1):this.el.clientHeight===a.scrollHeight&&g===t?this.slider.hide():this.slider.show(),this.pane.css({opacity:this.options.alwaysVisible?1:"",visibility:this.options.alwaysVisible?"visible":""}),c=this.$content.css("position"),("static"===c||"relative"===c)&&(m=parseInt(this.$content.css("right"),10),m&&this.$content.css({right:"",marginRight:m})),this)},j.prototype.scroll=function(){return this.isActive?(this.sliderY=Math.max(0,this.sliderY),this.sliderY=Math.min(this.maxSliderTop,this.sliderY),this.$content.scrollTop(this.maxScrollTop*this.sliderY/this.maxSliderTop),this.iOSNativeScrolling||(this.updateScrollValues(),this.setOnScrollStyles()),this):void 0},j.prototype.scrollBottom=function(a){return this.isActive?(this.$content.scrollTop(this.contentHeight-this.$content.height()-a).trigger(p),this.stop().restore(),this):void 0},j.prototype.scrollTop=function(a){return this.isActive?(this.$content.scrollTop(+a).trigger(p),this.stop().restore(),this):void 0},j.prototype.scrollTo=function(a){return this.isActive?(this.scrollTop(this.$el.find(a).get(0).offsetTop),this):void 0},j.prototype.stop=function(){return y&&this.scrollRAF&&(y(this.scrollRAF),this.scrollRAF=null),this.stopped=!0,this.removeEvents(),this.iOSNativeScrolling||this.pane.hide(),this},j.prototype.destroy=function(){return this.stopped||this.stop(),!this.iOSNativeScrolling&&this.pane.length&&this.pane.remove(),d&&this.$content.height(""),this.$content.removeAttr("tabindex"),this.$el.hasClass("has-scrollbar")&&(this.$el.removeClass("has-scrollbar"),this.$content.css({right:""})),this},j.prototype.flash=function(){return!this.iOSNativeScrolling&&this.isActive?(this.reset(),this.pane.addClass("flashed"),setTimeout(function(a){return function(){a.pane.removeClass("flashed")}}(this),this.options.flashDelay),this):void 0},j}(),a.fn.nanoScroller=function(b){return this.each(function(){var c,d;if((d=this.nanoscroller)||(c=a.extend({},z,b),this.nanoscroller=d=new q(this,c)),b&&"object"==typeof b){if(a.extend(d.options,b),null!=b.scrollBottom)return d.scrollBottom(b.scrollBottom);if(null!=b.scrollTop)return d.scrollTop(b.scrollTop);if(b.scrollTo)return d.scrollTo(b.scrollTo);if("bottom"===b.scroll)return d.scrollBottom(0);if("top"===b.scroll)return d.scrollTop(0);if(b.scroll&&b.scroll instanceof a)return d.scrollTo(b.scroll);if(b.stop)return d.stop();if(b.destroy)return d.destroy();if(b.flash)return d.flash()}return d.reset()})},a.fn.nanoScroller.Constructor=q});
+//# sourceMappingURL=jquery.nanoscroller.min.js.map
 
 
 /* REQUIRED PLUGINS
 /* ========================================================================
- * metismenu - v1.1.3 - Easy menu jQuery plugin for Twitter Bootstrap 3
- * https://github.com/onokumus/metisMenu
+ * metismenu - v2.4.2
+ * A jQuery menu plugin
+ * https://github.com/onokumus/metisMenu#readme
  *
- * Made by Osman Nuri Okumus
- * Under MIT License */
-!function(a,b,c){function d(b,c){this.element=a(b),this.settings=a.extend({},f,c),this._defaults=f,this._name=e,this.init()}var e="metisMenu",f={toggle:!0,doubleTapToGo:!1};d.prototype={init:function(){var b=this.element,d=this.settings.toggle,f=this;this.isIE()<=9?(b.find("li.active").has("ul").children("ul").collapse("show"),b.find("li").not(".active").has("ul").children("ul").collapse("hide")):(b.find("li.active").has("ul").children("ul").addClass("collapse in"),b.find("li").not(".active").has("ul").children("ul").addClass("collapse")),f.settings.doubleTapToGo&&b.find("li.active").has("ul").children("a").addClass("doubleTapToGo"),b.find("li").has("ul").children("a").on("click."+e,function(b){return b.preventDefault(),f.settings.doubleTapToGo&&f.doubleTapToGo(a(this))&&"#"!==a(this).attr("href")&&""!==a(this).attr("href")?(b.stopPropagation(),void(c.location=a(this).attr("href"))):(a(this).parent("li").toggleClass("active").children("ul").collapse("toggle"),void(d&&a(this).parent("li").siblings().removeClass("active").children("ul.in").collapse("hide")))})},isIE:function(){for(var a,b=3,d=c.createElement("div"),e=d.getElementsByTagName("i");d.innerHTML="<!--[if gt IE "+ ++b+"]><i></i><![endif]-->",e[0];)return b>4?b:a},doubleTapToGo:function(a){var b=this.element;return a.hasClass("doubleTapToGo")?(a.removeClass("doubleTapToGo"),!0):a.parent().children("ul").length?(b.find(".doubleTapToGo").removeClass("doubleTapToGo"),a.addClass("doubleTapToGo"),!1):void 0},remove:function(){this.element.off("."+e),this.element.removeData(e)}},a.fn[e]=function(b){return this.each(function(){var c=a(this);c.data(e)&&c.data(e).remove(),c.data(e,new d(this,b))}),this}}(jQuery,window,document);
+ * Made by Osman Nuri Okumuş <onokumus@gmail.com> (https://github.com/onokumus)
+ * Under MIT License
+ */
 
-
-
+!function(a,b){"function"==typeof define&&define.amd?define(["jquery"],b):"object"==typeof exports?module.exports=b(require("jquery")):a.sortable=b(a.jQuery)}(this,function(a){"use strict";function b(){var a=document.createElement("mm"),b={WebkitTransition:"webkitTransitionEnd",MozTransition:"transitionend",OTransition:"oTransitionEnd otransitionend",transition:"transitionend"};for(var c in b)if(void 0!==a.style[c])return{end:b[c]};return!1}function c(b){return this.each(function(){var c=a(this),d=c.data("mm"),f=a.extend({},e.DEFAULTS,c.data(),"object"==typeof b&&b);d||c.data("mm",d=new e(this,f)),"string"==typeof b&&d[b]()})}a.fn.emulateTransitionEnd=function(b){var c=!1,e=this;a(this).one("mmTransitionEnd",function(){c=!0});var f=function(){c||a(e).trigger(d.end)};return setTimeout(f,b),this};var d=b();d&&(a.event.special.mmTransitionEnd={bindType:d.end,delegateType:d.end,handle:function(b){return a(b.target).is(this)?b.handleObj.handler.apply(this,arguments):void 0}});var e=function(b,c){this.$element=a(b),this.options=a.extend({},e.DEFAULTS,c),this.transitioning=null,this.init()};e.TRANSITION_DURATION=350,e.DEFAULTS={toggle:!0,doubleTapToGo:!1,preventDefault:!0,activeClass:"active",collapseClass:"collapse",collapseInClass:"in",collapsingClass:"collapsing",onTransitionStart:!1,onTransitionEnd:!1},e.prototype.init=function(){var b=this,c=this.options.activeClass,d=this.options.collapseClass,e=this.options.collapseInClass;this.$element.find("li."+c).has("ul").children("ul").attr("aria-expanded",!0).addClass(d+" "+e),this.$element.find("li").not("."+c).has("ul").children("ul").attr("aria-expanded",!1).addClass(d),this.options.doubleTapToGo&&this.$element.find("li."+c).has("ul").children("a").addClass("doubleTapToGo"),this.$element.find("li").has("ul").children("a").on("click.metisMenu",function(d){var e=a(this),f=e.parent("li"),g=f.children("ul");return b.options.preventDefault&&d.preventDefault(),"true"!==e.attr("aria-disabled")?(f.hasClass(c)&&!b.options.doubleTapToGo?(b.hide(g),e.attr("aria-expanded",!1)):(b.show(g),e.attr("aria-expanded",!0)),b.options.onTransitionStart&&b.options.onTransitionStart(),b.options.doubleTapToGo&&b.doubleTapToGo(e)&&"#"!==e.attr("href")&&""!==e.attr("href")?(d.stopPropagation(),void(document.location=e.attr("href"))):void 0):void 0})},e.prototype.doubleTapToGo=function(a){var b=this.$element;return a.hasClass("doubleTapToGo")?(a.removeClass("doubleTapToGo"),!0):a.parent().children("ul").length?(b.find(".doubleTapToGo").removeClass("doubleTapToGo"),a.addClass("doubleTapToGo"),!1):void 0},e.prototype.show=function(b){var c=this.options.activeClass,f=this.options.collapseClass,g=this.options.collapseInClass,h=this.options.collapsingClass,i=a(b),j=i.parent("li");if(!this.transitioning&&!i.hasClass(g)){j.addClass(c),this.options.toggle&&this.hide(j.siblings().children("ul."+g).attr("aria-expanded",!1)),i.removeClass(f).addClass(h).height(0),this.transitioning=1;var k=function(){this.transitioning&&this.options.onTransitionEnd&&this.options.onTransitionEnd(),i.removeClass(h).addClass(f+" "+g).height("").attr("aria-expanded",!0),this.transitioning=0};return d?void i.one("mmTransitionEnd",a.proxy(k,this)).emulateTransitionEnd(e.TRANSITION_DURATION).height(i[0].scrollHeight):k.call(this)}},e.prototype.hide=function(b){var c=this.options.activeClass,f=this.options.collapseClass,g=this.options.collapseInClass,h=this.options.collapsingClass,i=a(b);if(!this.transitioning&&i.hasClass(g)){i.parent("li").removeClass(c),i.height(i.height())[0].offsetHeight,i.addClass(h).removeClass(f).removeClass(g),this.transitioning=1;var j=function(){this.transitioning&&this.options.onTransitionEnd&&this.options.onTransitionEnd(),this.transitioning=0,i.removeClass(h).addClass(f).attr("aria-expanded",!1)};return d?void i.height(0).one("mmTransitionEnd",a.proxy(j,this)).emulateTransitionEnd(e.TRANSITION_DURATION):j.call(this)}};var f=a.fn.metisMenu;a.fn.metisMenu=c,a.fn.metisMenu.Constructor=e,a.fn.metisMenu.noConflict=function(){return a.fn.metisMenu=f,this}});
 
 
 
@@ -695,7 +697,7 @@ Both of the above methods will produce the same results.
                     animation:false,
                     trigger: 'hover focus',
                     placement: 'bottom',
-                    container: '#mainnav-container',
+                    container: 'body' , //#mainnav-container',
                     template: '<div class="popover mainnav-shortcut"><div class="arrow"></div><div class="popover-content"></div>'
                 });
             });
@@ -707,7 +709,7 @@ Both of the above methods will produce the same results.
 
 
  /* ========================================================================
- * NIFTY NAVIGATION v1.3.1
+ * NIFTY NAVIGATION v1.3.2
  * -------------------------------------------------------------------------
  *
  * Require Bootstrap Popover
@@ -725,8 +727,9 @@ Both of the above methods will produce the same results.
     "use strict";
 
 
-    var $menulink           = $( '#mainnav-menu > li > a, #mainnav-menu-wrap .mainnav-widget a[data-toggle="menu-widget"]'),
-    mainNavHeight           = $( '#mainnav' ).height(),
+    var $menulink           = $('#mainnav-menu > li > a, #mainnav-menu-wrap .mainnav-widget a[data-toggle="menu-widget"]'),
+    boxedContainer          = nifty.container.children('.boxed'),
+    mainNavHeight           = $('#mainnav').height(),
     scrollbar				= null,
     updateMethod            = false,
     isSmallNav              = false,
@@ -758,10 +761,8 @@ Both of the above methods will produce the same results.
                     $el.on('click', function(e){e.preventDefault()});
                 }
                 if ($listSub.length){
-                    $listSub.removeClass('in').removeAttr('style');
-                    $el.on('click', function(e){
-                        e.preventDefault()
-                    }).parent('li').removeClass('active');
+                    //$listSub.removeClass('in').removeAttr('style');
+                    $el.on('click', function(e){e.preventDefault()}).parent('li').removeClass('active');
                     return true;
                 }else{
                     return false;
@@ -780,12 +781,14 @@ Both of the above methods will produce the same results.
             };
 
             $(document).click(function(event) {
+
                 if(!$(event.target).closest('#mainnav-container').length) {
                     $el.removeClass('hover').popover('hide');
                 }
             });
 
             $('#mainnav-menu-wrap > .nano').on("update", function(event, values){
+                
                 $el.removeClass('hover').popover('hide');
             });
 
@@ -814,8 +817,7 @@ Both of the above methods will produce the same results.
                     return $content;
                 },
                 template: '<div class="popover menu-popover"><h4 class="popover-title"></h4><div class="popover-content"></div></div>'
-            })
-            .on('show.bs.popover', function () {
+            }).on('show.bs.popover', function () {
                 if(!$popover){
                     $popover = $el.data('bs.popover').tip();
                     $poptitle = $popover.find('.popover-title');
@@ -825,13 +827,15 @@ Both of the above methods will produce the same results.
                     $popoverSub = $popcontent.children('.sub-menu');
                 }
                 if (!elHasSub && $listWidget.length == 0)return;
-            })
-            .on('shown.bs.popover', function () {
+            }).
+            on('shown.bs.popover', function () {
                 if (!elHasSub && $listWidget.length == 0){
                     var margintop = 0 - (0.5 * $el.outerHeight());
                     $popcontent.css({'margin-top': margintop + 'px', 'width' : 'auto'});
                     return;
                 }
+
+
                 var offsetTop 		= parseInt($popover.css('top')),
                 elHeight		= $el.outerHeight(),
                 offsetBottom 	= function(){
@@ -916,7 +920,6 @@ Both of the above methods will produce the same results.
     unbindSmallNav = function(){
         var colapsed = $('#mainnav-menu').find('.collapse');
         if(colapsed.length){
-
             colapsed.each(function(){
                 var cl = $(this);
                 if (cl.hasClass('in')){
@@ -929,7 +932,7 @@ Both of the above methods will produce the same results.
         if(scrollbar != null && scrollbar.length){
             scrollbar.nanoScroller({stop : true});
         }
-        //console.log($menulink)
+
         $menulink.popover('destroy').unbind('mouseenter mouseleave');
         isSmallNav = false;
     },
@@ -937,6 +940,7 @@ Both of the above methods will produce the same results.
         //if(!defaultSize) return;
 
         var sw = nifty.container.width(), currentScreen;
+
 
         if (sw <= 740) {
             currentScreen = 'xs';
@@ -958,14 +962,29 @@ Both of the above methods will produce the same results.
             }
         }
     },
+    boxedPosition = function(){
+        if(nifty.container.hasClass('boxed-layout') && nifty.container.hasClass('mainnav-fixed') && boxedContainer.length){
+            nifty.mainNav.css({
+                'left' : boxedContainer.offset().left + 'px'
+            });
+        }else{
+            nifty.mainNav.css({
+                'left' :''
+            });
+        }
+    },
     updateNav = function(e){
         nifty.mainNav.niftyAffix('update');
+
         unbindSmallNav();
         updateSize();
+        boxedPosition();
+
         if (updateMethod == 'collapse' || nifty.container.hasClass('mainnav-sm') ) {
             nifty.container.removeClass('mainnav-in mainnav-out mainnav-lg');
             bindSmallNav();
         }
+
         mainNavHeight = $('#mainnav').height();
         updateMethod = false;
         return null;
@@ -1057,7 +1076,6 @@ Both of the above methods will produce the same results.
         },
         'expand' : function(){
             nifty.container.removeClass('mainnav-sm mainnav-in mainnav-out').addClass('mainnav-lg');
-            //unbindSmallNav();
             return nifty.window.trigger('resize');
         },
         'togglePosition' : function(){
@@ -1090,6 +1108,7 @@ Both of the above methods will produce the same results.
                 }
             }
             var val = methods[method].apply(this,Array.prototype.slice.call(arguments, 1));
+            updateNav();
             if(complete) return complete();
             else if (val) return val;
         }
@@ -1122,7 +1141,7 @@ Both of the above methods will produce the same results.
         if(toggleBtn.length){
             toggleBtn.on('click', function(e){
                 e.preventDefault();
-                
+
                 if(toggleBtn.hasClass('push')){
                       $.niftyNav('pushToggle');
                 }else if(toggleBtn.hasClass('slide')){
@@ -1130,7 +1149,6 @@ Both of the above methods will produce the same results.
                 }else if(toggleBtn.hasClass('reveal')){
                     $.niftyNav('revealToggle');
                 }else{
-                    //console.log('colExpToggle menu')
                     $.niftyNav('colExpToggle');
                 }
             }
@@ -1170,7 +1188,7 @@ Both of the above methods will produce the same results.
 
 
 /* ========================================================================
- * NIFTY ASIDE v1.1
+ * NIFTY ASIDE v1.2
  * -------------------------------------------------------------------------
  * - ThemeOn.net -
  * ========================================================================*/
@@ -1197,27 +1215,27 @@ Both of the above methods will produce the same results.
         },
         'toggleAlign' : function(){
             nifty.container.toggleClass('aside-left');
-            nifty.aside.niftyAffix('update');
+            updateAside();
         },
         'alignLeft' : function(){
             nifty.container.addClass('aside-left');
-            nifty.aside.niftyAffix('update');
+            updateAside();
         },
         'alignRight' : function(){
             nifty.container.removeClass('aside-left');
-            nifty.aside.niftyAffix('update');
+            updateAside();
         },
         'togglePosition' : function(){
             nifty.container.toggleClass('aside-fixed');
-            nifty.aside.niftyAffix('update');
+            updateAside();
         },
         'fixedPosition' : function(){
             nifty.container.addClass('aside-fixed');
-            nifty.aside.niftyAffix('update');
+            updateAside();
         },
         'staticPosition' : function(){
             nifty.container.removeClass('aside-fixed');
-            nifty.aside.niftyAffix('update');
+            updateAside();
         },
         'toggleTheme' : function(){
             nifty.container.toggleClass('aside-bright');
@@ -1227,6 +1245,9 @@ Both of the above methods will produce the same results.
         },
         'darkTheme' : function(){
             nifty.container.removeClass('aside-bright');
+        },
+        'update' : function(){
+            updateAside();
         }
     },
     toggleNav = function(){
@@ -1237,8 +1258,38 @@ Both of the above methods will produce the same results.
                 nifty.container.removeClass('mainnav-in mainnav-lg mainnav-sm').addClass('mainnav-out');
             }
         }
+    },
+    boxedContainer = nifty.container.children('.boxed'), navlg = 0, navsm = 0,
+    updateAside = function(){
+        nifty.aside.niftyAffix('update');
+        var cssProp = {};
+        if(nifty.container.hasClass('boxed-layout') && nifty.container.hasClass('aside-fixed') && boxedContainer.length){
+            if(nifty.container.hasClass('aside-left')){
+                cssProp ={
+                    '-ms-transform' : 'translateX(' + boxedContainer.offset().left + 'px)',
+                    '-webkit-transform' : 'translateX(' + boxedContainer.offset().left + 'px)',
+                    'transform' : 'translateX(' + boxedContainer.offset().left + 'px)'
+                }
+            }else{
+                cssProp = {
+                    '-ms-transform' : 'translateX(' + ( 0 - boxedContainer.offset().left) + 'px)',
+                    '-webkit-transform' : 'translateX(' + (0 - boxedContainer.offset().left) + 'px)',
+                    'transform' : 'translateX(' + (0 - boxedContainer.offset().left) + 'px)'
+                }
+            }
+        }else{
+            cssProp = {
+                '-ms-transform' : '',
+                '-webkit-transform' : '',
+                'transform' : '',
+                'right':''
+            }
+        }
+        nifty.aside.css(cssProp);
     };
 
+
+    nifty.window.on('resizeEnd',updateAside);
 
 
     $.niftyAside = function(method,complete){
@@ -1297,7 +1348,7 @@ Both of the above methods will produce the same results.
         $langBtn = $langMenu.find('a'),
         selectedID = $langBtn.filter('.active').find('.lang-id').text(),
         selectedName = $langBtn.filter('.active').find('.lang-name').text();
- 
+
         var changeTo = function(te){
             $langBtn.removeClass('active');
             te.addClass('active');

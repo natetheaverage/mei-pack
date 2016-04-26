@@ -256,7 +256,7 @@ class MainNavigationSeeder extends Seeder  {
 
 		$Objects = InterfaceObject::create([
 			'label'      => 'Directory',           // header / Label displayed
-			'href'       => '/dashboard/employee/directory',          // target for links
+			'href'       => '/dashboard/employees/directory',          // target for links
 			'on_click'   => 'EmployeeDirectory',          // target for links
 			'icon'       => 'fa-watch',                    // icon from fa-
 			'name'		 => 'time_off_requests',

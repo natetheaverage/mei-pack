@@ -1,6 +1,7 @@
  import {
   RESET_ALL_MENU_ACTIVE,
   SET_MENU_ACTIVE,
+  SET_OBJECT,
   SET_MENU
 } from '../mutation-types'
 import menus from '../../api/vuex/menus.js'
@@ -46,7 +47,16 @@ const mutations = {
         }
       }    
     } 
-  } 
+  },
+
+  [SET_OBJECT] (state, object, field, value) {
+    var menu = state[object.menu_name]
+    console.log(menu[menu.indexOf(object)][field])
+    if( menu != undefined ){
+      menu[menu.indexOf(object)][field] = value
+    }
+    console.log(menu[menu.indexOf(object)][field])
+  },
 
 
 

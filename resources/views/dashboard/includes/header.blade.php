@@ -4,10 +4,11 @@
     <!--Open Sans Font [ OPTIONAL ] -->
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&amp;subset=latin" rel="stylesheet">
  
+    <link href="{!! asset('css/mei-app-core.css') !!}" rel="stylesheet">
     <!--Bootstrap Stylesheet -->
     <link href="{!! asset('/css/bootstrap.min.css') !!}" rel="stylesheet">
 
-    <!--Bnifty Stylesheet -->
+    <!--nifty Stylesheet -->
     <link href="{!! asset('/css/nifty.css') !!}" rel="stylesheet">
 
     <!--app Stylesheet -->
@@ -44,6 +45,7 @@
 
     <!--Demo script [ DEMONSTRATION ]-->
     <link href="{!! asset('css/demo/nifty-demo.min.css') !!}" rel="stylesheet">
+
 
     <!--SCRIPT FOR LOAD BAR-->
     <!--=================================================-->

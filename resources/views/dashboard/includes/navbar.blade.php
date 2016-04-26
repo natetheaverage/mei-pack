@@ -1,7 +1,7 @@
 <!--NAVBAR-->
 <!--===================================================-->
-<header id="navbar">
-	<div id="navbar-container" class="boxed">
+<header id="navbar" >
+	<div id="navbar-container" style="z-index:9000">
 
 		<!--Brand logo & name-->
 		<!--================================-->
@@ -25,7 +25,10 @@
 				<!--Navigation toogle button-->
 				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 				<li class="tgl-menu-btn">
-					<a class="mainnav-toggle" href="#">
+					<a
+					v-on:click="$root.reloadNav()" 
+					class="mainnav-toggle" 
+					href="#">
 						<i class="fa fa-navicon fa-lg"></i>
 					</a>
 				</li>
@@ -502,27 +505,17 @@
 				</li>
 				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 				<!--End mega dropdown-->
-                <li>
-                    <h1 class="page-header text-overflow">
-                        @{{ viewTitle }}
-                    </h1>
-                </li>
-
+        <li>
+            <h1 
+            	class="page-header text-overflow"
+            	style="padding-bottom: 0"
+            	v-text="viewTitle"
+            ></h1>
+        </li>
 			</ul>
+
 			<ul class="nav navbar-top-links pull-right">
-            
-            <!--Searchbox-->
-            <li>
-                <div class="searchbox">
-                    <div class="input-group custom-search-form">
-                        <input type="text" class="form-control" placeholder="Search..">
-                            <span class="input-group-btn">
-                                <button class="text-muted" type="button"><i class="fa fa-search"></i></button>
-                            </span>
-                    </div>
-                </div>
-            </li>
-                
+             
 				<!--Language selector-->
 				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 				<li v-if="showLanguageSelector" class="dropdown">
@@ -653,13 +646,12 @@
 				</li>
 				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 				<!--End user dropdown-->
-
 			</ul>
 		</div>
-		<!--================================-->
-		<!--End Navbar Dropdown-->
-
 	</div>
+	<!--================================-->
+	<!--End Navbar Dropdown-->
 </header>
 <!--===================================================-->
 <!--END NAVBAR-->
+

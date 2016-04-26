@@ -4,7 +4,7 @@ import Profile from '../vue/components/profile/Profile.vue'
 import Projector from '../vue/components/projector/Projector.vue'
 import Communications from '../vue/components/converse/Communications.vue';
 import SingleConversation from '../vue/components/converse/SingleConversation.vue';
-import NavPage from '../vue/components/navigation/Navpage.vue';
+import NavPage from '../vue/components/navigation/NavPage.vue';
 import Pos from '../vue/components/pos/Checkout.vue';
 import Calendar from '../vue/components/calendar/Calendar.vue';
 import Settings from '../vue/components/settings/Settings.vue';
@@ -17,6 +17,7 @@ import UiUx from '../vue/components/controllers/UiUxPage.vue';
 import UiUxButtons from '../vue/components/controllers/UiUxButtons.vue';
 import UiUxCharts from '../vue/components/controllers/UiUxCharts.vue';
 import TicketsIt from '../vue/components/pages/TicketsIt.vue';
+import FrozenNodeAdmin from '../vue/components/pages/FrozenNodeAdmin.vue';
 
 //import loadjs from 'partition-bundle';
 
@@ -37,7 +38,7 @@ export function configRouter (router) {
     '/dashboard': {
       component: {
         name: 'Dashboard',
-        template: '<div><h3>dashboard</h2><router-view></router-view></div>',
+        template: '<div><router-view></router-view></div>',
         changeTabTitle: false,
         logHooksToConsole: true,
         watchMode: true,
@@ -137,7 +138,12 @@ export function configRouter (router) {
 
         '/help-desk': {
           component: TicketsIt, 
-          name: 'HelpDesk',
+          name: 'help-desk',
+        },
+
+        '/super-admin': {
+          component: FrozenNodeAdmin, 
+          name: 'super-admin',
         },
       },// dashboard sub route close
     }, //dashboard close

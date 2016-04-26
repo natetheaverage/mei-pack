@@ -17,8 +17,8 @@ Route::auth();
 
 Route::get('/', function () {
   \JavaScript::put([
-    'editMode' => 1, 
-    'currentUser' => Session::get('currentUser'),
+    //'currentUser' => Session::get('currentUser'),
+    'currentUser' => \Auth::user(),
     'vueRoute' => '/'
   ]);
   return view('welcome');
@@ -27,7 +27,13 @@ Route::get('/', function () {
 Route::get('/options', function () {
   return view('front.home');
 });
-
+Route::group(['prefix' => 'dashboard'], function () {
+  Route::resource('/profile', 'DashboardController');
+  Route::resource('/employees', 'DashboardController');
+  Route::resource('/customers', 'DashboardController');
+  Route::resource('/inventory', 'DashboardController');
+  Route::resource('/components', 'DashboardController');
+});
 Route::resource('/dashboard', 'DashboardController');
 
 /*

@@ -2,7 +2,7 @@
 
 <!-- FOOTER -->
 <!--===================================================-->
-<footer id="footer">
+<footer id="footer" style="color: #535353; background: none; z-index:10">
  
 	<!-- Visible when footer positions are fixed -->
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->

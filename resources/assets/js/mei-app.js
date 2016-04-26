@@ -12,10 +12,11 @@ export default {
       id: 0,
       objectResource: this.$resource('/api/:objectType/:objectOptions'),
       apiResource: this.$resource('/api/:model/:id'),
-      editMode: false,
+      editMode: true,
       editAll: false,
       dataMode: false,
       baseView: 'front',
+      viewTitle: 'Dashboard',
       //copy: this.copy,
 
       // mail form fields
@@ -310,8 +311,8 @@ export default {
       //this.settings
     }, { deep: true })
     this.$watch('$route.path', function(route){ 
-      console.log('route in mei-app/ready()')
-      console.log(route)
+      // console.log('route in mei-app/ready()')
+      // console.log(route)
       this.setTickets() },{ deep: true })
   }
 

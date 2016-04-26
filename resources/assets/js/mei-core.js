@@ -18,6 +18,10 @@ Vue.filter('currencyDisplay', CurrencyDisplay)
 import HooksMixin from './vue/mixins/HooksMixin.js';
 Vue.mixin(HooksMixin);
 
+// enable @keyup.s
+Vue.directive('on').keyCodes.s = 83
+
+
 // REQUESTS HEADER
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('#token').getAttribute('value');
 
@@ -69,6 +73,9 @@ Vue.component('ticketsIt', TicketsIt)
 import EditableCopy from './vue/components/controllers/EditableCopy.vue';
 Vue.component('editableCopy', EditableCopy)
 
+import SearchBox from './vue/components/controllers/SearchBox.vue';
+Vue.component('SearchBox', SearchBox)
+
 // import AddressForm from './vue/components/form/AddressForm.vue';
 // Vue.component('address_form', AddressForm)
 // import ContactsForm from './vue/components/form/ContactsForm.vue';
@@ -106,10 +113,10 @@ Vue.component('ipadMenu', iPad3DMenu)
 
 
 import MainNav from './vue/components/navigation/nifty/MainNav.vue';
-Vue.component('mainnav', MainNav);
+Vue.component('MainNav', MainNav);
 
 import MainNavButton from './vue/components/navigation/nifty/MainNavButton.vue';
-Vue.component('mainnavbutton', MainNavButton )
+Vue.component('MainNavButton', MainNavButton )
 
 import ShortcutButtons from './vue/components/navigation/nifty/ShortcutButtons.vue';
 Vue.component('shortcutbuttons', ShortcutButtons )
@@ -150,8 +157,8 @@ Vue.component('objecteditor', ObjectEditor )
 // import VisibilitySwitch from './vue/components/controllers/VisibilitySwitch.vue';
 // Vue.component('visibilityswitch',  VisibilitySwitch )
 
-import NavPageButton from './vue/components/navigation/NavpageButton.vue';
-Vue.component('navpagebutton',  NavPageButton )
+import NavPageButton from './vue/components/navigation/NavPageButton.vue';
+Vue.component('NavPageButton',  NavPageButton )
 
 // 
 import { sync } from 'vuex-router-sync'
@@ -223,6 +230,8 @@ var $head = $( '#ha-header' );
     });
     // TODO: This needs to implement anaming system of sorts
     // switcher.onchange = function() {};
+
+
 
 
 

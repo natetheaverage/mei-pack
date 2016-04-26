@@ -1,5 +1,6 @@
-<template>
-<li :class="active ? 'active' : ''" >
+<template> 
+<!-- <li :class="active ? 'active' : ''" > -->
+<li v-link-active>
   <div 
     class="col-xs-2 pad-no" 
     v-if="editMode"
@@ -19,7 +20,7 @@
       <span class="menu-title">
         <strong v-text="button.label"></strong>
       </span>
-          <i :class="{'arrow': isFolder}"></i>
+          <i v-if="isFolder" class="arrow"></i>
         <span 
           v-if="hasBadge" 
           class="pull-right badge badge-success"
@@ -29,14 +30,11 @@
       class="collapse" 
       :class="{'in': active}"
     >
-      <mainnavbutton 
+      <main-nav-button 
         v-for="button in button.submenu" 
         :button="button"
-      ></mainnavbutton>
-        <li 
-          v-if="editMode" 
-          @click="addButton"
-        >
+      ></main-nav-button>
+        <li v-if="editMode" @click="addButton">
       <a> + Create New Button</a></li>
     </ul>
 </li>

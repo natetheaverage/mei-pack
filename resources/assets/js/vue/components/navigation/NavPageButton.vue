@@ -1,26 +1,27 @@
 <template>
   <div 
     class="pad-no edit-btn" 
-    v-if="editMode"
+    v-if="$root.editMode"
   >
     <a 
       style="padding:10px 5px" 
-      @click="$root.editButton(button.id)" 
+      @click="$root.editButton(button)" 
       class="pad-no text-bold text-bright" 
     ><i class="fa fa-edit"></i></a>
   </div>
-    <objecteditor 
-      v-if="editMode" 
-      :object="button"
+  <objecteditor 
+    v-if="$root.editMode" 
+    :object="button"
   ></objecteditor>
     <a 
       :id="button.id" 
       v-link="button.href" 
-      :class="button.class"
-      class="mtrl-btn mtrl-raised mtrl-btn-dashboard"
+      class="mtrl-btn mtrl-raised mtrl-btn-dashboard bg-off-white"
     >
+    
+      <!-- :class="button.class" -->
     <i :class="'fa fa-4x ' + button.icon"></i>
-    <span class="dashboard-text" v-text="button.label"></span>
+    <p class="dashboard-text" v-text="button.label"></p>
     <span 
       v-if="button.notification_text"
       :class="'pull-right badge badge-'+button.notification_color+' '+button.notification_style"
@@ -38,5 +39,7 @@ export default {
 
 <style lang="stylus">
 .edit-btn
-    position: absolute
+  position absolute
+  z-index: 10;
+  padding: 6px 2px;
 </style>

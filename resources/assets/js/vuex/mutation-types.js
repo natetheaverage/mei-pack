@@ -8,6 +8,8 @@ export const SET_MENU = 'SET_MENU'
 export const TOGGLE_SETTING = 'TOGGLE_SETTING'
 
 export const SET_PAGE = 'SET_PAGE'
+export const SET_OBJECT = 'SET_OBJECT'
+
 export const SET_SETTING = 'SET_SETTING'
 export const SET_COMPANY_BRAND_DETAIL = 'SET_COMPANY_BRAND_DETAIL'
 

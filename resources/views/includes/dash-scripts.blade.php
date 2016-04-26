@@ -3,11 +3,11 @@
 
 <!--jQuery [ REQUIRED ]-->
 <!-- <script src="/js/jquery-2.1.1.min.js"></script> -->
-<script src="/js/jquery.js"></script>
+<script src="{!! asset('/js/jquery.js') !!}"></script>
 
 
 <!--BootstrapJS [ RECOMMENDED ]-->
-<script src="/js/bootstrap.min.js"></script>
+<script src="{!! asset('/js/bootstrap.min.js') !!}"></script>
 
 
 <!--Fast Click [ OPTIONAL ]-->
@@ -43,7 +43,7 @@
 
 <!--Nifty Admin [ RECOMMENDED ]-->
 {{-- <script src="{!! asset('js/nifty2.min.js') !!}"></script> --}}
-<script src="{!! asset('/js/nifty.js') !!}"></script>
+<script src="{!! asset('js/nifty.js') !!}"></script>
 
 
 <!-- Vue Compiled-->

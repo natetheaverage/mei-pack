@@ -168,7 +168,7 @@
 							
 							<!--Edit Toggle Button-->
 			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-			                @can('edit-layout')
+			                @role('average')
 			                <li class="list-group-item">
 			                	<div class="pull-right">
 			                    	<input 
@@ -180,12 +180,12 @@
 								<p>Edit All</p>
 								<small class="text-muted">Right now edit mode is @{{ editMode ? "on" : "off" }}.</small>
 			                </li>
-			                @endCan
+			                @endrole
 			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 			                <!--End Edit toggle button-->
 			                <!--Data Output Toggle Button-->
 			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-			                @can('edit-layout')
+			                @role('edit-layout')
 			                <li class="list-group-item">
 			                	<div class="pull-right">
 			                    	<input 
@@ -197,7 +197,7 @@
 								<p>Data Output</p>
 								<small class="text-muted">Right now data view is @{{ dataMode ? "on" : "off" }}.</small>
 			                </li>
-			                @endCan
+			                @endrole
 			                <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 			                <!--End Edit toggle button-->
 
