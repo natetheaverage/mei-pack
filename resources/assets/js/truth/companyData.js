@@ -52,7 +52,7 @@ module.exports = {
 	branding:{
 		name: "20-20 Investment",
 		tagLine:"Your key to financial success in the medical market!",
-		smallLogo:'/images/logos/logo.png',
-		largeLogo:'/images/logos/logo.png',
+		smallLogo:'apple-icon-72x72.png',
+		largeLogo:'ms-icon-310x310.png',
 	}
 }

@@ -1,6 +1,27 @@
 module.exports = {
 	// These two are for saving method
   front:{
+    BrandBox_0:[
+      {
+        copy: '20-20 INVESTMENTS',
+        versionList: '{0:1}',
+        version: 0,
+        height: 1,
+        parent_name: 'BrandBox_0',
+        parent_id: 0,
+        base_view: 'front',
+        instance_number: 0,
+      },{
+        copy: '',
+        versionList: '{0:1}',
+        version: 0,
+        height: 1,
+        parent_name: 'BrandBox_0',
+        parent_id: 0,
+        base_view: 'front',
+        instance_number: 1,
+      }
+    ],
     MEiApp_0:[
       {
         copy: 'Welcome to the Internets',

@@ -11,6 +11,5 @@
 
 	@yield('footer')
   @include('includes.php-to-js')
-  @include('front.'.config('app.theme').'.footer')
   </body>
 </html>

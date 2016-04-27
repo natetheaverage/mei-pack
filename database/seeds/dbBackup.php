@@ -6,7 +6,7 @@ use Spatie\Permission\Models\Permission;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 
-class DatabaseSeeder extends Seeder
+class DatabaseSeeder2 extends Seeder
 {
 
     protected $toTruncate = [

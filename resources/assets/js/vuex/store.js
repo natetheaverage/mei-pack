@@ -11,8 +11,10 @@ import createLogger from 'vuex/logger'
 import truth from '../truth/truth.js'
 
 Vue.use( Vuex )
-
-const state = {
+var store = Persistance.get();
+const state = 
+{
+  //store,
   truth,
   models:{
 	  projects:{},
@@ -75,7 +77,7 @@ const persistToDatabase = {
     // console.log( prevState )
     // console.log( nextState )
     // console.log( store )
-    Persistance.save(mutation) 
+    Persistance.save(nextState) 
   }
 }
 

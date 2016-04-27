@@ -18018,7 +18018,7 @@ exports.default = {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _vue = require('vue');
@@ -18034,13 +18034,25 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _vue2.default.use(_vueResource2.default);
 
 exports.default = new _vue2.default({
-	methods: {
-		save: function save(d) {
-			//console.log('save fired in api/vuex/pessistance.js with following data')
-			//console.log(d)
-			return true;
-		}
-	}
+  methods: {
+    save: function save(state) {
+      this.$http.post('/api/state', { state: state }, function (data, status, request) {
+        console.log("ui / vuex / persistance.js  >>>GOOD<<<<");
+        //that.setCopy(data[1]);
+      }).error(function (data, status, request) {
+        console.log("Err in ui vuex persistance.js");
+      }.bind(this));
+    },
+    get: function get() {
+      this.$http.get('/api/state', function (data, status, request) {
+        console.log("ui / vuex / persistance.js  >>>Retrieved<<<<");
+        //onsole.log(data);
+        return data;
+      }).error(function (data, status, request) {
+        console.log("Err in ui vuex persistance.js");
+      }.bind(this));
+    }
+  }
 });
 
 },{"vue":49,"vue-resource":40}],58:[function(require,module,exports){
@@ -18063,8 +18075,6 @@ var _router = require('./vue-router/router');
 var _router2 = _interopRequireDefault(_router);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//var socket = io();
 
 exports.default = {
   name: 'MEiApp',
@@ -18867,8 +18877,8 @@ module.exports = {
 	branding: {
 		name: "20-20 Investment",
 		tagLine: "Your key to financial success in the medical market!",
-		smallLogo: '/images/logos/logo.png',
-		largeLogo: '/images/logos/logo.png'
+		smallLogo: 'apple-icon-72x72.png',
+		largeLogo: 'ms-icon-310x310.png'
 	}
 };
 
@@ -18897,6 +18907,25 @@ module.exports = [{
 module.exports = {
   // These two are for saving method
   front: {
+    BrandBox_0: [{
+      copy: '20-20 INVESTMENTS',
+      versionList: '{0:1}',
+      version: 0,
+      height: 1,
+      parent_name: 'BrandBox_0',
+      parent_id: 0,
+      base_view: 'front',
+      instance_number: 0
+    }, {
+      copy: '',
+      versionList: '{0:1}',
+      version: 0,
+      height: 1,
+      parent_name: 'BrandBox_0',
+      parent_id: 0,
+      base_view: 'front',
+      instance_number: 1
+    }],
     MEiApp_0: [{
       copy: 'Welcome to the Internets',
       versionList: '{0:0}',
@@ -19438,7 +19467,24 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.default = {
+
+exports.default = function () {
+	if (data.length) {
+		return data;
+	} else {
+		return truth;
+	}
+};
+
+var _persistance = require('../api/vuex/persistance.js');
+
+var _persistance2 = _interopRequireDefault(_persistance);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var data = _persistance2.default.get();
+
+var truth = {
 	settings: require('./settingsData'),
 
 	company: require('./companyData'),
@@ -19461,10 +19507,9 @@ exports.default = {
 	images: require('./imagesData'),
 
 	features: require('./features')
-
 };
 
-},{"./adminMenuData":60,"./companyData":61,"./conversationData":62,"./copyText":63,"./eventsData":64,"./features":65,"./imagesData":66,"./infoSectionData":67,"./mainMenuData":68,"./newsData":69,"./settingsData":70}],72:[function(require,module,exports){
+},{"../api/vuex/persistance.js":57,"./adminMenuData":60,"./companyData":61,"./conversationData":62,"./copyText":63,"./eventsData":64,"./features":65,"./imagesData":66,"./infoSectionData":67,"./mainMenuData":68,"./newsData":69,"./settingsData":70}],72:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20241,14 +20286,16 @@ exports.default = {
 
   ready: function ready() {
     this.parent = this.findNameOfParent();
-    this.copyObject = this.routePrefix[this.instanceNumber];
-    this.$watch('$root.copy', function () {
+    if (this.routePrefix) {
       this.copyObject = this.routePrefix[this.instanceNumber];
-    }, { deep: true });
+      this.$watch('$root.copy', function () {
+        this.copyObject = this.routePrefix[this.instanceNumber];
+      }, { deep: true });
+    }
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"editable-copy\">\n  <div v-if=\"!editMode\">\n    <span v-if=\"html\" v-html=\"copyObject.copy\" style=\"width:100%\"></span>\n    <span v-if=\"!html\" v-text=\"copyObject.copy\" style=\"width:100%\"></span>\n  </div>\n<!-- :rows=\"copyObject.height\" -->\n  <textarea v-if=\"editMode\" :value=\"copyObject.copy\" @blur=\"saveVersion\" @input=\"persistCopyText | debounce 500\" placeholder=\"start typing to save new copy\" style=\"width:100%\"></textarea>\n\n    <!-- <a class=\"mtrl-btn mtrl-primary mtrl-raised\"\n      v-if=\"editMode\"\n      @click=\"saveVersion\"\n    >Save</a> -->\n</div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"editable-copy\">\n  <div v-if=\"!editMode\">\n    <span v-if=\"html\" v-html=\"copyObject.copy\" style=\"width:100%; text-align: inherit;\"></span>\n    <span v-if=\"!html\" v-text=\"copyObject.copy\" style=\"width:100%; text-align: inherit;\"></span>\n  </div>\n<!-- :rows=\"copyObject.height\" -->\n  <textarea v-if=\"editMode\" :value=\"copyObject.copy\" @blur=\"saveVersion\" @input=\"persistCopyText | debounce 500\" placeholder=\"start typing to save new copy\" style=\"width:100%; text-align: inherit;\"></textarea>\n\n    <!-- <a class=\"mtrl-btn mtrl-primary mtrl-raised\"\n      v-if=\"editMode\"\n      @click=\"saveVersion\"\n    >Save</a> -->\n</div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -22757,6 +22804,7 @@ exports.default = {
   name: 'brand-box',
   logHooksToConsole: true,
   watchMode: true,
+  props: ['theme', 'id'],
   vuex: {
     getters: {
       company: _getters.getCompanyDetails,
@@ -22770,13 +22818,11 @@ exports.default = {
     updateMessage: function updateMessage(e) {
       this.setCompanyBrandingDetail(e.target.id.split('-').pop(), e.target.value);
     }
-  },
-  ready: function ready() {
-    //console.log( document.querySelector('.brand-title').value )
   }
+
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- VUE Brand Box -->\n  <div class=\"brand-box\">\n    <img class=\"brand-logo\" :src=\"company.branding.smallLogo\">\n    <div class=\"brand-text-box\">\n      <h1 class=\"brand-title\" v-if=\"!pubSettings.editMode\" v-text=\"company.branding.name\"></h1>\n      <input id=\"branding-title\" type=\"textBox\" v-if=\"pubSettings.editMode\" class=\"brand-title vue-model-input\" :value=\"company.branding.name\" @input=\"updateMessage\">\n      <h3 class=\"brand-sub-title \" v-if=\"!pubSettings.editMode\" v-text=\"company.branding.tagLine\"></h3>\n      <input id=\"branding-tagLine\" type=\"textBox\" class=\"brand-sub-title vue-model-input\" :value=\"company.branding.tagLine\" v-if=\"pubSettings.editMode\" @input=\"updateMessage\">\n    </div>\n  </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- VUE Brand Box -->\n  <div class=\"brand-box\">\n    <img class=\"brand-logo\" :src=\"'/images/'+theme+'/logos/'+company.branding.smallLogo\">\n      <!-- :src=\"company.branding.smallLogo\"  -->\n    <div class=\"brand-text-box\">\n        <!-- v-if=\"!pubSettings.editMode\" -->\n        <!-- v-text=\"company.branding.name\" -->\n      <h1 class=\"brand-title\"><editable-copy :name-of-parent=\"'BrandBox_'+id\" instance-number=\"0\" use-html=\"true\"></editable-copy>\n      </h1>\n      <!-- <input\n        id=\"branding-title\"\n        type=\"textBox\"\n        v-if=\"pubSettings.editMode\" \n        class=\"brand-title vue-model-input\" \n        :value=\"company.branding.name\" \n        @input=\"updateMessage\"\n      /> -->\n        <!-- v-if=\"!pubSettings.editMode\" -->\n        <!-- v-text=\"company.branding.tagLine\" -->\n      <h3 class=\"brand-sub-title \"><editable-copy :name-of-parent=\"'BrandBox_'+id\" instance-number=\"1\" use-html=\"true\"></editable-copy>\n      </h3>\n    </div>\n  </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -23226,8 +23272,9 @@ var _truth2 = _interopRequireDefault(_truth);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _vue2.default.use(_vuex2.default);
-
+var store = _persistance2.default.get();
 var state = {
+  //store,
   truth: _truth2.default,
   models: {
     projects: {},
@@ -23285,7 +23332,7 @@ var persistToDatabase = {
     // console.log( prevState )
     // console.log( nextState )
     // console.log( store )
-    _persistance2.default.save(mutation);
+    _persistance2.default.save(nextState);
   }
 };
 

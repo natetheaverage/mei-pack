@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
         // $this->call('ProjectsSeeder');
         // $this->call('TasksSeeder');
 
-art iseed --force activity_log,companies,conversations,copy_texts,customers,dates,discounts,employees,events,events_dates,events_discounts,events_features,events_pdfs,events_prices,events_tickets,facilities,faqs,features,image_files,image_gallery,interface_objects,inventories,lists,mcs,memberships,menus,messages,mips,object_classes,opcs,pdf_files,pdfs,permissions,post_tag,post_user,posts,prices,products,profiles,projects,role_has_permissions,roles,subscriptions,tags,tasks,users,ticketit,ticketit_audits,ticketit_categories,ticketit_categories_users,ticketit_comments,ticketit_priorities,ticketit_settings,ticketit_statuses,tickets,user_activities,user_has_roles,user_has_permissions,users
+// art iseed --force activity_log,companies,conversations,copy_texts,customers,dates,discounts,employees,events,events_dates,events_discounts,events_features,events_pdfs,events_prices,events_tickets,facilities,faqs,features,image_files,image_gallery,interface_objects,inventories,lists,mcs,memberships,menus,messages,mips,object_classes,opcs,pdf_files,pdfs,permissions,post_tag,post_user,posts,prices,products,profiles,projects,role_has_permissions,roles,subscriptions,tags,tasks,users,ticketit,ticketit_audits,ticketit_categories,ticketit_categories_users,ticketit_comments,ticketit_priorities,ticketit_settings,ticketit_statuses,tickets,user_activities,user_has_roles,user_has_permissions,users
 
 
         #iseed_start

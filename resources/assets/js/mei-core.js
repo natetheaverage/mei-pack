@@ -5,7 +5,7 @@ import Vue from 'vue'
 Vue.use(VueRouter)
 Vue.use(VueResource)
 Vue.use(VueTouch)
-
+ 
 import SettingsWatcher from './vue/mixins/SettingsWatcher.js';
 Vue.mixin(SettingsWatcher);
 

@@ -14,7 +14,10 @@
       </button>
 
       <div class="brand">
-      	<brand-box></brand-box>
+      	<brand-box
+          theme="{!! $theme !!}"
+          :id="0"
+        ></brand-box>
       </div>
 
     </div>

@@ -24,7 +24,6 @@
 
 @section('footer')
   @parent
-
   <script src="/js/front-vendor.js"></script>
 
 @endsection

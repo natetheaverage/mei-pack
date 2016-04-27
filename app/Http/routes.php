@@ -26,12 +26,15 @@ Route::auth();
 //Route::get('/home', 'HomeController@index');
 
 Route::get('/', function () {
+  $user = \Auth::user();
+  $theme = config('app.theme');
+  
   \JavaScript::put([
-    //'currentUser' => Session::get('currentUser'),
-    'currentUser' => \Auth::user(),
-    'vueRoute' => '/'
+    'currentUser' => $user,
+    'vueRoute' => '/',
+    'theme' => $theme,
   ]);
-  return view('welcome');
+  return view('welcome', compact('user', 'theme'));
 });
 
 Route::get('/options', function () {
@@ -52,6 +55,17 @@ Route::resource('/dashboard', 'DashboardController');
 Route::group(['prefix' => 'api'], function () {
   Route::resource('interfaceObjects', 'InterfaceObjectsController');
   Route::resource('mailForm', 'CommunicationsController');
+
+  Route::post('state', function(\Illuminate\Http\Request $request){
+    $expiresAt = Carbon\Carbon::now()->addMonths(3);
+    Cache::put('state', $request->all(), $expiresAt);
+    return 'success';
+  });
+  Route::get('state', function(){
+    $value = Cache::pull('state');
+    //dd($value);
+    return $value;
+  });
   //Route::resource('conversations', 'ConversationController');
   //Route::resource('messages', 'MessageController');
   //Route::resource('projects', 'ProjectController');

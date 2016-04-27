@@ -7322,6 +7322,7 @@ hr.style-one {
   display: -ms-flexbox;
   display: flex;
   height: 100px;
+  width: 25vw;
 }
 #main-menu .navbar-header .brand {
   -webkit-align-self: center;
@@ -7336,6 +7337,7 @@ hr.style-one {
   height: auto;
   font-weight: 400;
   font-size: 1.5em;
+  width: 100%;
 }
 #main-menu .navbar-header .brand > img {
   max-width: 50px;

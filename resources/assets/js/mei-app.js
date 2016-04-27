@@ -3,7 +3,6 @@ import { setSetting, toggleSetting, setMenu, setCopy, setFeatures } from './vuex
 import store from './vuex/store'
 import router from './vue-router/router' 
 
-//var socket = io();
 
 export default {
 	name: 'MEiApp',

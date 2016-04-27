@@ -3,35 +3,37 @@
   <div class="brand-box">
     <img 
       class="brand-logo" 
-      :src="company.branding.smallLogo"
+      :src="'/images/'+theme+'/logos/'+company.branding.smallLogo" 
     >
+      <!-- :src="company.branding.smallLogo"  -->
     <div class="brand-text-box">
+        <!-- v-if="!pubSettings.editMode" -->
+        <!-- v-text="company.branding.name" -->
       <h1 
         class="brand-title" 
-        v-if="!pubSettings.editMode"
-        v-text="company.branding.name"
-      ></h1>
-      <input
+      ><editable-copy
+          :name-of-parent="'BrandBox_'+id"
+          instance-number="0"
+          use-html="true" 
+        ></editable-copy>
+      </h1>
+      <!-- <input
         id="branding-title"
         type="textBox"
         v-if="pubSettings.editMode" 
         class="brand-title vue-model-input" 
         :value="company.branding.name" 
         @input="updateMessage"
-      />
-      <h3 
-        class="brand-sub-title " 
-        v-if="!pubSettings.editMode"
-        v-text="company.branding.tagLine"
-      ></h3>
-      <input
-        id="branding-tagLine"
-        type="textBox"
-        class="brand-sub-title vue-model-input" 
-        :value="company.branding.tagLine" 
-        v-if="pubSettings.editMode" 
-        @input="updateMessage"
-      />
+      /> -->
+        <!-- v-if="!pubSettings.editMode" -->
+        <!-- v-text="company.branding.tagLine" -->
+      <h3 class="brand-sub-title " 
+      ><editable-copy
+          :name-of-parent="'BrandBox_'+id"
+          instance-number="1"
+          use-html="true" 
+        ></editable-copy>
+      </h3>
     </div>
   </div>
 
@@ -46,6 +48,7 @@ export default {
   name: 'brand-box',
   logHooksToConsole: true,
   watchMode: true,
+  props:['theme', 'id'],
   vuex:{
     getters:{ 
       company: getCompanyDetails,
@@ -61,9 +64,7 @@ export default {
     },
 
   },
-  ready(){
-    //console.log( document.querySelector('.brand-title').value )
-  }
+
 }
 </script>
 <style lang="stylus">

@@ -4,12 +4,12 @@
     <span 
       v-if="html" 
       v-html="copyObject.copy"
-      style="width:100%"
+      style="width:100%; text-align: inherit;"
 	  ></span>
-    <span 
+    <span  
       v-if="!html" 
       v-text="copyObject.copy"
-      style="width:100%"
+      style="width:100%; text-align: inherit;"
     ></span>
   </div>
 <!-- :rows="copyObject.height" -->
@@ -19,7 +19,7 @@
       @blur="saveVersion"
       @input="persistCopyText | debounce 500"
       placeholder="start typing to save new copy"
-      style="width:100%"
+      style="width:100%; text-align: inherit;"
   ></textarea>
 
     <!-- <a class="mtrl-btn mtrl-primary mtrl-raised"
@@ -105,10 +105,12 @@ export default {
 
     ready() {
       this.parent = this.findNameOfParent()
-      this.copyObject = this.routePrefix[this.instanceNumber]
-      this.$watch('$root.copy', function(){
+      if(this.routePrefix){
         this.copyObject = this.routePrefix[this.instanceNumber]
-      }, { deep: true })
+        this.$watch('$root.copy', function(){
+          this.copyObject = this.routePrefix[this.instanceNumber]
+        }, { deep: true })
+      }
     },
   }
 </script>
