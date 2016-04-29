@@ -30,7 +30,7 @@ export default {
 
       // CurrentUser
       user: {
-        username: 'Bangie-Boom-Boom'
+        username: 'UserName: in mei-app.js'
       },
       profile: {},
       customer_info: {},

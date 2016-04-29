@@ -18007,7 +18007,7 @@ var _menus = _truth2.default.menus;
 
 exports.default = {
 	getMenu: function getMenu(menuName, cb) {
-		//console.log(menuName)
+		console.log(menuName, 'in ->api/vuex/menus.js');
 		setTimeout(function () {
 			cb(_menus[menuName]);
 		}, 100);
@@ -18102,7 +18102,7 @@ exports.default = {
 
       // CurrentUser
       user: {
-        username: 'Bangie-Boom-Boom'
+        username: 'UserName: in mei-app.js'
       },
       profile: {},
       customer_info: {},
@@ -19465,51 +19465,48 @@ module.exports = {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+		value: true
 });
+//import Persistance from '../api/vuex/persistance.js'
 
-exports.default = function () {
-	if (data.length) {
-		return data;
-	} else {
-		return truth;
-	}
+//var data = Persistance.get();
+
+exports.default = {
+		settings: require('./settingsData'),
+
+		company: require('./companyData'),
+
+		posts: require('./newsData'),
+
+		conversations: require('./conversationData'),
+
+		menus: {
+				primary: require('./mainMenuData'),
+				adminPrimary: require('./adminMenuData'),
+				DashboardMenu: {}
+		},
+
+		copyText: require('./copyText'),
+
+		events: require('./eventsData'),
+
+		infoSection: require('./infoSectionData'),
+
+		images: require('./imagesData'),
+
+		features: require('./features')
 };
 
-var _persistance = require('../api/vuex/persistance.js');
+//  function(){
+// 	console.log(truth)
+// 	// if(data.length){
+// 	// 	return data;
+// 	// } else {
+// 		return truth;
+// 	// }
+// }
 
-var _persistance2 = _interopRequireDefault(_persistance);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var data = _persistance2.default.get();
-
-var truth = {
-	settings: require('./settingsData'),
-
-	company: require('./companyData'),
-
-	posts: require('./newsData'),
-
-	conversations: require('./conversationData'),
-
-	menus: {
-		primary: require('./mainMenuData'),
-		adminPrimary: require('./adminMenuData')
-	},
-
-	copyText: require('./copyText'),
-
-	events: require('./eventsData'),
-
-	infoSection: require('./infoSectionData'),
-
-	images: require('./imagesData'),
-
-	features: require('./features')
-};
-
-},{"../api/vuex/persistance.js":57,"./adminMenuData":60,"./companyData":61,"./conversationData":62,"./copyText":63,"./eventsData":64,"./features":65,"./imagesData":66,"./infoSectionData":67,"./mainMenuData":68,"./newsData":69,"./settingsData":70}],72:[function(require,module,exports){
+},{"./adminMenuData":60,"./companyData":61,"./conversationData":62,"./copyText":63,"./eventsData":64,"./features":65,"./imagesData":66,"./infoSectionData":67,"./mainMenuData":68,"./newsData":69,"./settingsData":70}],72:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22906,6 +22903,7 @@ var setMenu = exports.setMenu = function setMenu(_ref6, menuName) {
   var state = _ref6.state;
   var menu = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
+
   if (menu != null) {
     dispatch(types.SET_MENU, [menu, menuName]);
   } else {
@@ -23122,8 +23120,10 @@ var state = {
 };
 
 var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_MENU, function (state, payload) {
+
   state[payload[1]] = payload[0];
 }), (0, _defineProperty3.default)(_mutations, _mutationTypes.RESET_ALL_MENU_ACTIVE, function (state) {
+
   for (var menu in state) {
     for (var button in state[menu]) {
       state[menu][button].active = false;
@@ -23133,6 +23133,7 @@ var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, _mut
     }
   }
 }), (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_MENU_ACTIVE, function (state, button) {
+
   var menu = state[button['menu_name']];
   if (menu != undefined) {
     menu[menu.indexOf(button)].active = !menu[menu.indexOf(button)].active;
@@ -23147,6 +23148,7 @@ var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, _mut
     }
   }
 }), (0, _defineProperty3.default)(_mutations, _mutationTypes.SET_OBJECT, function (state, object, field, value) {
+
   var menu = state[object.menu_name];
   console.log(menu[menu.indexOf(object)][field]);
   if (menu != undefined) {

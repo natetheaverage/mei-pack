@@ -1,8 +1,8 @@
-import Persistance from '../api/vuex/persistance.js'
+//import Persistance from '../api/vuex/persistance.js'
 
-var data = Persistance.get();
+//var data = Persistance.get();
 
-var truth = {
+export default {
 		settings: require('./settingsData'),
 		
 		company: require('./companyData'),
@@ -14,6 +14,7 @@ var truth = {
 		menus: {
 			primary: require('./mainMenuData'),
 			adminPrimary: require('./adminMenuData'),
+			DashboardMenu: {},
 		},
 		
 		copyText:  require('./copyText'),
@@ -28,10 +29,11 @@ var truth = {
 }  
 
 
-export default function(){
-	if(data.length){
-		return data;
-	} else {
-		return truth;
-	}
-}
+//  function(){
+// 	console.log(truth)
+// 	// if(data.length){
+// 	// 	return data;
+// 	// } else {
+// 		return truth;
+// 	// }
+// }

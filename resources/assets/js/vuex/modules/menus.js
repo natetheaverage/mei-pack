@@ -17,10 +17,12 @@ const state = {
 const mutations = {
 
   [SET_MENU] (state, payload) {
+
     state[payload[1]] = payload[0]
   },
 
   [RESET_ALL_MENU_ACTIVE] (state) {
+    
     for(var menu in state){
       for(var button in state[menu]){
         state[menu][button].active = false
@@ -34,6 +36,7 @@ const mutations = {
   // Button owner_type is the name of the menu
   // Use indexOf to locate the buttons position in the menu
   [SET_MENU_ACTIVE] (state, button) {
+
     var menu = state[button['menu_name']]
     if( menu != undefined ){
       menu[menu.indexOf(button) ].active = !menu[ menu.indexOf(button) ].active
@@ -50,6 +53,7 @@ const mutations = {
   },
 
   [SET_OBJECT] (state, object, field, value) {
+    
     var menu = state[object.menu_name]
     console.log(menu[menu.indexOf(object)][field])
     if( menu != undefined ){

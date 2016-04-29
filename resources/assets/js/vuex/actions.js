@@ -29,6 +29,7 @@ export const toggleSetting = ({ dispatch }, container) => {
 
 // When a full menu is fetched use this action to set the menu to state
 export const setMenu = ({ dispatch, state}, menuName, menu=null) => {
+  
   if(menu != null){
     dispatch(types.SET_MENU, [menu, menuName])
   }else{
