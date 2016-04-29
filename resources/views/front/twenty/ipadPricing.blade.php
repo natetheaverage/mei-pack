@@ -27,7 +27,7 @@
           <li class="plan-purchase">
             <a 
               class="mtrl-btn mtrl-raised bg-blue" 
-              href="http://www.apple.com"
+              href="https://itunes.apple.com/us/app/20-20-investing/id1106422899"
             >DOWNLOAD NOW</a></li> 
         </ul>
       </div>
@@ -55,7 +55,7 @@
           <li class="plan-purchase">
             <a 
               class="mtrl-btn mtrl-raised bg-blue" 
-              href="http://www.apple.com"
+              href="https://itunes.apple.com/us/app/20-20-investing/id1106422899"
             >DOWNLOAD NOW</a></li> 
         </ul>
       </div>

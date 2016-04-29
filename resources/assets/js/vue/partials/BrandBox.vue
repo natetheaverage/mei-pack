@@ -76,7 +76,9 @@ export default {
 .brand-logo
   max-height 50px
   min-height 40px
-  padding 0 5px 5px 5px
+  margin 0 5px 5px 5px
+  border-radius 10px
+  border 1px silver solid
 .brand-text-box
   display flex
   line-height 20px

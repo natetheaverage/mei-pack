@@ -11,7 +11,7 @@
   	<div class="fly-away-image">
   		<!-- @click="settings.animateHeader = !settings.animateHeader"  -->
   		
-  			<img class=" mtrl-raised" src="images/frontImages/headerImage.jpg" />
+  			<img class=" mtrl-raised" src="images/twenty/header.gif" />
   		
     </div></center>
   </div>
@@ -80,9 +80,9 @@ export default {
 	.hero
 		padding 30px 0
 	.fly-away-image
-		height 120px
+		height 220px
 		> img
-			max-height 120px
+			max-height 220px
 	.fly-away
 		top -300px
 //ipad and bigger
@@ -91,24 +91,24 @@ export default {
 		padding 100px 0
 	.fly-away-image
 		background-image: -webkit-linear-gradient(90deg, #2c8cb3 0%, #2caab3 100%);
-		height 250px
+		height 350px
 		> img
 			margin 0 auto
-			max-height 250px
+			max-height 350px
 @media (min-width 850px)
 	.fly-away-image
 		background-image: -webkit-linear-gradient(90deg, #2c8cb3 0%, #2caab3 100%);
-		height 325px
+		height 425px
 		> img
-			max-height 350px
+			max-height 450px
 //ipad and bigger
 @media (min-width 1400px)
 	.fly-away-image
-		height 450px
+		height 650px
 		width 100%
 		> img
 			max-width 1400px
-			max-height 450px
+			max-height 650px
 			
 	.fly-away
 		top -600px
