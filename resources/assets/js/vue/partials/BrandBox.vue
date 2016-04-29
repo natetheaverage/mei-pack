@@ -79,6 +79,7 @@ export default {
   margin 0 5px 5px 5px
   border-radius 10px
   border 1px silver solid
+  box-shadow 1px 1px 3px #ccc
 .brand-text-box
   display flex
   line-height 20px
