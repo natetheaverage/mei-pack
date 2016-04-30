@@ -21950,7 +21950,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"SuperAdmin\">\n  <iframe class=\"hack-frame\" src=\"http://localhost:3000/modelAdmin\"></iframe>\n</div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"SuperAdmin\">\n  <iframe class=\"hack-frame\" src=\"/modelAdmin\"></iframe>\n</div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -22010,7 +22010,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"tickets\">\n    <!--Page content-->\n    <!--===================================================-->\n    <!--VUE ROUTER checks for nested componants -->\n    \n  <iframe class=\"hack-frame\" src=\"http://localhost:3000/tickets\"></iframe>\n\t\t<!--===================================================-->\n\t\t<!--End page content-->\n  </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"tickets\">\n    <!--Page content-->\n    <!--===================================================-->\n    <!--VUE ROUTER checks for nested componants -->\n    \n  <iframe class=\"hack-frame\" src=\"http://natetheaverage.com/tickets\"></iframe>\n\t\t<!--===================================================-->\n\t\t<!--End page content-->\n  </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
