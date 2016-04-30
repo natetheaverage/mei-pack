@@ -36,6 +36,7 @@ elixir(function(mix) {
     //.stylus('material-1-app.styl')
     .stylus('twenty-app.styl', 'public/css/app-core.css')
     .stylus('mei-core.styl', 'public/css/mei-app-core.css')
+    .stylus('dash-core.styl', 'public/css/dash-core.css')
     .browserify('mei-core.js')
 
     // Always required
@@ -46,12 +47,22 @@ elixir(function(mix) {
         './resources/assets/vendor/css/animate.min.css',
     ], './public/css/all-vendor.css')
 
+    //Twenty and FrontRange vendor css 
     .styles([
         './resources/assets/vendor/css/owl.carousel.css',
         './resources/assets/vendor/css/owl.transitions.css',
         './resources/assets/vendor/css/prettyPhoto.css',
         './resources/assets/vendor/css/responsive.css',
     ], './public/css/front-vendor.css')
+
+    // Twenty app Css Vendor
+    .styles([
+        './resources/assets/vendor/AnimatedLetters/css/demo.css',
+        './resources/assets/twenty-plugins/demo-phone.css',
+        './resources/assets/twenty-plugins/ipad3dmenu.css',
+    ], './public/css/twenty/vendor.css')
+
+
 
 
     .scripts([
@@ -69,11 +80,6 @@ elixir(function(mix) {
         './resources/assets/vendor/waypoints.min.js',
     ], './public/js/front-vendor.js')
 
-    .styles([
-        './resources/assets/vendor/AnimatedLetters/css/demo.css',
-        './resources/assets/twenty-plugins/demo-phone.css',
-        './resources/assets/twenty-plugins/ipad3dmenu.css',
-    ], './public/css/twenty/vendor.css')
 
     .task('test')
 

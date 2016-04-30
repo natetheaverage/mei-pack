@@ -1,4 +1,4 @@
-@extends('nest')
+@extends('admin')
 @section('title') 
 	@parent @yield('page')
 @stop

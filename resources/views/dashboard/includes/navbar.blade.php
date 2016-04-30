@@ -9,8 +9,8 @@
 			<a href="/" class="navbar-brand">
 				<img src="{!! asset('images/logos/logo.png') !!}" alt="Logo" class="brand-icon">
 				<div class="brand-title">
-					<span class="brand-text">|{!! config('app.name') !!}</span>
-				</div>
+					<span class="brand-text">|{!! $app['title'] !!}</span>
+				</div><!-- config('app.name') -->
 			</a>
 		</div>
 		<!--================================-->
@@ -515,6 +515,9 @@
 			</ul>
 
 			<ul class="nav navbar-top-links pull-right">
+				<li>
+					<h4>{!! $app['date'] !!}</h4>
+				</li>
 				
 				@include('dashboard.includes.languageSelector')
 				<!--User dropdown-->
@@ -531,10 +534,13 @@
 									<img 
 										alt="Profile Picture" 
 										class="img-circle img-user media-object" 
-										:src="profile.profile_picture" 
+										src="{!! $meiSettings["currentUser"]->profile->profile_picture !!}" 
 									/>
 								</span>
-						<div class="username hidden-xs" v-text="user.name"></div>
+						<div class="username hidden-xs" >
+							{!! $meiSettings["currentUser"]->profile->first_name !!}
+							{!! $meiSettings["currentUser"]->profile->last_name !!}
+						</div>
 					</a>
 
 

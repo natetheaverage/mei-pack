@@ -11,6 +11,9 @@
     <!--nifty Stylesheet -->
     <link href="{!! asset('/css/nifty.css') !!}" rel="stylesheet">
 
+    <!--dash-core Stylesheet  [ contains overwrites for vendor apps ]-->
+    <link href="{!! asset('/css/dash-core.css') !!}" rel="stylesheet">
+
     <!--app Stylesheet -->
     {{--}}
     <link href="{!! asset('/css/app.css') !!}" rel="stylesheet">

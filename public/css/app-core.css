@@ -6745,8 +6745,6 @@ button.close {
     display: none !important;
   }
 }
-@import "https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900";
-@import "https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css";
 .mar-top {
   margin-top: 10px;
 }
@@ -7558,16 +7556,6 @@ ul.nostyle i {
     transform: scale(1);
   }
 }
-h2 {
-  margin-top: 180px;
-  font-size: 38px;
-  line-height: 1;
-  text-transform: uppercase;
-  color: #7049ba;
-}
-h2 > span {
-  color: #7049ba;
-}
 #Main-Slider {
   overflow: hidden;
 }
@@ -8066,6 +8054,15 @@ h2 > span {
 }
 .hero {
   padding: 100px 0;
+}
+.hero >h2,
+.hero margin-top 180px,
+.hero font-size 38px,
+.hero line-height 1,
+.hero text-transform uppercase,
+.hero color $brand-purple,
+.hero >span {
+  color: #7049ba;
 }
 .blue-hero {
   background-image: -webkit-linear-gradient(90deg, #2caab3 0%, #2c8cb3 100%);

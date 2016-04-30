@@ -34,8 +34,8 @@ class UserDetailsComposer {
     {
 
 		// TODO set menus to populate based on role rather than user
-        $currentUser = Session::get('currentUser');
-        //dd($currentUser);
+        $currentUser = Auth::user();
+        dd($currentUser);
 		if($currentUser){
 		//$dashboardMenu = $currentUser->interfaceObject->where('menu_name', 'DashboardMenu')->sortBy('menu_order');
 		//$mainNav = $currentUser->interfaceObject->where('menu_name', 'MainNavigation')->sortBy('menu_order');
