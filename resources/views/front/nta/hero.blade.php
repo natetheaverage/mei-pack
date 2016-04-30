@@ -2,7 +2,7 @@
 HERO AREA
 {{===========================--}}
 <div id="hero">           
-    <div class="container herocontent">         
+    <div class="herocontent">         
         {{-- <h2 class="title wow fadeIndown" data-wow-duration="2s">NateTheAverage</h2> --}}
         <img src="/images/nta/logos/NTA-sm-200x150.png" />
     </div>
