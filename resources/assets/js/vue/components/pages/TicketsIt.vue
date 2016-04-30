@@ -4,7 +4,7 @@
     <!--===================================================-->
     <!--VUE ROUTER checks for nested componants -->
     
-  <iframe class="hack-frame" src="http://localhost:3000/tickets"></iframe>
+  <iframe class="hack-frame" src="http://natetheaverage.com/tickets"></iframe>
 		<!--===================================================-->
 		<!--End page content-->
   </div>

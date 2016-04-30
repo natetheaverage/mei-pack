@@ -1,6 +1,6 @@
 <template>
   <div class="SuperAdmin">
-    <iframe class="hack-frame" src="http://localhost:3000/modelAdmin"></iframe>
+    <iframe class="hack-frame" src="/modelAdmin"></iframe>
   </div>
 </template>
 
