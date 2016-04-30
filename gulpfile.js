@@ -37,6 +37,7 @@ elixir(function(mix) {
     .stylus('twenty-app.styl', 'public/css/app-core.css')
     .stylus('mei-core.styl', 'public/css/mei-app-core.css')
     .stylus('dash-core.styl', 'public/css/dash-core.css')
+    .stylus('tickets.styl', 'public/css/tickets.css')
     .browserify('mei-core.js')
 
     // Always required

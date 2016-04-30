@@ -9,7 +9,7 @@
     <title>{!! config('app.name') !!} | @yield('page')</title>
 
     @include('dashboard.includes.header')
-
+    @yield('stylesheets')
 </head> 
 <body>
     
