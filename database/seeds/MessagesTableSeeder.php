@@ -18,7 +18,7 @@ class MessagesTableSeeder extends Seeder
         
         \DB::table('messages')->insert(array (
             0 => 
-            array ( 
+            array (  
                 'id' => 1,
                 'subject' => 'Ut nostrum sit corrupti quasi.',
                 'body_message' => 'Quia aut nihil aut est nostrum. Porro quo saepe assumenda enim eius debitis. Sint quis aliquid esse animi nemo fugit itaque.',

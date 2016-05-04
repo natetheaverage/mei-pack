@@ -26,7 +26,7 @@ class CompaniesTableSeeder extends Seeder
                 'phone2' => 000000000,
                 'fax' => 0000000000,
                 'email1' => 'contactus@20-20investing.com',
-                'email2' => 'dougmt_98@yahoo.com'
+                'email2' => 'dougmt_98@yahoo.com',
                 'address_street' => '2759 Somewhere Grove Apt. 242',
                 'address_city' => 'Metropolis',
                 'address_state' => 'Co.',
@@ -47,7 +47,7 @@ class CompaniesTableSeeder extends Seeder
                 'phone2' => 000000000,
                 'fax' => 0000000000,
                 'email1' => 'nate@natetheaverage.com',
-                'email2' => 'natetheaverage@gmail.com'
+                'email2' => 'natetheaverage@gmail.com',
                 'address_street' => '5324 Billings St.',
                 'address_city' => 'Denver',
                 'address_state' => 'Co.',
@@ -68,7 +68,7 @@ class CompaniesTableSeeder extends Seeder
                 'phone2' => 000000000,
                 'fax' => 2147483647,
                 'email1' => 'this@that.com',
-                'email2' => 'that@this.com'
+                'email2' => 'that@this.com',
                 'address_street' => '68668 Ayana Shores',
                 'address_city' => 'Metropolis',
                 'address_state' => 'Co.',
@@ -89,7 +89,7 @@ class CompaniesTableSeeder extends Seeder
                 'phone2' => 000000000,
                 'fax' => 2147483647,
                 'email1' => 'this@that.com',
-                'email2' => 'that@this.com'
+                'email2' => 'that@this.com',
                 'address_street' => '934 Rudy Underpass',
                 'address_city' => 'Metropolis',
                 'address_state' => 'Co.',
@@ -100,7 +100,6 @@ class CompaniesTableSeeder extends Seeder
                 'updated_at' => '2016-04-19 08:09:36',
             ),
         ));
-        
         
     }
 }
