@@ -18336,9 +18336,9 @@ exports.default = {
     }
   },
   ready: function ready() {
-    //this.loadMenus()
-    //this.loadCopy()
-    //this.loadFeatures()
+    this.loadMenus();
+    this.loadCopy();
+    this.loadFeatures();
 
     //var socket = io.connect('http://192.168.10.10:3000');
     // this.socket.on('message-channel:App\\Events\\Conversations\\MessageSent',
