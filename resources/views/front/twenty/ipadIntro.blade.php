@@ -29,7 +29,11 @@
     <div class="col-sm-3 flex-center text-center">
       <a class="mtrl-btn mtrl-raised bg-green" 
         href="https://itunes.apple.com/us/app/20-20-investing/id1106422899"
-      >download now<br><center><i class="fa fa-arrow-circle-o-down fa-3x"></i></center></a>
+      >download now<br />
+      <img src="/images/twenty/app-store.png" /><br />
+      <center>
+        <i class="fa fa-arrow-circle-o-down fa-3x"></i>
+      </center></a>
     </div>
   </div>
 </div>

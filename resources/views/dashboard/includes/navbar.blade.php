@@ -541,6 +541,7 @@
 							{!! $meiSettings["currentUser"]->profile->first_name !!}
 							{!! $meiSettings["currentUser"]->profile->last_name !!}
 						</div>
+						
 					</a>
 
 

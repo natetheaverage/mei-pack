@@ -19,14 +19,9 @@ export default {
       baseView: 'front',
       viewTitle: 'Dashboard',
       //copy: this.copy,
-
-      // mail form fields
-      contactResource: this.$resource('api/mailForm'),
       registrationVisible: true,
-      senderName: '',
-      senderEmail: '',
-      subject: '',
-      message: '',
+
+      socket: io.connect('http://192.168.10.10:3000'),
 
       // CurrentUser
       user: {
@@ -56,19 +51,7 @@ export default {
   },
 
   computed: {
-    contactReady(){
-      if( this.senderName != '' &&
-          this.senderEmail != '' && 
-          this.senderEmail.indexOf('@') >- 0 &&
-          this.subject != '' &&
-          this.message != ''
-        ){
-        this.setSetting('contactFormReady', true)
-        return true;
-      }
-      this.setSetting('contactFormReady', false)
-      return false;
-    },
+    
 
     userFields(){
       this.user = (window).mei.currentUser
@@ -76,12 +59,12 @@ export default {
       this.profile = this.user.profile
       this.customer_info = this.user.customer_info
       this.employee_info = this.user.employee_info
-
     }
   }, 
 
   methods:{
     //objectMethods: require('./vue/control/objectMethods.js'),
+
     addNavButton(){
       this.navPage.menuLayout.push({
         icon: "fa-user",
@@ -169,28 +152,7 @@ export default {
       }).submit();
     },
 
-    contactForm(e){
-            e.preventDefault();
-            var contact = {
-                name: this.senderName,
-                email: this.senderEmail,
-                subject: this.subject,
-                message: this.message,
-            }
-
-            var form_status = $('<div class="form_status"></div>');
-            $('#main-contact-form').prepend( form_status.html('<p><i class="fa fa-spinner fa-spin"></i> Email is sending...</p>').fadeIn() );
-           
-            this.contactResource.save( contact, 
-            function (data) 
-            { 
-                swal('Thank you!', 'We will be in touch.', 'success');
-            }
-            ).error(function (data, status, request) 
-            { 
-               form_status.html('<p class="text-danger">There was a problem sending your message please try an email or call</p>').delay(3000).fadeOut();
-            })  
-        },
+    
 
     /*
     * Called from buttons dispaches 
@@ -317,31 +279,28 @@ export default {
     }
   },
   ready(){
-    this.loadMenus()
-    this.loadCopy()
-    this.loadFeatures()
+    //this.loadMenus()
+    //this.loadCopy()
+    //this.loadFeatures()
 
-  var socket = io.connect('http://192.168.10.10:3000');
-  
-  socket.on('newMessage', function(){
-    //socket.emit('bang', this.user)
-  })
-  .on('message-channel:thisHappened', function(message){
-    console.log(message)
-    socket.emit('bang', this.user)
-  }.bind(this))
-  // .on('bang', function(message){
-  //   console.log(message)
+  //var socket = io.connect('http://192.168.10.10:3000');
+  // this.socket.on('message-channel:App\\Events\\Conversations\\MessageSent', 
+  //   function(data){
+  //     console.log('[mei-app.js] '+data.message.name+' sent quick from mailer message!')
   // })
+  // .on('message-channel:thisHappened', function(message){
+  //   console.log(message)
+  //   socket.emit('bang', this.user)
+  // }.bind(this))
+  
 
     this.setTickets() 
     //this.copyObject = this.routePrefix[this.instanceNumber]
     this.$watch('settings', function(){},{deep:true})
     
     this.$watch('$route.path', function(route){ 
-      // console.log('route in mei-app/ready()')
-      // console.log(route)
-      this.setTickets() },{ deep: true })
+      this.setTickets() },{ deep: true }
+    )
 
 
     // socket.on('message-channel:thisHappened', function(message){

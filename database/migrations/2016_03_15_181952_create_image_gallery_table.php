@@ -18,6 +18,8 @@ class CreateImageGalleryTable extends Migration
             $table->string('img');
             $table->string('description');
             $table->string('tags');
+            $table->string('order_column');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

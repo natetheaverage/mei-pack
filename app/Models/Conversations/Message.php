@@ -7,19 +7,29 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Message extends Model {
 	use SoftDeletes;
-
 	/**
 	 * The attributes that are mass assignable.
 	 *
 	 * @var array
 	 */
 	protected $fillable = [
-		'subject',
-		'body',
-		'body_height',
-		'class',
+		'name',
+	  'email',
+	  'from',
+	  'to',
+	  'cc',
+	  'bcc',
+	  'subject',
+	  'body_message',
+	  'message_type',
 		'conversation_id',
-		'user_id'
+		'body_height',
+		'user_id',
+		'class',
+		'read',
+		'sent_on',
+		'recieved_on',
+		'opened_on',
 	];
 
 	/**

@@ -28,7 +28,7 @@
             <a 
               class="mtrl-btn mtrl-raised bg-blue" 
               href="https://itunes.apple.com/us/app/20-20-investing/id1106422899"
-            >DOWNLOAD NOW</a></li> 
+            ><i class="fa fa-apple"></i> &nbsp; DOWNLOAD NOW</a></li> 
         </ul>
       </div>
     </div>
@@ -56,7 +56,7 @@
             <a 
               class="mtrl-btn mtrl-raised bg-blue" 
               href="https://itunes.apple.com/us/app/20-20-investing/id1106422899"
-            >DOWNLOAD NOW</a></li> 
+            ><i class="fa fa-apple"></i> &nbsp; DOWNLOAD NOW</a></li> 
         </ul>
       </div>
     </div>

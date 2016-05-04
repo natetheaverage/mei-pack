@@ -22,16 +22,16 @@ class OpcsTableSeeder extends Seeder
                 'id' => 1,
                 'facility_id' => 5,
                 'deleted_at' => NULL,
-                'created_at' => '2016-04-17 19:32:42',
-                'updated_at' => '2016-04-17 19:32:42',
+                'created_at' => '2016-04-19 08:09:36',
+                'updated_at' => '2016-04-19 08:09:36',
             ),
             1 => 
             array (
                 'id' => 2,
                 'facility_id' => 6,
                 'deleted_at' => NULL,
-                'created_at' => '2016-04-17 19:32:42',
-                'updated_at' => '2016-04-17 19:32:42',
+                'created_at' => '2016-04-19 08:09:36',
+                'updated_at' => '2016-04-19 08:09:36',
             ),
         ));
         

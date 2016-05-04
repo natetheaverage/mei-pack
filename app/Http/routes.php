@@ -21,6 +21,8 @@
 //   Redis::publish('message-channel', json_encode($data));
 // });
 
+Route::get('job', 'SystemController@index');
+
 Route::auth();
 
 //Route::get('/home', 'HomeController@index');
@@ -28,7 +30,7 @@ Route::auth();
 Route::get('/', function () {
   $user = \Auth::user();
   $theme = config('app.theme');
-  
+
   \JavaScript::put([
     'currentUser' => $user,
     'vueRoute' => '/',

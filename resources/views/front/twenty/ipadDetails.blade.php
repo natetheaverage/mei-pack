@@ -75,7 +75,7 @@
       <a 
         class="mtrl-btn mtrl-raised bg-green flex-center" 
         href="https://itunes.apple.com/us/app/20-20-investing/id1106422899"
-      >Download Now</a>
+      ><i class="fa fa-apple"></i> &nbsp; Download Now</a>
     </center>
 
   </div>

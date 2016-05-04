@@ -11,7 +11,10 @@
   	<div class="fly-away-image">
   		<!-- @click="settings.animateHeader = !settings.animateHeader"  -->
   		
-  			<img class=" mtrl-raised" src="images/twenty/header.gif" />
+  			<img 
+  				class=" mtrl-raised" 
+  				:src="flyAwayImg" 
+  			/>
   		
     </div></center>
   </div>
@@ -31,6 +34,7 @@ export default {
       	pageTitle: 'Intro Fly Away',
       	bang: false,
       	flyaway: '',
+      	flyAwayImg: 'images/twenty/header.jpg',
       }
     },
 

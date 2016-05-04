@@ -12,14 +12,11 @@
     <div class="app-content content pad-all" > 
       @section('content')
 
-        
-
       @show
     </div>
     @include('front.'.config('app.theme').'.nav' )
     @include('front.'.config('app.theme').'.aside'  )
   </div>
   @include('front.'.config('app.theme').'.footer')
-  
 
 @stop

@@ -14,10 +14,11 @@ class CreateFaqsTable extends Migration
     {
         Schema::create('faqs', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('order_column');
             $table->string('label');
             $table->string('content');
             $table->string('active');
+            $table->integer('order_column');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

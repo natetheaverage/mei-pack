@@ -9,12 +9,18 @@ class Company extends Model {
 	protected $fillable = [
 		'name',
 		'type',
+		'theme',
 		'ein',
-		'phone',
+		'phone1',
+		'phone2',
 		'fax',
+		'email1',
+		'email2',
 		'address_street',
+		'address_unit',
 		'address_city',
 		'address_state',
+		'address_zip',
 		'owner_id'
 	];
 

@@ -16,7 +16,6 @@ class CreatePiviotsTable extends Migration
             $table->integer('event_id')->unsigned();
             $table->integer('date_id')->unsigned();
             $table->integer('order_column');
-
             $table->foreign('event_id')
                 ->references('id')
                 ->on('events')

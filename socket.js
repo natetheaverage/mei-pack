@@ -1,5 +1,5 @@
-//var app = require('express')();
-var http = require('http').Server();
+var app = require('express')();
+var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var Redis = require('ioredis');
 var redis = new Redis();
@@ -23,7 +23,7 @@ redis.subscribe(events, function(err, count) {});
 // send(emit) that JSON to channel listeners
 redis.on("message", function(channel, message) {
     message = JSON.parse(message);
-    console.log("mew message in queue " + channel + ':' + message.event, message.data);
+    console.log("new message in queue " + channel + ':' + message.event, message.data);
     io.emit(channel + ':' + message.event, message.data);
     io.emit('newMessage');
 });

@@ -6,6 +6,7 @@
 
     <input type="hidden" name="_method" value="POST">
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="messageType" value="quickForm">
     <div class="form-group">
         <input 
             type="text" 
@@ -36,7 +37,7 @@
     <div class="form-group">
         <textarea 
             rows="8" 
-            name="message" 
+            name="body_message" 
             v-model="message"
             class="form-control" 
             placeholder="Message" 

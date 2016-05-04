@@ -18091,14 +18091,9 @@ exports.default = {
       baseView: 'front',
       viewTitle: 'Dashboard',
       //copy: this.copy,
-
-      // mail form fields
-      contactResource: this.$resource('api/mailForm'),
       registrationVisible: true,
-      senderName: '',
-      senderEmail: '',
-      subject: '',
-      message: '',
+
+      socket: io.connect('http://192.168.10.10:3000'),
 
       // CurrentUser
       user: {
@@ -18132,14 +18127,6 @@ exports.default = {
   },
 
   computed: {
-    contactReady: function contactReady() {
-      if (this.senderName != '' && this.senderEmail != '' && this.senderEmail.indexOf('@') > -0 && this.subject != '' && this.message != '') {
-        this.setSetting('contactFormReady', true);
-        return true;
-      }
-      this.setSetting('contactFormReady', false);
-      return false;
-    },
     userFields: function userFields() {
       this.user = window.mei.currentUser;
       //console.log(this.user)
@@ -18229,24 +18216,6 @@ exports.default = {
           console.log("Something went wrong with (mainnavbutton.js->addButton->objectArray.save) Error Stat = " + status + " here is the request = " + request);
         });
       }).submit();
-    },
-    contactForm: function contactForm(e) {
-      e.preventDefault();
-      var contact = {
-        name: this.senderName,
-        email: this.senderEmail,
-        subject: this.subject,
-        message: this.message
-      };
-
-      var form_status = $('<div class="form_status"></div>');
-      $('#main-contact-form').prepend(form_status.html('<p><i class="fa fa-spinner fa-spin"></i> Email is sending...</p>').fadeIn());
-
-      this.contactResource.save(contact, function (data) {
-        swal('Thank you!', 'We will be in touch.', 'success');
-      }).error(function (data, status, request) {
-        form_status.html('<p class="text-danger">There was a problem sending your message please try an email or call</p>').delay(3000).fadeOut();
-      });
     },
 
 
@@ -18367,29 +18336,25 @@ exports.default = {
     }
   },
   ready: function ready() {
-    this.loadMenus();
-    this.loadCopy();
-    this.loadFeatures();
+    //this.loadMenus()
+    //this.loadCopy()
+    //this.loadFeatures()
 
-    var socket = io.connect('http://192.168.10.10:3000');
-
-    socket.on('newMessage', function () {
-      //socket.emit('bang', this.user)
-    }).on('message-channel:thisHappened', function (message) {
-      console.log(message);
-      socket.emit('bang', this.user);
-    }.bind(this));
-    // .on('bang', function(message){
-    //   console.log(message)
+    //var socket = io.connect('http://192.168.10.10:3000');
+    // this.socket.on('message-channel:App\\Events\\Conversations\\MessageSent',
+    //   function(data){
+    //     console.log('[mei-app.js] '+data.message.name+' sent quick from mailer message!')
     // })
+    // .on('message-channel:thisHappened', function(message){
+    //   console.log(message)
+    //   socket.emit('bang', this.user)
+    // }.bind(this))
 
     this.setTickets();
     //this.copyObject = this.routePrefix[this.instanceNumber]
     this.$watch('settings', function () {}, { deep: true });
 
     this.$watch('$route.path', function (route) {
-      // console.log('route in mei-app/ready()')
-      // console.log(route)
       this.setTickets();
     }, { deep: true });
 
@@ -18399,7 +18364,7 @@ exports.default = {
   }
 };
 
-},{"./vue-router/router":73,"./vuex/actions.js":123,"./vuex/getters.js":124,"./vuex/store":130}],59:[function(require,module,exports){
+},{"./vue-router/router":73,"./vuex/actions.js":125,"./vuex/getters.js":126,"./vuex/store":132}],59:[function(require,module,exports){
 'use strict';
 
 var _vueResource = require('vue-resource');
@@ -18446,6 +18411,10 @@ var _SubMenuButton = require('./vue/components/navigation/materialTheme/SubMenuB
 
 var _SubMenuButton2 = _interopRequireDefault(_SubMenuButton);
 
+var _PageActivity = require('./vue/components/system/alerts/PageActivity.vue');
+
+var _PageActivity2 = _interopRequireDefault(_PageActivity);
+
 var _BrandBox = require('./vue/partials/BrandBox.vue');
 
 var _BrandBox2 = _interopRequireDefault(_BrandBox);
@@ -18461,6 +18430,10 @@ var _AnimatedWords2 = _interopRequireDefault(_AnimatedWords);
 var _IntroFlyAway = require('./vue/components/animate/IntroFlyAway.vue');
 
 var _IntroFlyAway2 = _interopRequireDefault(_IntroFlyAway);
+
+var _QuickForm = require('./vue/components/converse/QuickForm.vue');
+
+var _QuickForm2 = _interopRequireDefault(_QuickForm);
 
 var _MeiAdminLogin = require('./vue/components/auth/MeiAdminLogin.vue');
 
@@ -18552,6 +18525,8 @@ _vue2.default.component('menuButton', _MenuButton2.default);
 
 _vue2.default.component('subMenuButton', _SubMenuButton2.default);
 
+_vue2.default.component('pageActivity', _PageActivity2.default);
+
 _vue2.default.component('brandBox', _BrandBox2.default);
 
 _vue2.default.component('blueHero', _BlueHero2.default);
@@ -18559,6 +18534,8 @@ _vue2.default.component('blueHero', _BlueHero2.default);
 _vue2.default.component('animatedWords', _AnimatedWords2.default);
 
 _vue2.default.component('introFlyAway', _IntroFlyAway2.default);
+
+_vue2.default.component('quickForm', _QuickForm2.default);
 
 _vue2.default.component('meiAdminLogin', _MeiAdminLogin2.default);
 
@@ -18723,7 +18700,7 @@ switchElems.forEach(function (html) {
 // TODO: This needs to implement anaming system of sorts
 // switcher.onchange = function() {};
 
-},{"./mei-app.js":58,"./vue-router/router-config":72,"./vue/components/animate/AnimatedWords.vue":74,"./vue/components/animate/IntroFlyAway.vue":75,"./vue/components/animate/iPad3DMenu.vue":76,"./vue/components/auth/MeiAdminLogin.vue":77,"./vue/components/controllers/EditableCopy.vue":79,"./vue/components/controllers/ObjectEditor.vue":80,"./vue/components/controllers/SearchBox.vue":81,"./vue/components/converse/ContactList.vue":86,"./vue/components/navigation/NavPageButton.vue":97,"./vue/components/navigation/materialTheme/MainMenu.vue":99,"./vue/components/navigation/materialTheme/MenuButton.vue":100,"./vue/components/navigation/materialTheme/SubMenuButton.vue":101,"./vue/components/navigation/nifty/MainNav.vue":102,"./vue/components/navigation/nifty/MainNavButton.vue":103,"./vue/components/navigation/nifty/MenuWidget.vue":104,"./vue/components/navigation/nifty/ShortcutButtons.vue":105,"./vue/components/pages/TicketsIt.vue":107,"./vue/components/settings/AsideSettings.vue":115,"./vue/filters/Currency.js":117,"./vue/filters/VisibilityMode.js":118,"./vue/mixins/HooksMixin.js":119,"./vue/mixins/SettingsWatcher.js":120,"./vue/partials/BlueHero.vue":121,"./vue/partials/BrandBox.vue":122,"./vuex/store":130,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],60:[function(require,module,exports){
+},{"./mei-app.js":58,"./vue-router/router-config":72,"./vue/components/animate/AnimatedWords.vue":74,"./vue/components/animate/IntroFlyAway.vue":75,"./vue/components/animate/iPad3DMenu.vue":76,"./vue/components/auth/MeiAdminLogin.vue":77,"./vue/components/controllers/EditableCopy.vue":79,"./vue/components/controllers/ObjectEditor.vue":80,"./vue/components/controllers/SearchBox.vue":81,"./vue/components/converse/ContactList.vue":86,"./vue/components/converse/QuickForm.vue":87,"./vue/components/navigation/NavPageButton.vue":98,"./vue/components/navigation/materialTheme/MainMenu.vue":100,"./vue/components/navigation/materialTheme/MenuButton.vue":101,"./vue/components/navigation/materialTheme/SubMenuButton.vue":102,"./vue/components/navigation/nifty/MainNav.vue":103,"./vue/components/navigation/nifty/MainNavButton.vue":104,"./vue/components/navigation/nifty/MenuWidget.vue":105,"./vue/components/navigation/nifty/ShortcutButtons.vue":106,"./vue/components/pages/TicketsIt.vue":108,"./vue/components/settings/AsideSettings.vue":116,"./vue/components/system/alerts/PageActivity.vue":118,"./vue/filters/Currency.js":119,"./vue/filters/VisibilityMode.js":120,"./vue/mixins/HooksMixin.js":121,"./vue/mixins/SettingsWatcher.js":122,"./vue/partials/BlueHero.vue":123,"./vue/partials/BrandBox.vue":124,"./vuex/store":132,"vue":49,"vue-resource":40,"vue-router":47,"vue-touch":48,"vuex-router-sync":51}],60:[function(require,module,exports){
 'use strict';
 
 // Setting for the main menu
@@ -19467,10 +19444,6 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
 		value: true
 });
-//import Persistance from '../api/vuex/persistance.js'
-
-//var data = Persistance.get();
-
 exports.default = {
 		settings: require('./settingsData'),
 
@@ -19483,7 +19456,7 @@ exports.default = {
 		menus: {
 				primary: require('./mainMenuData'),
 				adminPrimary: require('./adminMenuData'),
-				DashboardMenu: {}
+				dashboardMenu: {}
 		},
 
 		copyText: require('./copyText'),
@@ -19496,15 +19469,6 @@ exports.default = {
 
 		features: require('./features')
 };
-
-//  function(){
-// 	console.log(truth)
-// 	// if(data.length){
-// 	// 	return data;
-// 	// } else {
-// 		return truth;
-// 	// }
-// }
 
 },{"./adminMenuData":60,"./companyData":61,"./conversationData":62,"./copyText":63,"./eventsData":64,"./features":65,"./imagesData":66,"./infoSectionData":67,"./mainMenuData":68,"./newsData":69,"./settingsData":70}],72:[function(require,module,exports){
 'use strict';
@@ -19756,7 +19720,7 @@ function configRouter(router) {
    // })
 }
 
-},{"../vue/components/calendar/Calendar.vue":78,"../vue/components/controllers/UiUxButtons.vue":82,"../vue/components/controllers/UiUxCharts.vue":83,"../vue/components/controllers/UiUxPage.vue":84,"../vue/components/converse/Communications.vue":85,"../vue/components/converse/SingleConversation.vue":87,"../vue/components/customer/Customers.vue":88,"../vue/components/customer/New.vue":89,"../vue/components/employee/Employees.vue":90,"../vue/components/employee/New.vue":91,"../vue/components/inventory/Inventory.vue":92,"../vue/components/inventory/Inventorycalculator.vue":93,"../vue/components/navigation/NavPage.vue":96,"../vue/components/pages/FrozenNodeAdmin.vue":106,"../vue/components/pages/TicketsIt.vue":107,"../vue/components/pos/Checkout.vue":108,"../vue/components/profile/Profile.vue":111,"../vue/components/projector/Projector.vue":112,"../vue/components/settings/Settings.vue":116,"babel-runtime/helpers/defineProperty":3}],73:[function(require,module,exports){
+},{"../vue/components/calendar/Calendar.vue":78,"../vue/components/controllers/UiUxButtons.vue":82,"../vue/components/controllers/UiUxCharts.vue":83,"../vue/components/controllers/UiUxPage.vue":84,"../vue/components/converse/Communications.vue":85,"../vue/components/converse/SingleConversation.vue":88,"../vue/components/customer/Customers.vue":89,"../vue/components/customer/New.vue":90,"../vue/components/employee/Employees.vue":91,"../vue/components/employee/New.vue":92,"../vue/components/inventory/Inventory.vue":93,"../vue/components/inventory/Inventorycalculator.vue":94,"../vue/components/navigation/NavPage.vue":97,"../vue/components/pages/FrozenNodeAdmin.vue":107,"../vue/components/pages/TicketsIt.vue":108,"../vue/components/pos/Checkout.vue":109,"../vue/components/profile/Profile.vue":112,"../vue/components/projector/Projector.vue":113,"../vue/components/settings/Settings.vue":117,"babel-runtime/helpers/defineProperty":3}],73:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19942,7 +19906,7 @@ function configRouter(router) {
     });
 }
 
-},{"../vue/components/calendar/Calendar.vue":78,"../vue/components/controllers/UiUxButtons.vue":82,"../vue/components/controllers/UiUxCharts.vue":83,"../vue/components/controllers/UiUxPage.vue":84,"../vue/components/converse/Communications.vue":85,"../vue/components/converse/SingleConversation.vue":87,"../vue/components/customer/Customers.vue":88,"../vue/components/customer/New.vue":89,"../vue/components/employee/New.vue":91,"../vue/components/inventory/Inventory.vue":92,"../vue/components/inventory/Inventorycalculator.vue":93,"../vue/components/navigation/Navpage.vue":98,"../vue/components/pages/TicketsIt.vue":107,"../vue/components/pos/Checkout.vue":108,"../vue/components/settings/Settings.vue":116,"babel-runtime/helpers/defineProperty":3}],74:[function(require,module,exports){
+},{"../vue/components/calendar/Calendar.vue":78,"../vue/components/controllers/UiUxButtons.vue":82,"../vue/components/controllers/UiUxCharts.vue":83,"../vue/components/controllers/UiUxPage.vue":84,"../vue/components/converse/Communications.vue":85,"../vue/components/converse/SingleConversation.vue":88,"../vue/components/customer/Customers.vue":89,"../vue/components/customer/New.vue":90,"../vue/components/employee/New.vue":92,"../vue/components/inventory/Inventory.vue":93,"../vue/components/inventory/Inventorycalculator.vue":94,"../vue/components/navigation/Navpage.vue":99,"../vue/components/pages/TicketsIt.vue":108,"../vue/components/pos/Checkout.vue":109,"../vue/components/settings/Settings.vue":117,"babel-runtime/helpers/defineProperty":3}],74:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20023,7 +19987,8 @@ exports.default = {
     return {
       pageTitle: 'Intro Fly Away',
       bang: false,
-      flyaway: ''
+      flyaway: '',
+      flyAwayImg: 'images/twenty/header.jpg'
     };
   },
 
@@ -20047,7 +20012,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"intro-fly-away\" :class=\"flyaway\">\n  \t<blue-hero :blue=\"true\" id=\"1\"></blue-hero>\n\t\t<center>\n  \t<div class=\"fly-away-image\">\n  \t\t<!-- @click=\"settings.animateHeader = !settings.animateHeader\"  -->\n  \t\t\n  \t\t\t<img class=\" mtrl-raised\" src=\"images/twenty/header.gif\">\n  \t\t\n    </div></center>\n  </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"intro-fly-away\" :class=\"flyaway\">\n  \t<blue-hero :blue=\"true\" id=\"1\"></blue-hero>\n\t\t<center>\n  \t<div class=\"fly-away-image\">\n  \t\t<!-- @click=\"settings.animateHeader = !settings.animateHeader\"  -->\n  \t\t\n  \t\t\t<img class=\" mtrl-raised\" :src=\"flyAwayImg\">\n  \t\t\n    </div></center>\n  </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -20063,7 +20028,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":123,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],76:[function(require,module,exports){
+},{"../../../vuex/actions.js":125,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],76:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".media {\n  position: absolute;\n}\n@media (min-width: 500px) {\n  .media {\n    position: inherit;\n    padding-top: 100px;\n  }\n}\n")
 'use strict';
 
@@ -20304,7 +20269,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions":123,"vue":49,"vue-hot-reload-api":38}],80:[function(require,module,exports){
+},{"../../../vuex/actions":125,"vue":49,"vue-hot-reload-api":38}],80:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -20367,7 +20332,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../api/data/iconListForSelectBox":54,"../../../vuex/actions":123,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],81:[function(require,module,exports){
+},{"../../../api/data/iconListForSelectBox":54,"../../../vuex/actions":125,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],81:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".open-search {\n  position: absolute;\n}\n.searchbox {\n  top: -35px;\n  right: 0;\n  padding: 0 0 5px 25%;\n  min-width: 100vw;\n  position: relative;\n  margin-right: 0px;\n  -webkit-transition: 0.3s ease;\n  transition: 0.3s ease;\n}\n.searchbox >.input-group >input {\n  font-size: 14px;\n  font-weight: 100;\n  -webkit-transition: 0.3s ease;\n  transition: 0.3s ease;\n}\n.searchbox >.input-group >input:focus {\n  border: none;\n}\n.searchbox.in {\n  top: 0px;\n  padding-top: 50px;\n}\n.searchbox.in >.input-group >input {\n  font-size: 42px;\n}\n")
 'use strict';
 
@@ -20609,6 +20574,88 @@ if (module.hot) {(function () {  module.hot.accept()
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _actions = require('../../../vuex/actions');
+
+exports.default = {
+  name: 'quick-message-form',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'QuickForm',
+      formValid: false,
+      contactResource: this.$resource('api/mailForm'),
+
+      // mail form fields
+      senderName: '',
+      senderEmail: '',
+      subject: '',
+      message: ''
+    };
+  },
+
+  vuex: {
+    actions: {
+      setSetting: _actions.setSetting
+    }
+  },
+
+  computed: {
+    formValid: function formValid() {
+      if (this.senderName != '' && this.senderEmail != '' && this.senderEmail.indexOf('@') > -0 && this.subject != '' && this.message != '') {
+        return true;
+      }
+      return false;
+    }
+  },
+
+  methods: {
+    contactForm: function contactForm(e) {
+      e.preventDefault();
+      var contact = {
+        name: this.senderName,
+        email: this.senderEmail,
+        from: this.senderEmail,
+        subject: this.subject,
+        body_message: this.message,
+        message_type: 'quick-contact-form',
+        sent_on: null
+      };
+
+      var form_status = $('<div class="form_status"></div>');
+      $('#main-contact-form').prepend(form_status.html('<p><i class="fa fa-spinner fa-spin"></i> Email is sending...</p>').fadeIn());
+
+      this.contactResource.save(contact, function (data) {
+        form_status.html('<p class="text-success">Message Sent!</p>').delay(3000).fadeOut();
+      }).error(function () {
+        form_status.html('<p class="text-danger">There was a problem sending your message please try an email or call</p>').delay(3000).fadeOut();
+      });
+    }
+  },
+
+  ready: function ready() {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"quick-message-form\">\n  <form id=\"main-contact-form\" name=\"contact-form\" method=\"POST\" action=\"/contact\">\n\n    <input type=\"hidden\" name=\"messageType\" value=\"quickForm\">\n\n    <div class=\"form-group\">\n      <input type=\"text\" name=\"name\" placeholder=\"Name\" v-model=\"senderName\" class=\"form-control\" required=\"\">\n    </div>\n    <div class=\"form-group\">\n      <input type=\"email\" name=\"email\" placeholder=\"Email\" class=\"form-control\" v-model=\"senderEmail\" required=\"\">\n    </div>\n    <div class=\"form-group\">\n      <input type=\"text\" name=\"subject\" v-model=\"subject\" class=\"form-control\" placeholder=\"Subject\" required=\"\">\n    </div>\n    <div class=\"form-group\">\n      <textarea rows=\"8\" name=\"body_message\" v-model=\"message\" class=\"form-control\" placeholder=\"Message\" required=\"\"></textarea>\n    </div>\n    <button type=\"submit\" v-on:click=\"contactForm\" class=\"btn btn-primary\" :disabled=\"!formValid\">Send Message</button> \n      <!-- v-if=\"quickFormValid\" -->\n    <small v-if=\"!formValid\">All fields required to send message</small>\n  </form>\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/converse/QuickForm.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../../vuex/actions":125,"vue":49,"vue-hot-reload-api":38}],88:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = {
@@ -20635,7 +20682,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],88:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],89:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -20686,7 +20733,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],89:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],90:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20722,7 +20769,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],90:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],91:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -20771,7 +20818,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],91:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],92:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20807,7 +20854,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],92:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20833,7 +20880,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],93:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],94:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -21142,7 +21189,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../api/inventoryDropzone.js":55,"./inventory.vue":94,"./workbook.vue":95,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],94:[function(require,module,exports){
+},{"../../../api/inventoryDropzone.js":55,"./inventory.vue":95,"./workbook.vue":96,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21168,7 +21215,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],95:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],96:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -21272,7 +21319,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],96:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],97:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -21327,7 +21374,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":123,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],97:[function(require,module,exports){
+},{"../../../vuex/actions.js":125,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],98:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".edit-btn {\n  position: absolute;\n  z-index: 10;\n  padding: 6px 2px;\n}\n")
 'use strict';
 
@@ -21354,7 +21401,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],98:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],99:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -21409,7 +21456,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions.js":123,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],99:[function(require,module,exports){
+},{"../../../vuex/actions.js":125,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],100:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21460,7 +21507,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../../vuex/actions.js":123,"vue":49,"vue-hot-reload-api":38}],100:[function(require,module,exports){
+},{"../../../../vuex/actions.js":125,"vue":49,"vue-hot-reload-api":38}],101:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -21566,7 +21613,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],101:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],102:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".btn {\n  border-radius: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -21605,7 +21652,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],102:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],103:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n/*.v-link-active \n  color: purple\n  padding-left: 20px\n  font-weight: bold\n  box-shadow:inset 2px 2px 2px  4px #999*/\n")
 'use strict';
 
@@ -21717,7 +21764,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../../vuex/actions":123,"../../../../vuex/getters":124,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],103:[function(require,module,exports){
+},{"../../../../vuex/actions":125,"../../../../vuex/getters":126,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21836,7 +21883,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],104:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],105:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21871,7 +21918,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],105:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],106:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21906,7 +21953,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],106:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],107:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".hack-frame {\n  padding: 0;\n  width: 100%;\n  height: 1000px;\n  margin: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -21966,7 +22013,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions":123,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],107:[function(require,module,exports){
+},{"../../../vuex/actions":125,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],108:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".hack-frame {\n  padding: 0;\n  width: 100%;\n  height: 1000px;\n  margin: 0;\n  border: 0;\n}\n")
 'use strict';
 
@@ -22010,7 +22057,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"tickets\">\n    <!--Page content-->\n    <!--===================================================-->\n    <!--VUE ROUTER checks for nested componants -->\n    \n  <iframe class=\"hack-frame\" src=\"http://natetheaverage.com/tickets\"></iframe>\n\t\t<!--===================================================-->\n\t\t<!--End page content-->\n  </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"tickets\">\n    <!--Page content-->\n    <!--===================================================-->\n    <!--VUE ROUTER checks for nested componants -->\n    \n  <!-- <iframe class=\"hack-frame\" src=\"http://natetheaverage.com/tickets\"></iframe> -->\n  <iframe class=\"hack-frame\" src=\"/tickets\"></iframe>\n\t\t<!--===================================================-->\n\t\t<!--End page content-->\n  </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -22026,7 +22073,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions":123,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],108:[function(require,module,exports){
+},{"../../../vuex/actions":125,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],109:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".checkout {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n}\n")
 'use strict';
 
@@ -22086,7 +22133,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./NumPad.vue":109,"./SalesReceipt.vue":110,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],109:[function(require,module,exports){
+},{"./NumPad.vue":110,"./SalesReceipt.vue":111,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],110:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".numbers {\n  width: 370px;\n  border: 1px #000 solid;\n  background: #999;\n}\n.numbers .numbers-pad {\n  width: 100%;\n  height: 340px;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  border: 1px #33abb7 solid;\n}\n.numbers .numbers-pad > button {\n  margin: 2.2% 2.8% 2.8% 2.2%;\n  width: 15%;\n  height: 19%;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: center;\n  -webkit-justify-content: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  background: -webkit-linear-gradient(top, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  background: linear-gradient(to bottom, #e2e2e2 0%, #dbdbdb 48%, #d1d1d1 52%, #fefefe 100%);\n  box-shadow: 2px 2px 6px #000;\n  border-radius: 5px;\n}\n.numbers .numbers-pad > button:active {\n  color: #33abb7;\n  margin: 2.5% 2.5% 2.5% 2.5%;\n  box-shadow: 0px 0px 3px #000;\n}\n.numbers .numbers-pad > button > span {\n  font-size: 2em;\n  line-height: 1em;\n}\n.numbers .numbers-pad .tall {\n  height: 30%;\n}\n.numbers .numbers-entry-field {\n  width: 100%;\n  font-size: 3em;\n  font-weight: bold;\n  text-align: right;\n  padding: 4px;\n}\n")
 'use strict';
 
@@ -22177,7 +22224,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],110:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],111:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".receipt-window {\n  width: 370px;\n  height: 400px;\n/* TODO Attach nano scroller to this */\n  overflow: auto;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  border: 1px #000 solid;\n  background: #eee;\n}\n.receipt-window .receipt-item {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  padding: 5px;\n}\n.receipt-window .receipt-item .item-controls {\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details {\n  font-size: 1.5em;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n  width: 85%;\n}\n.receipt-window .receipt-item .item-details > input {\n  width: 100%;\n  border: none;\n  background-color: none;\n}\n.receipt-window .receipt-item .item-details .item-id {\n  width: 10%;\n}\n.receipt-window .receipt-item .item-details .item-name {\n  width: 50%;\n}\n.receipt-window .receipt-item .item-details .item-price {\n  text-align: right;\n  width: 15%;\n}\n.receipt-window .receipt-item .item-details .item-sku {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-rfid {\n  font-size: 1em;\n  width: 80%;\n}\n.receipt-window .receipt-item .item-details .item-field-sm {\n  width: 20%;\n}\n")
 'use strict';
 
@@ -22221,7 +22268,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],111:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],112:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22257,7 +22304,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],112:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],113:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n\n")
 'use strict';
 
@@ -22412,7 +22459,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./project.vue":113,"./task.vue":114,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],113:[function(require,module,exports){
+},{"./project.vue":114,"./task.vue":115,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],114:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".project-message-body {\n  background-color: transparent;\n  border: none;\n  resize: none;\n  overflow: hidden;\n  width: 80%;\n  height: 100%;\n  margin: 0;\n  display: block;\n}\n.project-message-body:focus {\n  outline: none;\n}\n.project-title {\n  font-size: 2em;\n}\n")
 "use strict";
 
@@ -22506,7 +22553,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],114:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],115:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n")
 'use strict';
 
@@ -22561,7 +22608,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],115:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],116:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22608,7 +22655,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../../vuex/actions":123,"vue":49,"vue-hot-reload-api":38}],116:[function(require,module,exports){
+},{"../../../vuex/actions":125,"vue":49,"vue-hot-reload-api":38}],117:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22644,7 +22691,52 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],117:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],118:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert(".page-activity >ul {\n  margin: 0;\n  padding: 3px;\n}\n.page-activity >ul >li {\n  list-style-type: none;\n}\n.page-activity >ul >li >h4 {\n  font-wieght: bold;\n}\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  name: 'page-activity',
+  changeTabTitle: true,
+  logHooksToConsole: true,
+  watchMode: true,
+  data: function data() {
+    return {
+      pageTitle: 'page-activity',
+      activityFeed: []
+    };
+  },
+
+
+  methods: {},
+
+  ready: function ready() {
+    this.$root.socket.on('message-channel:App\\Events\\Conversations\\MessageSent', function (data) {
+      this.activityFeed.push(data.message);
+    }.bind(this));
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n  <div class=\"page-activity\">\n  \t<ul>\n\t    <li v-for=\"item in activityFeed\">\n\t    \t<h4 v-html=\"item.message_type\"></h4>\n\t    \t<p v-html=\"'sent from ' + item.name\"></p>\n\t    \t<p v-html=\"'on: ' + item.sent_on\"></p>\n\t    \t<a class=\"mtrl-btn mtrl-raised bg-purple\">Open Message <i class=\"fa fa-icon fa-message\"></i></a>\n\t    </li>\n    </ul>\n  </div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/natetheaverage/www/mei-pack/resources/assets/js/vue/components/system/alerts/PageActivity.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache[".page-activity >ul {\n  margin: 0;\n  padding: 3px;\n}\n.page-activity >ul >li {\n  list-style-type: none;\n}\n.page-activity >ul >li >h4 {\n  font-wieght: bold;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],119:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22661,7 +22753,7 @@ module.exports = {
   }
 };
 
-},{}],118:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22689,7 +22781,7 @@ module.exports = {
     }
 };
 
-},{}],119:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22736,7 +22828,7 @@ exports.default = {
     }
 };
 
-},{"../../vuex/actions":123}],120:[function(require,module,exports){
+},{"../../vuex/actions":125}],122:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -22756,7 +22848,7 @@ module.exports = {
     }
 };
 
-},{}],121:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22785,7 +22877,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":49,"vue-hot-reload-api":38}],122:[function(require,module,exports){
+},{"vue":49,"vue-hot-reload-api":38}],124:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert(".brand-box {\n  position: relative;\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  margin: auto 2px auto 2px;\n  -webkit-box-flex: 1;\n  -webkit-flex: 1;\n      -ms-flex: 1;\n          flex: 1;\n}\n.brand-logo {\n  max-height: 50px;\n  min-height: 40px;\n  margin: 0 5px 5px 5px;\n  border-radius: 10px;\n  border: 1px #c0c0c0 solid;\n  box-shadow: 1px 1px 3px #ccc;\n}\n.brand-text-box {\n  display: -webkit-box;\n  display: -webkit-flex;\n  display: -ms-flexbox;\n  display: flex;\n  line-height: 20px;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -webkit-flex-direction: column;\n      -ms-flex-direction: column;\n          flex-direction: column;\n}\n.brand-title {\n  font-size: 18px;\n  margin: 5px 0 0 0;\n  font-weight: 600;\n}\n.brand-sub-title {\n  font-size: 14px;\n  margin: 5px 0 0 0;\n  font-weight: 400;\n}\n")
 'use strict';
 
@@ -22835,7 +22927,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../vuex/actions.js":123,"../../vuex/getters.js":124,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],123:[function(require,module,exports){
+},{"../../vuex/actions.js":125,"../../vuex/getters.js":126,"vue":49,"vue-hot-reload-api":38,"vueify-insert-css":50}],125:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22952,7 +23044,7 @@ var setPage = exports.setPage = function setPage(_ref12) {
   dispatch(types.SET_PAGE, state);
 };
 
-},{"../api/vuex/menus.js":56,"./mutation-types":129,"babel-runtime/helpers/typeof":4}],124:[function(require,module,exports){
+},{"../api/vuex/menus.js":56,"./mutation-types":131,"babel-runtime/helpers/typeof":4}],126:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23005,7 +23097,7 @@ function getHomePage(state) {
   return state.pages.home;
 }
 
-},{}],125:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23054,7 +23146,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":71,"../mutation-types":129,"babel-runtime/helpers/defineProperty":3}],126:[function(require,module,exports){
+},{"../../truth/truth.js":71,"../mutation-types":131,"babel-runtime/helpers/defineProperty":3}],128:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23087,7 +23179,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":71,"../mutation-types":129,"babel-runtime/helpers/defineProperty":3}],127:[function(require,module,exports){
+},{"../../truth/truth.js":71,"../mutation-types":131,"babel-runtime/helpers/defineProperty":3}],129:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23162,7 +23254,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../api/vuex/menus.js":56,"../../truth/truth.js":71,"../mutation-types":129,"babel-runtime/helpers/defineProperty":3}],128:[function(require,module,exports){
+},{"../../api/vuex/menus.js":56,"../../truth/truth.js":71,"../mutation-types":131,"babel-runtime/helpers/defineProperty":3}],130:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23201,7 +23293,7 @@ exports.default = {
   mutations: mutations
 };
 
-},{"../../truth/truth.js":71,"../mutation-types":129,"babel-runtime/helpers/defineProperty":3}],129:[function(require,module,exports){
+},{"../../truth/truth.js":71,"../mutation-types":131,"babel-runtime/helpers/defineProperty":3}],131:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23227,7 +23319,7 @@ var SET_COPY = exports.SET_COPY = 'SET_COPY';
 
 var SET_FEATURES = exports.SET_FEATURES = 'SET_FEATURES';
 
-},{}],130:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23352,6 +23444,6 @@ exports.default = new _vuex2.default.Store({
   mutations: mutations
 });
 
-},{"../api/vuex/persistance.js":57,"../truth/truth.js":71,"./modules/copyText.js":125,"./modules/features.js":126,"./modules/menus.js":127,"./modules/settings.js":128,"vue":49,"vuex":52,"vuex/logger":53}]},{},[59]);
+},{"../api/vuex/persistance.js":57,"../truth/truth.js":71,"./modules/copyText.js":127,"./modules/features.js":128,"./modules/menus.js":129,"./modules/settings.js":130,"vue":49,"vuex":52,"vuex/logger":53}]},{},[59]);
 
 //# sourceMappingURL=mei-core.js.map

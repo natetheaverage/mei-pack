@@ -17,9 +17,13 @@ class CreateCompaniesTable extends Migration {
 			$table->increments('id');
 			$table->string('name', 40);
 			$table->string('type', 40);
+			$table->string('theme');
 			$table->integer('ein');
-			$table->integer('phone');
+			$table->integer('phone1');
+			$table->integer('phone2');
 			$table->integer('fax');
+			$table->string('email1');
+			$table->string('email2');
 			$table->string('address_street');
 			$table->string('address_city', 55);
 			$table->string('address_state', 45);

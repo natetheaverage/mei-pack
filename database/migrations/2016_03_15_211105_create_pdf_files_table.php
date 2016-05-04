@@ -14,11 +14,12 @@ class CreatePdfFilesTable extends Migration
     {
         Schema::create('pdf_files', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('order_column');
             $table->string('tag_line');
             $table->string('label');
             $table->string('link');
             $table->integer('event_id');
+            $table->integer('order_column');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

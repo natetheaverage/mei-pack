@@ -31,6 +31,9 @@ import MenuButton from './vue/components/navigation/materialTheme/MenuButton.vue
 Vue.component('menuButton', MenuButton)
 import SubMenuButton from './vue/components/navigation/materialTheme/SubMenuButton.vue';
 Vue.component('subMenuButton', SubMenuButton)
+
+import PageActivity from './vue/components/system/alerts/PageActivity.vue';
+Vue.component('pageActivity', PageActivity)
  
 import BrandBox from './vue/partials/BrandBox.vue';
 Vue.component('brandBox', BrandBox)
@@ -43,6 +46,9 @@ Vue.component('animatedWords', AnimatedWords)
 
 import IntroFlyAway from './vue/components/animate/IntroFlyAway.vue';
 Vue.component('introFlyAway', IntroFlyAway) 
+
+import QuickForm from './vue/components/converse/QuickForm.vue';
+Vue.component('quickForm', QuickForm) 
 
 import MeiAdminLogin from './vue/components/auth/MeiAdminLogin.vue';
 Vue.component('meiAdminLogin', MeiAdminLogin)
@@ -174,6 +180,8 @@ import MeiApp from './mei-app.js'
 
 // Root Componant
 const MEi = Vue.extend(MeiApp)
+
+
 
 // create router
 const router = new VueRouter({

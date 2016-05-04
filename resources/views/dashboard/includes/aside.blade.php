@@ -60,7 +60,9 @@
 						></a>
 						@roles
 						<!-- <div id="TaskSystem" class="bg-dark"></div> -->
-						
+						<div id="PageActivity">
+							<page-activity></page-activity>
+						</div>
 					</div>
 					<!--End second tab (Custom layout)-->
 					<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

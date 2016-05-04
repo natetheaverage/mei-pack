@@ -14,13 +14,14 @@ class CreateFeaturesTable extends Migration
     {
         Schema::create('features', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('order_column');
             $table->string('title');
             $table->text('content');
             $table->string('image');
             $table->string('link');
             $table->string('icon');
             $table->string('parent');
+            $table->integer('order_column');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

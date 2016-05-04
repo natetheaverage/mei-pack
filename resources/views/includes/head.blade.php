@@ -22,8 +22,8 @@
   @include('includes.metaTags')
  	@include( 'front.'.config('app.theme').'.includes.metaTags' )
 
- 	@include( 'front.'.config('app.theme').'.includes.linkTags' )
   @include('includes.linkTags')
+ 	@include( 'front.'.config('app.theme').'.includes.linkTags' )
 
  	@include( 'front.'.config('app.theme').'.includes.headScripts' )
 

@@ -44,8 +44,6 @@ elixir(function(mix) {
     .styles([
         './node_modules/normalize.css/normalize.css',
         './node_modules/sweetalert/dist/sweetalert.css',
-        './resources/assets/vendor/css/font-awesome.min.css',
-        './resources/assets/vendor/css/animate.min.css',
     ], './public/css/all-vendor.css')
 
     //Twenty and FrontRange vendor css 

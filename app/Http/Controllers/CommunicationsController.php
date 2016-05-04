@@ -5,10 +5,22 @@ namespace App\Http\Controllers;
 use Mail;
 use App\Http\Requests;
 use Illuminate\Http\Request;
-use App\Models\Communications\Message;
+use App\Models\Conversations\Message;
+use App\Models\Companies\Company;
+use App\Events\Conversations\MessageSent;
 
 class CommunicationsController extends Controller
 {
+
+  protected $message;
+  protected $company;
+
+  function __construct(Company $company, Message $message)
+  {
+    $this->message = $message;
+    $this->company = $company;
+  }
+
     /**
      * Display a listing of the resource.
      *
@@ -37,29 +49,37 @@ class CommunicationsController extends Controller
      */
     public function store(Request $request)
     {
-        $msg = Message::create($request->all());
+      $msg = $request->all();
+      $msg['sent_on'] = \Carbon\Carbon::now()->toDateTimeString();
+      $msg = $this->message->create($msg);
+      $company = $this->company
+        ->where('theme', config('app.theme'))
+        ->first();
+      Mail::queue('front.'.config('app.theme').'.emails.contact', 
+        ['msg' => $msg, 'company' => $company], 
+        function ($message) use ($msg, $company)  {
 
-        Mail::send('mail.contact', ['msg' => $msg], 
-            function ($m) use ($msg) {
-                $m->to('contactus@20-20investing.com')
-                    ->bcc(
-                    'natetheaverage@gmail.com', 
-                    //'info@frontrangeshows.com', 
-                    'dougmt_98@yahoo.com'
-                );
+          $message->to($company->email1)
+            ->bcc('natetheaverage@gmail.com',$company->email2);
 
-        $m->from($msg->email, '20-20 Investing');
+          $message->from($msg->email, $msg->name);
 
-        $m->subject('New message - '.$msg->subject);
-    });
+          $message->subject('New message - '.$msg->subject);
 
-    Mail::send('mail.confirmation', ['msg' => $msg], function ($m) use ($msg)  {
-        $m->to($msg->email)->bcc('natetheaverage@gmail.com');
+      });
 
-        $m->from('contactus@20-20investing.com', '20-20 Investing');
+      Mail::queue('front.'.config('app.theme').'.emails.confirmation', 
+        ['msg' => $msg, 'company' => $company], 
+        function ($message) use ($msg, $company)  {
 
-        $m->subject('Thank you for contacting 20-20 Investing. We will get back to you promptly.');
-    });
+        $message->to($msg->email)->bcc('natetheaverage@gmail.com');
+
+        $message->from($company->email1, $company->name);
+
+        $message->subject('Thank you for contacting '.$company->name.'. We will get back to you promptly.');
+
+        event(new MessageSent($msg));
+      });
     }
 
 
